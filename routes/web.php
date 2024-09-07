@@ -1,12 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
-Route::view('/', 'welcome');
+Route::view('/', 'home')->name('home');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Volt::route('image/upload', 'image-upload')->name('image.upload');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])

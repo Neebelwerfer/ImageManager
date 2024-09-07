@@ -1,4 +1,4 @@
-@props(['align' => 'right', 'width' => '48', 'contentClasses' => 'py-1 bg-white dark:bg-gray-700'])
+@props(['align' => 'right', 'width' => '48', 'border' => ''])
 
 @php
 $alignmentClasses = match ($align) {
@@ -7,13 +7,18 @@ $alignmentClasses = match ($align) {
     default => 'ltr:origin-top-right rtl:origin-top-left end-0',
 };
 
+
 $width = match ($width) {
     '48' => 'w-48',
-    default => $width,
+    '12' => 'w-12',
+    '18' => 'w-18',
+    '20' => 'w-20',
+    '14' => 'w-14',
+    default => 'w-auto',
 };
 @endphp
 
-<div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">
+<div class="relative {{$attributes->get('class')}}" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">
     <div @click="open = ! open">
         {{ $trigger }}
     </div>
@@ -28,7 +33,7 @@ $width = match ($width) {
             class="absolute z-50 mt-2 {{ $width }} rounded-md shadow-lg {{ $alignmentClasses }}"
             style="display: none;"
             @click="open = false">
-        <div class="rounded-md ring-1 ring-black ring-opacity-5 {{ $contentClasses }}">
+        <div class="rounded-md item ring-1 ring-black dark:ring-opacity-50 py-1 bg-gray-300 dark:bg-gray-700">
             {{ $content }}
         </div>
     </div>
