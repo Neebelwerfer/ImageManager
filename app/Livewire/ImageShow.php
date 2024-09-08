@@ -20,7 +20,7 @@ class ImageShow extends Component
 
     public function delete()
     {
-        $this->image->deleteImage();
+        $this->image->delete();
         return redirect('/');
     }
 

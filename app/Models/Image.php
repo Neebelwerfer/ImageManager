@@ -30,13 +30,13 @@ class Image extends Model
         return $this->belongsToMany(ImageTag::class);
     }
 
-    public function deleteImage()
+    protected static function booted(): void
     {
-        Storage::disk('local')->delete($this->path);
+        static::deleting(function (Image $image) {
+            Storage::disk('local')->delete($image->path);
 
-        Storage::disk('local')->delete($this->thumbnail_path);
-
-        $this->delete();
+            Storage::disk('local')->delete($image->thumbnail_path);
+        });
     }
 
 }

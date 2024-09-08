@@ -6,11 +6,7 @@
 
 <div class="mt-5">
     <div class="items-center w-1/2 p-1" style="margin-left: 33%;">
-        @if (session('status'))
-            <div class="alert alert-success">
-                {{ session('status') }}
-            </div>
-        @endif
+
         <div wire:loading wire:target="image">Uploading...</div>
         <form wire:submit="save">
             @csrf
@@ -38,14 +34,18 @@
                     </div>
 
                     <div class="inline-flex gap-4">
-                        <label for="category" class="form-label">Category: @if(isset($category)){{ $category->name }}@endif</label>
+                        <label for="category" class="form-label">Category: @if (isset($category))
+                                {{ $category->name }}
+                            @endif
+                        </label>
                         <div class="mb-3">
                             <input type="hidden" class="text-black form-control" wire:model="category"></textarea>
 
                             @error('category')
                                 <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
                             @enderror
-                            <button class="px-2 border rounded" type="button" wire:click="toggleCategoryModal">+</button>
+                            <button class="px-2 border rounded" type="button"
+                                wire:click="toggleCategoryModal">+</button>
                         </div>
                     </div>
 
@@ -58,8 +58,8 @@
 
                 <div class="flex flex-col min-h-screen">
                     <div class="mb-3">
-                        <input type="file" oninput="readURL(this)" wire:model='image' name="image"
-                            placeholder="Choose image" id="imageInput">
+                        <input type="file" wire:model='image' name="image" placeholder="Choose image"
+                            id="imageInput">
                         @error('image')
                             <div class="mt-1 mb-1 text-red-600 alert">{{ $message }}</div>
                         @enderror
@@ -68,12 +68,17 @@
                                 <img id="image-preview" src="{{ $image->temporaryUrl() }}" style="max-height: 250px;">
                             </div>
                         @endif
+
                     </div>
                 </div>
             </div>
         </form>
         @if ($showCategory)
-            <livewire:image-show.modal />
+            <livewire:category-show.modal />
+        @endif
+
+        @if (session('duplicate'))
+            <livewire:image-show.modal path="{{ session('duplicate') }}" />
         @endif
     </div>
 </div>
