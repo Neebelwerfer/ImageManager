@@ -83,34 +83,34 @@ class ImageUpload extends Component
         $imageInfo = ImageManager::imagick()->read($this->image);
         $imageModel->width = $imageInfo->width();
         $imageModel->height = $imageInfo->height();
-        $imageInfo->toWebp();
+        $imageModel->thumbnail_path = 'thumbnails/' . $imageModel->uuid . '.webp';
         $imageInfo->scaleDown(512, 512);
-        $imageModel->thumbnail_path = 'thumbnails/'.$imageModel->uuid.'.webp';
         $imageInfo->save(storage_path('app') . '/' . ($imageModel->thumbnail_path));
 
-        // Check if image already exists via image hash
-        // Currently only compares images with same width and height
-        $hash = $comparator->hashImage($imageModel->thumbnail_path);
-        $imageModel->image_hash = $comparator->convertHashToBinaryString($hash);
-        $sameSizeImages = Image::where('owner_id', $user->id)->where('width', $imageModel->width)->where('height', $imageModel->height)->get();
-        if(isset($sameSizeImages) && $sameSizeImages->count() > 0)
-        {
-            foreach ($sameSizeImages as $sameSizeImage)
-            {
-                if($comparator->compareHashStrings($sameSizeImage->image_hash, $imageModel->image_hash) > 95)
-                {
-                    Storage::disk('local')->delete($imageModel->thumbnail_path);
-                    return redirect()->route('image.upload')->with( ['status' => 'Image already exists!', 'duplicate' => $sameSizeImage->path, 'hash' => $imageModel->image_hash] );
+        // Try/catch block to ensure image is deleted if it already exists even if exception is thrown
+        try {
+
+            // Check if image already exists via image hash
+            // Currently only compares images with same width and height
+            $hash = $comparator->hashImage($imageModel->thumbnail_path);
+            $imageModel->image_hash = $comparator->convertHashToBinaryString($hash);
+            $sameSizeImages = Image::where('owner_id', $user->id)->where('width', $imageModel->width)->where('height', $imageModel->height)->get();
+            if (isset($sameSizeImages) && $sameSizeImages->count() > 0) {
+                foreach ($sameSizeImages as $sameSizeImage) {
+                    if ($comparator->compareHashStrings($sameSizeImage->image_hash, $imageModel->image_hash) > 95) {
+                        Storage::disk('local')->delete($imageModel->thumbnail_path);
+                        return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'duplicate' => $sameSizeImage->path, 'hash' => $imageModel->image_hash, 'error' => true]);
+                    }
                 }
             }
+
+            $imageModel->path = $this->image->storeAs('images', $imageModel->uuid . '.' . $this->image->extension(), 'local');
+        } catch (\Exception $e) {
+            Storage::disk('local')->delete($imageModel->thumbnail_path);
+            return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true]);
         }
 
-        $imageModel->path = $this->image->storeAs('images', $imageModel->uuid.'.'.$this->image->extension(), 'local');
-
-
-
         $imageModel->save();
-
         return redirect()->route('image.upload')->with('status', 'Image uploaded successfully!');
     }
 

@@ -77,8 +77,17 @@
             <livewire:category-show.modal />
         @endif
 
-        @if (session('duplicate'))
-            <livewire:image-show.modal path="{{ session('duplicate') }}" />
+        @if (session('status'))
+            <x-status-modal>
+                <x-slot name="header">
+                        Status
+                </x-slot>
+                {{ session('status') }}
+                @if (session('duplicate'))
+                    <img class="w-full" src="{{ asset(session('duplicate')) }}" alt="image">
+                @endif
+            </x-status-modal>
         @endif
+
     </div>
 </div>

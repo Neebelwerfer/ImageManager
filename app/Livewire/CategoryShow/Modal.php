@@ -33,6 +33,10 @@ class Modal extends Component
 
     public function selectCategory($id)
     {
+        if($id == -1) {
+            $this->category = null;
+            return;
+        }
         $this->dispatch('categorySelected', $id);
         $this->close();
     }
@@ -55,10 +59,9 @@ class Modal extends Component
             <div class="fixed inset-0 z-40 flex items-center justify-center bg-gray-900 bg-opacity-50">
                 <!-- Modal Content -->
                 <div class="w-1/2 max-w-3xl p-8 bg-gray-700 rounded-lg shadow-lg"  x-on:click.away="$wire.close">
-                    <h2 class="mb-4 text-2xl font-bold">Categories</h2>
+                    <h2 class="mb-4 text-2xl font-bold border-b">Categories</h2>
 
                     <div class="mb-6 space-y-2 overflow-auto">
-                        <h3 class="mb-2 text-xl font-bold">Categories</h3>
                         <button class="w-auto px-5 py-2 text-white bg-gray-500 rounded-md" wire:click="selectCategory(-1)">None</button>
                         @foreach ($this->categories as $category)
                             <div class="flex justify-between py-2 border-t border-gray-900">
