@@ -25,6 +25,7 @@ services:
             - pgsql
             - redis
             - meilisearch
+            - postgresqlAdmin
     pgsql:
         image: 'postgres:15'
         ports:
@@ -84,6 +85,18 @@ services:
                 - 'http://127.0.0.1:7700/health'
             retries: 3
             timeout: 5s
+    postgresqlAdmin:
+        image: dpage/pgadmin4:latest
+        ports:
+            - '${FORWARD_PGADMIN_PORT:-5050}:80'
+        environment:
+            PGADMIN_DEFAULT_EMAIL: '${PGADMIN_DEFAULT_EMAIL}'
+            PGADMIN_DEFAULT_PASSWORD: '${PGADMIN_DEFAULT_PASSWORD:-secret}'
+            PGADMIN_LISTEN_PORT: '${PGADMIN_LISTEN_PORT:-80}'
+        volumes:
+            - 'sail-pgsql:/var/lib/postgresql/data'
+        networks:
+            - sail
 networks:
     sail:
         driver: bridge
@@ -94,3 +107,4 @@ volumes:
         driver: local
     sail-meilisearch:
         driver: local
+

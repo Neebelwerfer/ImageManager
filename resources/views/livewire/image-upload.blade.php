@@ -1,10 +1,16 @@
-<?php
+<script>
+    function readURL(input) {
+        if (input.files[0]) {
+            var reader = new FileReader();
+            let img = document.getElementById("image-preview");
 
-use Livewire\Volt\Component;
-use Livewire\Attributes\Layout;
-
-new #[Layout('layouts.app')] class extends Component {}; ?>
-
+            reader.onload = function(e) {
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
 
 <x-slot name="header">
     <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -20,41 +26,52 @@ new #[Layout('layouts.app')] class extends Component {}; ?>
         </div>
     @endif
 
-    <div class="panel-body card-body" style="margin-left: 22%;">
-
-        <form method="POST" enctype="multipart/form-data" id="upload-image" action="{{ url('upload') }}">
+    <div class="items-center w-1/2 p-1" style="margin-left: 33%;">
+        <div wire:loading wire:target="photo">Uploading...</div>
+        <form wire:submit='save'>
             @csrf
 
-            <div class="mb-3">
-                <div class="form-group">
-                    <input type="file" name="image" placeholder="Choose image" id="image">
-                    @error('image')
-                        <div class="mt-1 mb-1 alert alert-danger">{{ $message }}</div>
-                    @enderror
+            <div class="columns-2">
+                <div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <div>
+                            <input type="text" class="text-black form-control" wire:model="name">
+
+                            @error('name')
+                                <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <label for="rating" class="form-label">Rating</label>
+                    <div class="mb-3">
+                        <input type="number" min="0" max="10" class="text-black form-control"
+                            wire:model="rating" value="5">
+
+                        @error('rating')
+                            <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <button type="submit"
+                            class="p-1 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
+                            id="submit">Submit</button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="mb-3">
-                <img id="image-preview"
-                    src="https://cdn.dribbble.com/users/4438388/screenshots/15854247/media/0cd6be830e32f80192d496e50cfa9dbc.jpg?resize=1000x750&vertical=center"
-                    alt="preview image" style="max-height: 250px;">
-            </div>
-
-            <script>
-                function previewImage(event) {
-                    var input = event.target;
-                    var reader = new FileReader();
-                    reader.onload = function(){
-                        var img = document.getElementById('imagePreview');
-                        img.src = reader.result;
-                        img.style.display = 'block';
-                    };
-                    reader.readAsDataURL(input.files[0]);
-                }
-            </script>
-
-            <div class="mb-3">
-                <button type="submit" class="btn btn-primary" id="submit">Submit</button>
+                <div class="flex flex-col min-h-screen">
+                    <div class="mb-3">
+                        <input type="file" oninput="readURL(this)" wire:model='image' name="image"
+                            placeholder="Choose image" id="imageInput">
+                        @error('imageInput')
+                            <div class="mt-1 mb-1 alert alert-danger">{{ $message }}</div>
+                        @enderror
+                        <div class="mb-3">
+                            <img id="image-preview" src="#" style="max-height: 250px;">
+                        </div>
+                    </div>
+                </div>
             </div>
     </div>
     </form>

@@ -21,13 +21,15 @@ return new class extends Migration
         });
 
         Schema::create('images', function (Blueprint $table) {
-            $table->id();
+            $table->uuid()->primary();
             $table->string('name');
             $table->string('path');
+            $table->boolean('is_public')->default(false);
+            $table->smallInteger('width', false, true);
+            $table->smallInteger('height', false, true);
             $table->string('thumbnail_path');
             $table->tinyInteger('rating')->default(5)->unsigned();
             $table->foreignId('category_id')->nullable()->constrained('image_categories');
-            $table->boolean('is_public')->default(false);
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
@@ -43,9 +45,9 @@ return new class extends Migration
 
 
         Schema::create('image_image_tag', function (Blueprint $table) {
-            $table->foreignId('image_id')->constrained('images')->onDelete('cascade');
+            $table->foreignUuid('image_uuid')->constrained('images', 'uuid')->onDelete('cascade');
             $table->foreignId('image_tag_id')->constrained('image_tags')->onDelete('cascade');
-            $table->primary(['image_id', 'image_tag_id']);
+            $table->primary(['image_uuid', 'image_tag_id']);
             $table->timestamps();
         });
     }
@@ -55,10 +57,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('image_image_tag');
+        Schema::dropIfExists('image_tags');
         Schema::dropIfExists('images');
         Schema::dropIfExists('image_categories');
-        Schema::dropIfExists('image_tags');
-        Schema::dropIfExists('image_image_category');
-        Schema::dropIfExists('image_image_tag');
     }
 };
