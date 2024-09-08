@@ -32,13 +32,19 @@ $logout = function (Logout $logout) {
                         @endif
                     @endauth
 
-                        @if (Route::has('image.upload'))
-                            <x-nav-link :href="route('image.upload')" :active="request()->routeIs('image.upload')" wire:navigate>
-                                {{ __('Image Upload') }}
-                            </x-nav-link>
-                        @endif
+                    @if (Route::has('image.upload'))
+                        <x-nav-link :href="route('image.upload')" :active="request()->routeIs('image.upload')" wire:navigate>
+                            {{ __('Image Upload') }}
+                        </x-nav-link>
+                    @endif
 
-                    @if(Route::has('database'))
+                    @if (Route::has('images'))
+                        <x-nav-link :href="route('images')" :active="request()->routeIs('images')" wire:navigate>
+                            {{ __('Images') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if (Route::has('database'))
                         <x-nav-link :href="route('database')" :active="request()->routeIs('database')" wire:navigate>
                             {{ __('Database') }}
                         </x-nav-link>
