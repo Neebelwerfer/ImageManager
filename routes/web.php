@@ -6,7 +6,11 @@ use Livewire\Volt\Volt;
 
 Route::view('/', 'home')->name('home');
 
-Route::get('image/upload', ImageUpload::class)->name('image.upload');
+Route::get('image/upload', ImageUpload::class)
+    ->middleware(['auth'])
+    ->name('image.upload');
+
+
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])

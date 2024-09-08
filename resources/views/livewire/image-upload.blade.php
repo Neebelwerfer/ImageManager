@@ -5,13 +5,12 @@
 </x-slot>
 
 <div class="mt-5 panel panel-primary card">
-    @if (session('status'))
-        <div class="alert alert-success">
-            {{ session('status') }}
-        </div>
-    @endif
-
     <div class="items-center w-1/2 p-1" style="margin-left: 33%;">
+        @if (session('status'))
+            <div class="alert alert-success">
+                {{ session('status') }}
+            </div>
+        @endif
         <div wire:loading wire:target="photo">Uploading...</div>
         <form wire:submit="save">
             @csrf

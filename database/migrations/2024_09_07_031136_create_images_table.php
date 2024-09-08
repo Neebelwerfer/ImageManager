@@ -24,11 +24,11 @@ return new class extends Migration
             $table->uuid()->primary();
             $table->string('name');
             $table->string('path');
-            $table->boolean('is_public')->default(false);
+            $table->string('thumbnail_path');
             $table->smallInteger('width', false, true);
             $table->smallInteger('height', false, true);
-            $table->string('thumbnail_path');
             $table->tinyInteger('rating')->default(5)->unsigned();
+            $table->boolean('is_public')->default(false);
             $table->foreignId('category_id')->nullable()->constrained('image_categories');
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();

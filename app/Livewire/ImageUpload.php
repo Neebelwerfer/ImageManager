@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Image;
+use App\Models\ImageData;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
@@ -29,18 +31,30 @@ class ImageUpload extends Component
     {
         $this->validate();
 
+        $user = Auth::user();
+
         $imageModel = new Image();
+
 
         $imageModel->uuid = Str::uuid();
         $imageModel->name = $this->name;
         $imageModel->rating = $this->rating;
+        $imageModel->owner_id = $user->id;
         $imageModel->path = $this->image->storeAs('images', $imageModel->uuid.'.'.$this->image->extension(), 'public');
 
         $thumbnail = ImageManager::imagick()->read(storage_path('app/public') . '/' . $imageModel->path);
+        $imageModel->width = $thumbnail->width();
+        $imageModel->height = $thumbnail->height();
+
         $thumbnail->toWebp();
         $thumbnail->scaleDown(512, 512);
-        $imageModel->thumbnail = 'thumbnails/'.$imageModel->uuid.'.webp';
-        $thumbnail->save(storage_path('app/public') . '/' .($imageModel->thumbnail));
+        $imageModel->thumbnail_path = 'thumbnails/'.$imageModel->uuid.'.webp';
+        $thumbnail->save(storage_path('app/public') . '/' . ($imageModel->thumbnail_path));
+
+        $imageModel->save();
+
+
+        return redirect()->route('image.upload')->with('status', 'Image uploaded successfully!');
     }
 
     public function render()
