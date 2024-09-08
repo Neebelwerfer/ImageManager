@@ -61,13 +61,6 @@ class ImageUpload extends Component
         return ImageCategory::where('owner_id', Auth::user()->id)->get();
     }
 
-    private function compareImage($oldImage, $newImage) : bool
-    {
-        $comparator = new ImageComparator();
-        $res = $comparator->compare($oldImage->thumbnail_path, $newImage->thumbnail_path);
-        return $res > 90;
-    }
-
     public function save()
     {
         $this->validate();
@@ -84,23 +77,30 @@ class ImageUpload extends Component
             $imageModel->category_id = $this->category->id;
         }
 
-        $thumbnail = ImageManager::imagick()->read($this->image);
-        $imageModel->width = $thumbnail->width();
-        $imageModel->height = $thumbnail->height();
-        $thumbnail->toWebp();
-        $thumbnail->scaleDown(512, 512);
-        $imageModel->thumbnail_path = 'thumbnails/'.$imageModel->uuid.'.webp';
-        $thumbnail->save(storage_path('app') . '/' . ($imageModel->thumbnail_path));
+        $comparator = new ImageComparator();
 
+
+        $imageInfo = ImageManager::imagick()->read($this->image);
+        $imageModel->width = $imageInfo->width();
+        $imageModel->height = $imageInfo->height();
+        $imageInfo->toWebp();
+        $imageInfo->scaleDown(512, 512);
+        $imageModel->thumbnail_path = 'thumbnails/'.$imageModel->uuid.'.webp';
+        $imageInfo->save(storage_path('app') . '/' . ($imageModel->thumbnail_path));
+
+        // Check if image already exists via image hash
+        // Currently only compares images with same width and height
+        $hash = $comparator->hashImage($imageModel->thumbnail_path);
+        $imageModel->image_hash = $comparator->convertHashToBinaryString($hash);
         $sameSizeImages = Image::where('owner_id', $user->id)->where('width', $imageModel->width)->where('height', $imageModel->height)->get();
         if(isset($sameSizeImages) && $sameSizeImages->count() > 0)
         {
             foreach ($sameSizeImages as $sameSizeImage)
             {
-                if($this->compareImage($sameSizeImage, $imageModel))
+                if($comparator->compareHashStrings($sameSizeImage->image_hash, $imageModel->image_hash) > 95)
                 {
                     Storage::disk('local')->delete($imageModel->thumbnail_path);
-                    return redirect()->route('image.upload')->with( ['status' => 'Image already exists!', 'duplicate' => $sameSizeImage->path] );
+                    return redirect()->route('image.upload')->with( ['status' => 'Image already exists!', 'duplicate' => $sameSizeImage->path, 'hash' => $imageModel->image_hash] );
                 }
             }
         }

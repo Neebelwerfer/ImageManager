@@ -35,7 +35,7 @@ return new class extends Migration
             $table->tinyInteger('rating')->default(5)->unsigned();
             $table->foreignId('category_id')->nullable()->constrained('image_categories')->nullOnDelete();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
-            $table->json('image_data')->nullable();
+            $table->tinyText('image_hash');
             $table->timestamps();
             $table->softDeletes();
         });
