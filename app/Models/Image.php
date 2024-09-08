@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Image extends Model
@@ -27,6 +28,15 @@ class Image extends Model
     public function tags() : BelongsToMany
     {
         return $this->belongsToMany(ImageTag::class);
+    }
+
+    public function deleteImage()
+    {
+        Storage::disk('local')->delete($this->path);
+
+        Storage::disk('local')->delete($this->thumbnail_path);
+
+        $this->delete();
     }
 
 }

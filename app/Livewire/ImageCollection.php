@@ -22,10 +22,6 @@ class ImageCollection extends Component
 
     public function mount()
     {
-        foreach (Storage::disk('public') as $directory) {
-            foreach (Storage::disk('public')->allFiles($directory) as $image) {
-            }
-        }
 
     }
 

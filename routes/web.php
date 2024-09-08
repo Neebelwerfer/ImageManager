@@ -1,22 +1,27 @@
 <?php
 
 use App\Livewire\ImageCollection;
+use App\Livewire\ImageShow;
 use App\Livewire\ImageUpload;
 use Illuminate\Support\Facades\Route;
-use Livewire\Volt\Volt;
 
-Route::view('/', 'home')->name('home');
 
-Route::get('image/upload', ImageUpload::class)
-    ->middleware(['auth'])
-    ->name('image.upload');
+Route::middleware(['auth'])->group(function () {
+    Route::view('/', 'home')->name('home');
 
-Route::get('show/images', ImageCollection::class)
-    ->middleware(['auth'])
-    ->name('images');
+    Route::get('image/upload', ImageUpload::class)
+        ->name('image.upload');
 
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
+    Route::get('show/images', ImageCollection::class)
+        ->name('images');
+
+    Route::get('show/image/{image}', ImageShow::class)
+        ->name('image.show');
+
+    Route::view('profile', 'profile')
+        ->name('profile');
+
+});
+
 
 require __DIR__.'/auth.php';
