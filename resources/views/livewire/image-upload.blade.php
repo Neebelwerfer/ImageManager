@@ -11,7 +11,7 @@
                 {{ session('status') }}
             </div>
         @endif
-        <div wire:loading wire:target="photo">Uploading...</div>
+        <div wire:loading wire:target="image">Uploading...</div>
         <form wire:submit="save">
             @csrf
 
@@ -36,6 +36,19 @@
                             <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    <div class="inline-flex gap-4">
+                        <label for="category" class="form-label">Category: @if(isset($category)){{ $category->name }}@endif</label>
+                        <div class="mb-3">
+                            <input type="hidden" class="text-black form-control" wire:model="category"></textarea>
+
+                            @error('category')
+                                <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
+                            @enderror
+                            <button class="px-2 border rounded" type="button" wire:click="toggleCategoryModal">+</button>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <button type="submit"
                             class="p-1 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
@@ -59,5 +72,8 @@
                 </div>
             </div>
         </form>
+        @if ($showCategory)
+            <livewire:image-show.modal />
+        @endif
     </div>
 </div>

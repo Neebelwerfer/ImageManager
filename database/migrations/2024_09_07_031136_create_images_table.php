@@ -33,7 +33,7 @@ return new class extends Migration
             $table->smallInteger('width', false, true);
             $table->smallInteger('height', false, true);
             $table->tinyInteger('rating')->default(5)->unsigned();
-            $table->foreignId('category_id')->nullable()->constrained('image_categories');
+            $table->foreignId('category_id')->nullable()->constrained('image_categories')->nullOnDelete();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();

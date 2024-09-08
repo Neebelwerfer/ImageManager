@@ -16,6 +16,9 @@
         <div class="w-full">
             <h1>Name: {{ $image->name }}</h1>
             <p>Rating: {{ $image->rating }}</p>
+            @isset($image->category)
+                <p>Category: {{ $image->category->name }}</p>
+            @endisset
 
             <button class="p-1 bg-red-600 border border-red-500 rounded" wire:click='delete'
                 wire:confirm="Are you sure you want to delete this image?">Delete</button>
