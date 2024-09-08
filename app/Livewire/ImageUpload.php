@@ -8,6 +8,7 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Intervention\Image\ImageManager;
+use Illuminate\Support\Str;
 
 #[Layout('layouts.app')]
 class ImageUpload extends Component
@@ -30,19 +31,16 @@ class ImageUpload extends Component
 
         $imageModel = new Image();
 
+        $imageModel->uuid = Str::uuid();
         $imageModel->name = $this->name;
         $imageModel->rating = $this->rating;
-        $imageModel->path = $this->image->store('images/'.$imageModel->uuid.'.'.$this->image->extension(), 'public');
+        $imageModel->path = $this->image->storeAs('images', $imageModel->uuid.'.'.$this->image->extension(), 'public');
 
-        $thumbnail = ImageManager::imagick()->read($imageModel->path);
-        $thumbnail->resize(100, 100);
-        $imageModel->thumbnail = 'thumbnails/'.$imageModel->uuid.'.jpg';
-        $thumbnail->save(public_path($imageModel->thumbnail));
-
-        $imageModel->save();
-
-        $this->emit('saved');
-
+        $thumbnail = ImageManager::imagick()->read(storage_path('app/public') . '/' . $imageModel->path);
+        $thumbnail->toWebp();
+        $thumbnail->scaleDown(512, 512);
+        $imageModel->thumbnail = 'thumbnails/'.$imageModel->uuid.'.webp';
+        $thumbnail->save(storage_path('app/public') . '/' .($imageModel->thumbnail));
     }
 
     public function render()

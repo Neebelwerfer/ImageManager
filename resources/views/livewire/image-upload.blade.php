@@ -1,17 +1,3 @@
-<script>
-    function readURL(input) {
-        if (input.files[0]) {
-            var reader = new FileReader();
-            let img = document.getElementById("image-preview");
-
-            reader.onload = function(e) {
-                img.src = e.target.result;
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-</script>
-
 <x-slot name="header">
     <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
         {{ __('Image Upload') }}
@@ -19,7 +5,6 @@
 </x-slot>
 
 <div class="mt-5 panel panel-primary card">
-
     @if (session('status'))
         <div class="alert alert-success">
             {{ session('status') }}
@@ -28,7 +13,7 @@
 
     <div class="items-center w-1/2 p-1" style="margin-left: 33%;">
         <div wire:loading wire:target="photo">Uploading...</div>
-        <form wire:submit='save'>
+        <form wire:submit="save">
             @csrf
 
             <div class="columns-2">
@@ -46,8 +31,7 @@
 
                     <label for="rating" class="form-label">Rating</label>
                     <div class="mb-3">
-                        <input type="number" min="0" max="10" class="text-black form-control"
-                            wire:model="rating" value="5">
+                        <input type="number" class="text-black form-control" wire:model="rating" value="5">
 
                         @error('rating')
                             <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
@@ -64,15 +48,17 @@
                     <div class="mb-3">
                         <input type="file" oninput="readURL(this)" wire:model='image' name="image"
                             placeholder="Choose image" id="imageInput">
-                        @error('imageInput')
-                            <div class="mt-1 mb-1 alert alert-danger">{{ $message }}</div>
+                        @error('image')
+                            <div class="mt-1 mb-1 text-red-600 alert">{{ $message }}</div>
                         @enderror
-                        <div class="mb-3">
-                            <img id="image-preview" src="#" style="max-height: 250px;">
-                        </div>
+                        @if ($image)
+                            <div class="mb-3">
+                                <img id="image-preview" src="{{ $image->temporaryUrl() }}" style="max-height: 250px;">
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
+        </form>
     </div>
-    </form>
 </div>
