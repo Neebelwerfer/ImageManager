@@ -38,9 +38,9 @@ $logout = function (Logout $logout) {
                         </x-nav-link>
                     @endif
 
-                    @if (Route::has('images'))
-                        <x-nav-link :href="route('images')" :active="request()->routeIs('images')" wire:navigate>
-                            {{ __('Images') }}
+                    @if (Route::has('collection'))
+                        <x-nav-link :href="route('collection')" :active="request()->routeIs('collection')" wire:navigate>
+                            {{ __('Collection') }}
                         </x-nav-link>
                     @endif
 
@@ -50,12 +50,6 @@ $logout = function (Logout $logout) {
                         </x-nav-link>
                     @endif
 
-
-                    @if (Route::has('collection'))
-                        <x-nav-link :href="route('collection')" :active="request()->routeIs('collection')" wire:navigate>
-                            {{ __('Collection') }}
-                        </x-nav-link>
-                    @endif
                 </div>
             </div>
 
