@@ -11,13 +11,18 @@ class Images extends Component
     use WithPagination;
 
     public $name = '';
-    public $rating = -1;
+    public $rating = 0;
+
+    public function search()
+    {
+        $this->resetPage();
+    }
 
     public function render()
     {
         return view('livewire.collection.images',
             [
-                'images' => Image::paginate(20)
+                'images' => Image::where('name', 'like', '%' . $this->name . '%')->where('rating', '>=', $this->rating)->paginate(20)
             ]);
     }
 }

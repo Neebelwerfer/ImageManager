@@ -8,11 +8,13 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Url;
 
 #[Layout('layouts.app')]
 class Collection extends Component
 {
 
+    #[Url('type')]
     public $type;
 
     public function setType($type)
