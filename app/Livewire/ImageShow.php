@@ -27,7 +27,7 @@ class ImageShow extends Component
     public function delete()
     {
         $this->image->delete();
-        return $this->redirect(route('images'), true);
+        return $this->redirect(route('collection', ['type' => 'images']), true);
     }
 
     public function render()

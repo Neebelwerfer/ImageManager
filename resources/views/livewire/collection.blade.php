@@ -13,5 +13,9 @@
         @if($this->type == 'images')
             <livewire:collection.images placeholder="Loading images..." wire:lazy/>
         @endif
+
+        @if($this->type == 'categories')
+            <livewire:collection.categories placeholder="Loading categories..." wire:lazy/>
+        @endif
     </div>
 </div>

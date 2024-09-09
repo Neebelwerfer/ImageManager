@@ -105,12 +105,13 @@ class ImageUpload extends Component
             }
 
             $imageModel->path = $this->image->storeAs('images', $imageModel->uuid . '.' . $this->image->extension(), 'local');
+            $imageModel->save();
         } catch (\Exception $e) {
             Storage::disk('local')->delete($imageModel->thumbnail_path);
-            return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true]);
+            return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true, 'error_message' => $e->getMessage()]);
         }
 
-        $imageModel->save();
+
         return redirect()->route('image.upload')->with('status', 'Image uploaded successfully!');
     }
 

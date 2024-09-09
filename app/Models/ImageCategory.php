@@ -13,6 +13,6 @@ class ImageCategory extends Model
 
     public function images() : HasMany
     {
-        return $this->hasMany(Image::class);
+        return $this->hasMany(Image::class, 'category_id', 'id');
     }
 }

@@ -84,6 +84,9 @@
                 </x-slot>
                 <div class="@if(session('error')) text-red-500 @endif">
                     {{ session('status') }}
+                    @if(session('error'))
+                        {{ session('error_message') }}
+                    @endif
                 </div>
                 @if (session('duplicate'))
                     <img class="w-full" src="{{ asset(session('duplicate')) }}" alt="image">
