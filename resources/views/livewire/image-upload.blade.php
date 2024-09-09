@@ -82,7 +82,9 @@
                 <x-slot name="header">
                         Status
                 </x-slot>
-                {{ session('status') }}
+                <div class="@if(session('error')) text-red-500 @endif">
+                    {{ session('status') }}
+                </div>
                 @if (session('duplicate'))
                     <img class="w-full" src="{{ asset(session('duplicate')) }}" alt="image">
                 @endif

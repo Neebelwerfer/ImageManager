@@ -15,13 +15,19 @@ class ImageShow extends Component
 
     public function mount($image)
     {
+        if(!isset($image) or empty($image)) {
+            abort(404);
+        }
         $this->image = Image::find($image);
+        if(!isset($this->image)) {
+            abort(404);
+        }
     }
 
     public function delete()
     {
         $this->image->delete();
-        return redirect('/');
+        return $this->redirect(route('images'), true);
     }
 
     public function render()

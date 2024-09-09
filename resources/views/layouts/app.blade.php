@@ -32,7 +32,7 @@
             </header>
         @endif
 
-        <main class="flex-grow">
+        <main class="flex flex-col flex-grow">
             {{ $slot }}
         </main>
 
