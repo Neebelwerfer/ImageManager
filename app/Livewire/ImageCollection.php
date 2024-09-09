@@ -8,25 +8,22 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 class ImageCollection extends Component
 {
+    use WithPagination;
 
-    #[Computed]
-    public function images()
-    {
-        $user = Auth::user();
-        return Image::where('owner_id', $user->id)->get();
-    }
-
-    public function mount()
-    {
-
-    }
+    public function mount() {}
 
     public function render()
     {
-        return view('livewire.image-collection');
+        return view(
+            'livewire.image-collection',
+            [
+                'images' => Image::where('owner_id', Auth::user()->id)->paginate(20),
+            ]
+        );
     }
 }
