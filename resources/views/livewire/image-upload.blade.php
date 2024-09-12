@@ -13,17 +13,6 @@
 
             <div class="columns-2">
                 <div>
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <div>
-                            <input type="text" class="text-black form-control" wire:model="name">
-
-                            @error('name')
-                                <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
                     <label for="rating" class="form-label">Rating</label>
                     <div class="mb-3">
                         <input type="number" class="text-black form-control" wire:model="rating" value="5">

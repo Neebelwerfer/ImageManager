@@ -26,9 +26,6 @@ class ImageUpload extends Component
     #[Validate('image|max:1024')]
     public $image;
 
-    #[Validate('required|min:3')]
-    public $name = '';
-
     #[Validate('required|min:0|max:10')]
     public $rating = 5;
 
