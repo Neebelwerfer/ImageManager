@@ -10,6 +10,11 @@ class ImageTag extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'owner_id'
+    ];
+
     public function images() : BelongsToMany
     {
         return $this->belongsToMany(Image::class);

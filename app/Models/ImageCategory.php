@@ -11,6 +11,10 @@ class ImageCategory extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'owner_id'
+    ];
 
     public function images() : HasMany
     {
