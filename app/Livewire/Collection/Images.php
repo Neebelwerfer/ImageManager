@@ -3,6 +3,7 @@
 namespace App\Livewire\Collection;
 
 use App\Models\Image;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -22,7 +23,7 @@ class Images extends Component
     {
         return view('livewire.collection.images',
             [
-                'images' => Image::where('name', 'like', '%' . $this->name . '%')->where('rating', '>=', $this->rating)->paginate(20)
+                'images' => Image::where('rating', '>=', $this->rating)->where('owner_id', Auth::user()->id)->paginate(20)
             ]);
     }
 }

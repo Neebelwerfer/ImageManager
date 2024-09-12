@@ -5,9 +5,9 @@ use App\Livewire\ImageShow;
 use App\Livewire\ImageUpload;
 use Illuminate\Support\Facades\Route;
 
+Route::view('/', 'home')->name('home');
 
 Route::middleware(['auth'])->group(function () {
-    Route::view('/', 'home')->name('home');
 
     Route::get('image/upload', ImageUpload::class)
         ->name('image.upload');
@@ -20,6 +20,18 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('profile', 'profile')
         ->name('profile');
+
+    Route::view('manage', 'manage')
+        ->name('manage');
+
+    Route::get('manage/images', null)
+        ->name('manage.images');
+
+    Route::get('manage/categories', null)
+        ->name('manage.categories');
+
+    Route::get('manage/tags', null)
+        ->name('manage.tags');
 
 });
 

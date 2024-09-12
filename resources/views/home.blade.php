@@ -23,7 +23,28 @@
 
         <main class="mt-2">
 
+            <div class="container mx-auto text-center">
+                @auth
+                    <h1 class="text-3xl font-bold">Welcome, {{ Auth::user()->name }}!</h1>
 
+                    <div class="mt-4 columns-3">
+                        <a href="{{ route('image.upload') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Upload Image</h5>
+                        </a>
+
+                        <a href="{{ route('collection') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Collection</h5>
+                        </a>
+
+                        <a href="{{ route('manage') }}" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Manage Images</h5>
+                        </a>
+
+                    </div>
+                @else
+                    <h1 class="text-3xl font-bold"><a class="text-blue-500" href="{{ route('login') }}">Login</a> to manage images</h1>
+                @endauth
+            </div>
 
         </main>
         <footer

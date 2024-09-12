@@ -1,10 +1,7 @@
 <x-grid>
     <x-slot name="header">
         <div class="flex flex-row justify-center gap-2">
-            <div class="flex flex-col">
-                <label for="name" class="">Name</label>
-                <input type="text" class="text-black form-control" wire:model="name" placeholder="Name..."/>
-            </div>
+
             <div class="flex flex-col">
                 <label for="rating" class="">Min Rating</label>
                 <input type="number" class="text-black form-control" wire:model="rating" placeholder="Rating..." min="0" max="10"/>
