@@ -1,12 +1,9 @@
 <div class="flex flex-row min-h-screen">
-    <div class="justify-center flex-shrink-0 w-64 bg-gray-800">
-        <ul class="mt-5 space-y-2">
-            <li><button class="w-full p-1 border-t border-b btn hover:bg-gray-400 hover:dark:bg-gray-500 @if($this->type == 'albums') bg-gray-400 dark:bg-gray-500 @endif" wire:click="setType('albums')">Albums</button></li>
-            <li><button class="w-full p-1 border-t border-b btn hover:bg-gray-400 hover:dark:bg-gray-500 @if($this->type == 'categories') bg-gray-400 dark:bg-gray-500 @endif" wire:click="setType('categories')">Categories</button></li>
-            <li><button class="w-full p-1 border-t border-b btn hover:bg-gray-400 hover:dark:bg-gray-500 @if($this->type == 'images') bg-gray-400 dark:bg-gray-500 @endif" wire:click="setType('images')">Images</button></li>
-        </ul>
-
-    </div>
+    <x-sidebar>
+        <x-sidebar.button active="{{ $this->type == 'albums' }}" wire:click="setType('albums')">Albums</x-sidebar.button>
+        <x-sidebar.button active="{{ $this->type == 'categories' }}" wire:click="setType('categories')">Categories</x-sidebar.button>
+        <x-sidebar.button active="{{ $this->type == 'images' }}" wire:click="setType('images')">Images</x-sidebar.button>
+    </x-sidebar>
 
     <div class="flex justify-center flex-grow">
         <div class="flex flex-col flex-grow-0 ">

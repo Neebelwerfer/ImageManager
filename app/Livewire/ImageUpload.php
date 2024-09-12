@@ -69,7 +69,6 @@ class ImageUpload extends Component
 
         $imageModel = new Image();
         $imageModel->uuid = Str::uuid();
-        $imageModel->name = $this->name;
         $imageModel->rating = $this->rating;
         $imageModel->owner_id = $user->id;
 
@@ -83,22 +82,22 @@ class ImageUpload extends Component
         $imageInfo = ImageManager::imagick()->read($this->image);
         $imageModel->width = $imageInfo->width();
         $imageModel->height = $imageInfo->height();
-        $imageModel->thumbnail_path = 'thumbnails/' . $imageModel->uuid . '.webp';
+        $thumbnail_path = 'thumbnails/' . $imageModel->uuid . '.webp';
         $imageInfo->scaleDown(512, 512);
-        $imageInfo->save(storage_path('app') . '/' . ($imageModel->thumbnail_path));
+        $imageInfo->save(storage_path('app') . '/' . ($thumbnail_path));
 
         // Try/catch block to ensure image is deleted if it already exists even if exception is thrown
         try {
 
             // Check if image already exists via image hash
             // Currently only compares images with same width and height
-            $hash = $comparator->hashImage($imageModel->thumbnail_path);
+            $hash = $comparator->hashImage($thumbnail_path);
             $imageModel->image_hash = $comparator->convertHashToBinaryString($hash);
             $sameSizeImages = Image::where('owner_id', $user->id)->where('width', $imageModel->width)->where('height', $imageModel->height)->get();
             if (isset($sameSizeImages) && $sameSizeImages->count() > 0) {
                 foreach ($sameSizeImages as $sameSizeImage) {
                     if ($comparator->compareHashStrings($sameSizeImage->image_hash, $imageModel->image_hash) > 95) {
-                        Storage::disk('local')->delete($imageModel->thumbnail_path);
+                        Storage::disk('local')->delete($thumbnail_path);
                         return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'duplicate' => $sameSizeImage->path, 'hash' => $imageModel->image_hash, 'error' => true]);
                     }
                 }
@@ -107,7 +106,7 @@ class ImageUpload extends Component
             $imageModel->path = $this->image->storeAs('images', $imageModel->uuid . '.' . $this->image->extension(), 'local');
             $imageModel->save();
         } catch (\Exception $e) {
-            Storage::disk('local')->delete($imageModel->thumbnail_path);
+            Storage::disk('local')->delete($thumbnail_path);
             return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true, 'error_message' => $e->getMessage()]);
         }
 

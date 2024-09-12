@@ -30,6 +30,11 @@ class Image extends Model
         return $this->belongsToMany(ImageTag::class);
     }
 
+    public function thumbnail_path() : string
+    {
+        return 'thumbnails/' . $this->uuid . '.webp';
+    }
+
     protected static function booted(): void
     {
         static::deleting(function (Image $image) {
