@@ -35,7 +35,6 @@ class Modal extends Component
     {
         if($id == -1) {
             $this->category = null;
-            return;
         }
         $this->dispatch('categorySelected', $id);
         $this->close();

@@ -30,6 +30,11 @@ class Image extends Model
         return $this->belongsToMany(ImageTag::class);
     }
 
+    public function user() : BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
     public function thumbnail_path() : string
     {
         return 'thumbnails/' . $this->uuid . '.webp';

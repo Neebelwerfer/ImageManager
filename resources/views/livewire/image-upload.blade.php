@@ -77,9 +77,6 @@
                         {{ session('error_message') }}
                     @endif
                 </div>
-                @if (session('duplicate'))
-                    <img class="w-full" src="{{ asset(session('duplicate')) }}" alt="image">
-                @endif
             </x-status-modal>
         @endif
 
