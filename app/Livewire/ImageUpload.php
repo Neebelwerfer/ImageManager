@@ -22,8 +22,8 @@ class ImageUpload extends Component
 {
     use WithFileUploads;
 
-    // 1MB Max
-    #[Validate('image|max:1024')]
+    // 10MB Max
+    #[Validate('image|max:10024')]
     public $image;
 
     #[Validate('required|min:0|max:10')]

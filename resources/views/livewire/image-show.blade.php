@@ -4,18 +4,11 @@
     </h2>
 </x-slot>
 
-<div>
-    <div class="flex justify-center my-2">
-        <div>
-            <img src="{{ asset($image->path) }}" alt="{{ $image->name }}" width="500" height="600">
-        </div>
-
-
-    </div>
-    <div class="flex flex-col border-t border-gray-800">
+<div class="flex flex-grow columns-2">
+    <div class="flex flex-col w-1/3 border-r border-gray-800">
         <div class="flex flex-col justify-center w-full">
             <div class="flex flex-row h-full mx-5">
-                <div class="flex flex-row w-1/3 space-x-6 columns-2">
+                <div class="flex flex-row w-1/2 space-x-6 columns-2">
                     <div>
                         <p>Rating: {{ $image->rating }}</p>
                         <p>Uploaded By: {{ $image->user->name }}</p>
@@ -40,8 +33,8 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col w-full my-2">
-                    <div class="flex flex-row h-10 space-x-2">
+                <div class="flex flex-col my-2">
+                    <div class="flex flex-row justify-center h-10 space-x-2">
                         <button class="bg-blue-600 border border-blue-500 rounded h-fit" wire:click='addTag'>Add Tag</button>
                         <h1>Tags</h1>
                     </div>
@@ -55,6 +48,10 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="flex justify-center w-full m-5">
+        <img class="object-scale-down" src="{{ asset($image->path) }}" alt="{{ $image->name }}">
     </div>
 
     @if ($showCategory)
