@@ -22,6 +22,11 @@ class Collection extends Component
         $this->type = $type;
     }
 
+    public function mount($collection = null)
+    {
+        $this->type = $collection;
+    }
+
     public function render()
     {
         return view('livewire.collection');

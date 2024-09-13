@@ -13,14 +13,14 @@
         </div>
 
         <div>
-            {{ $categories->links() }}
+            {{ $albums->links() }}
         </div>
     </x-slot>
-    @foreach ($categories as $category)
-        <x-grid.image-card :image="$this->getImageFromCategory($category)" route="#">
+    @foreach ($albums as $album)
+        <x-grid.image-card :image="$this->getImageFromAlbum($album)" route="#">
             <div class="absolute inset-0 flex items-end">
                 <div class="flex justify-center w-full border-t border-gray-700 bg-slate-800/60">
-                {{ $category->name }}
+                {{ $album->name }}
                 </div>
             </div>
         </x-grid.image-card>

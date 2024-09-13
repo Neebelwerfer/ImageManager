@@ -18,6 +18,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('collection', Collection::class)
         ->name('collection');
 
+    Route::get('collection/{collection}', Collection::class)
+        ->name('collection.show');
+
     Route::get('show/image/{image}', ImageShow::class)
         ->name('image.show');
 
