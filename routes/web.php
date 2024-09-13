@@ -4,6 +4,7 @@ use App\Livewire\Collection;
 use App\Livewire\ImageShow;
 use App\Livewire\ImageUpload;
 use App\Livewire\Manage;
+use App\Livewire\Manage\Albums;
 use App\Livewire\Manage\Categories;
 use App\Livewire\Manage\Tags;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('manage/tags', Tags::class)
         ->name('manage.tags');
+
+    Route::get('manage/albums', Albums::class)
+        ->name('manage.albums');
 
 });
 

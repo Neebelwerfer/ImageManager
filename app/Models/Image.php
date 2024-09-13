@@ -45,7 +45,7 @@ class Image extends Model
         static::deleting(function (Image $image) {
             Storage::disk('local')->delete($image->path);
 
-            Storage::disk('local')->delete($image->thumbnail_path);
+            Storage::disk('local')->delete($image->thumbnail_path());
         });
     }
 
