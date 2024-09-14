@@ -8,6 +8,10 @@
         <livewire:category-show.modal />
     @endif
 
+    @if ($showTags)
+        <livewire:tag-show.modal />
+    @endif
+
     @if (session('status'))
         <x-status-modal>
             <x-slot name="header">
@@ -56,15 +60,15 @@
 
                     <div class="flex flex-col my-2">
                         <div class="flex flex-row justify-center h-10 space-x-2">
-                            <button class="bg-blue-600 border border-blue-500 rounded h-fit" wire:click='addTag'>Add
+                            <button class="bg-blue-600 border border-blue-500 rounded h-fit" wire:click='toggleTag'>Add
                                 Tag</button>
                             <h1>Tags</h1>
                         </div>
                         <ul>
                             @foreach ($image->tags as $tag)
-                                <li class="flex flex-row justify-between p-2 bg-gray-800 border rounded ">
+                                <li class="flex flex-row justify-between pl-2 space-x-4 bg-gray-800 border rounded ">
                                     <p>{{ $tag->name }}</p>
-                                    <button class="bg-red-600 border border-red-500 rounded h-fit">Remove</button>
+                                    <button class="h-full bg-red-600 border border-red-500 rounded" wire:click='removeTag({{ $tag->id }})'>Remove</button>
                                 </li>
                             @endforeach
                         </ul>
