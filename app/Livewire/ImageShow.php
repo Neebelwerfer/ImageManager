@@ -53,6 +53,11 @@ class ImageShow extends Component
         $this->showCategory = !$this->showCategory;
     }
 
+    public function back()
+    {
+        return $this->redirect(url()->previous(), true);
+    }
+
     public function mount($image)
     {
         if(!isset($image) or empty($image)) {

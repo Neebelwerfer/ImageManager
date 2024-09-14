@@ -40,6 +40,11 @@ class Image extends Model
         return 'thumbnails/' . $this->uuid . '.webp';
     }
 
+    public function albums() : BelongsToMany
+    {
+        return $this->belongsToMany(Album::class, 'album_images', 'image_uuid', 'album_id');
+    }
+
     protected static function booted(): void
     {
         static::deleting(function (Image $image) {

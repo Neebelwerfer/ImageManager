@@ -22,7 +22,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('collection/{collection}', Collection::class)
         ->name('collection.show');
 
-    Route::get('show/image/{image}', ImageShow::class)
+    Route::get('collection/images/{image}', ImageShow::class)
         ->name('image.show');
 
     Route::view('profile', 'profile')
