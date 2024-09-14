@@ -18,12 +18,19 @@ class ImageShow extends Component
 
     public $showCategory = false;
     public $showTags = false;
+    public $showRating = false;
+
+    public function toggleRatingModal()
+    {
+        $this->showRating = !$this->showRating;
+    }
 
     #[On('closeModal')]
     public function closeModal()
     {
         $this->showCategory = false;
         $this->showTags = false;
+        $this->showRating = false;
     }
 
     #[On('categorySelected')]

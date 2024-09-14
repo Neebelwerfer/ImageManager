@@ -41,7 +41,7 @@ class Categories extends Component
     {
         return view('livewire.manage.categories',
             [
-                'categories' => ImageCategory::where('owner_id', Auth::user()->id)->paginate(20)
+                'categories' => ImageCategory::where('owner_id', Auth::user()->id)->paginate(50)
             ]);
     }
 }

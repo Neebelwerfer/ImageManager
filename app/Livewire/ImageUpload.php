@@ -23,8 +23,8 @@ class ImageUpload extends Component
 {
     use WithFileUploads;
 
-    // 10MB Max
-    #[Validate('image|max:10024')]
+    // 100MB Max
+    #[Validate('image')]
     public $image;
 
     #[Validate('required|min:0|max:10')]
@@ -100,16 +100,20 @@ class ImageUpload extends Component
 
         $comparator = new ImageComparator();
 
-
-        $imageInfo = ImageManager::imagick()->read($this->image);
-        $imageModel->width = $imageInfo->width();
-        $imageModel->height = $imageInfo->height();
-        $thumbnail_path = 'thumbnails/' . $imageModel->uuid . '.webp';
-        $imageInfo->scaleDown(512, 512);
-        $imageInfo->save(storage_path('app') . '/' . ($thumbnail_path));
-
         // Try/catch block to ensure image is deleted if it already exists even if exception is thrown
         try {
+
+            $imageInfo = ImageManager::imagick()->read($this->image);
+            $imageScaled = ImageManager::imagick()->read($imageInfo);
+            $imageModel->width = $imageInfo->width();
+            $imageModel->height = $imageInfo->height();
+            $thumbnail_path = 'thumbnails/' . $imageModel->uuid . '.webp';
+
+            $imageScaled = $imageScaled->scaleDown(2560, 1440);
+
+            $imageInfo->scaleDown(512, 512);
+            $imageInfo->save(storage_path('app') . '/' . ($thumbnail_path));
+
 
             // Check if image already exists via image hash
             // Currently only compares images with same width and height
@@ -125,7 +129,8 @@ class ImageUpload extends Component
                 }
             }
 
-            $imageModel->path = $this->image->storeAs('images', $imageModel->uuid . '.' . $this->image->extension(), 'local');
+            $imageModel->path = 'images/' . $imageModel->uuid . '.' . $this->image->extension();
+            $imageScaled->save(storage_path('app') . '/' . $imageModel->path);
             $imageModel->save();
 
             foreach ($this->tags as $tag) {

@@ -17,7 +17,7 @@
         </div>
     </x-slot>
     @foreach ($categories as $category)
-        <x-grid.image-card :image="$this->getImageFromCategory($category)" route="#">
+        <x-grid.image-card :image="$this->getImageFromCategory($category)" route="{{ route('collection.category', $category->id) }}">
             <div class="absolute inset-0 flex items-end">
                 <div class="flex justify-center w-full border-t border-gray-700 bg-slate-800/60">
                 {{ $category->name }}

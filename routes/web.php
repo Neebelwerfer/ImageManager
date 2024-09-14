@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Collection;
+use App\Livewire\Collection\Show\Category;
 use App\Livewire\ImageShow;
 use App\Livewire\ImageUpload;
 use App\Livewire\Manage;
@@ -21,6 +22,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('collection/{collection}', Collection::class)
         ->name('collection.show');
+
+    Route::get('collection/albums/{album}', Collection::class)
+        ->name('collection.album');
+
+    Route::get('collection/categories/{categoryID}', Category::class)
+        ->name('collection.category');
 
     Route::get('collection/images/{image}', ImageShow::class)
         ->name('image.show');

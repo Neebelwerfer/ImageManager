@@ -1,7 +1,10 @@
 <div x-data="{ showOptions: false }" class="relative flex flex-grow">
     <a class="absolute top-0 left-0 z-50 m-5" href="{{ url()->previous() }}">Back</a>
-    <div x-on:click="showOptions = !showOptions" class="flex justify-center w-full m-5">
-        <img class="object-scale-down" src="{{ asset($image->path) }}" alt="{{ $image->name }}">
+
+    <div class="flex justify-center w-full">
+        <div x-on:click="showOptions = !showOptions" class="flex justify-center w-4/5 m-5">
+            <img class="object-scale-down" src="{{ asset($image->path) }}" alt="{{ $image->name }}">
+        </div>
     </div>
 
     @if ($showCategory)
@@ -10,6 +13,10 @@
 
     @if ($showTags)
         <livewire:tag-show.modal />
+    @endif
+
+    @if ($showRating)
+        <livewire:image-show.rating :image="$image" />
     @endif
 
     @if (session('status'))
@@ -32,13 +39,12 @@
         <div class="flex flex-col justify-center w-full h-full">
             <div class="flex flex-row h-full mx-5">
                 <div class="flex flex-row w-full h-full space-x-6 justify-evenly">
-                    <div class="columns-2">
+                    <div class="h-full columns-2">
                         <p>Rating: {{ $image->rating }}</p>
                         <p>Uploaded By: {{ $image->user->name }}</p>
                         <p>Uploaded: {{ $image->created_at->diffForHumans() }}</p>
-
-                        <button class="w-20 p-1 bg-red-600 border border-red-500 rounded" wire:click='delete'
-                            wire:confirm="Are you sure you want to delete this image?">Delete</button>
+                        <button class="w-full p-1 bg-blue-600 border border-blue-500 rounded"
+                            wire:click='toggleRatingModal'>Change Rating</button>
 
                         <div class= "flex flex-col space-y-1">
                             @isset($image->category)
@@ -68,7 +74,8 @@
                             @foreach ($image->tags as $tag)
                                 <li class="flex flex-row justify-between pl-2 space-x-4 bg-gray-800 border rounded ">
                                     <p>{{ $tag->name }}</p>
-                                    <button class="h-full bg-red-600 border border-red-500 rounded" wire:click='removeTag({{ $tag->id }})'>Remove</button>
+                                    <button class="h-full bg-red-600 border border-red-500 rounded"
+                                        wire:click='removeTag({{ $tag->id }})'>Remove</button>
                                 </li>
                             @endforeach
                         </ul>
@@ -88,6 +95,8 @@
                         </div>
                     </div>
                 </div>
+                <button class="w-20 p-1 bg-red-600 border border-red-500 rounded h-fit" wire:click='delete'
+                    wire:confirm="Are you sure you want to delete this image?">Delete</button>
             </div>
         </div>
     </div>

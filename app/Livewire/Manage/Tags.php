@@ -40,7 +40,7 @@ class Tags extends Component
     {
         return view('livewire.manage.tags',
             [
-                'tags' => ImageTag::where('owner_id', Auth::user()->id)->paginate(20)
+                'tags' => ImageTag::where('owner_id', Auth::user()->id)->paginate(50)
             ]);
     }
 }
