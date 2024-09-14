@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Image;
 use App\Models\ImageCategory;
+use App\Models\ImageTag;
 use GdImage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -31,14 +32,18 @@ class ImageUpload extends Component
 
     public $category;
 
+    public $tags = [];
+
     public $duplicate;
 
     public bool $showCategory = false;
+    public bool $showTags = false;
 
     #[On('closeModal')]
     public function closeModal()
     {
         $this->showCategory = false;
+        $this->showTags = false;
     }
 
     #[On('categorySelected')]
@@ -50,6 +55,26 @@ class ImageUpload extends Component
     public function toggleCategoryModal()
     {
         $this->showCategory = !$this->showCategory;
+    }
+
+    #[On('tagSelected')]
+    public function tagSelected($tag)
+    {
+        if (isset($this->tags[$tag])) {
+            return;
+        }
+
+        $this->tags[$tag] = ImageTag::find($tag);
+    }
+
+    public function removeTag($tagID)
+    {
+        unset($this->tags[$tagID]);
+    }
+
+    public function toggleTagsModal()
+    {
+        $this->showTags = !$this->showTags;
     }
 
     #[Computed()]
@@ -102,6 +127,11 @@ class ImageUpload extends Component
 
             $imageModel->path = $this->image->storeAs('images', $imageModel->uuid . '.' . $this->image->extension(), 'local');
             $imageModel->save();
+
+            foreach ($this->tags as $tag) {
+                $imageModel->tags()->save($tag);
+            }
+
         } catch (\Exception $e) {
             Storage::disk('local')->delete($thumbnail_path);
             return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true, 'error_message' => $e->getMessage()]);
