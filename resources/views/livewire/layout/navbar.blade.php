@@ -31,12 +31,6 @@ $logout = function (Logout $logout) {
                             </x-nav-link>
                         @endif
 
-                        @if (Route::has('image.upload'))
-                        <x-nav-link :href="route('image.upload')" :active="request()->routeIs('image.upload')" wire:navigate>
-                            {{ __('Upload Image') }}
-                        </x-nav-link>
-                        @endif
-
                         @if (Route::has('collection'))
                         <x-nav-link :href="route('collection')" :active="request()->routeIs('collection')" wire:navigate>
                             {{ __('Collection') }}
@@ -44,9 +38,15 @@ $logout = function (Logout $logout) {
                         @endif
 
                         @if (Route::has('manage'))
-                            <x-nav-link :href="route('manage')" :active="request()->routeIs('manage')" wire:navigate>
-                                {{ __('Manage') }}
-                            </x-nav-link>
+                        <x-nav-link :href="route('manage')" :active="request()->routeIs('manage')" wire:navigate>
+                            {{ __('Manage') }}
+                        </x-nav-link>
+                        @endif
+
+                        @if (Route::has('image.upload'))
+                        <x-nav-link :href="route('image.upload')" :active="request()->routeIs('image.upload')" wire:navigate>
+                            {{ __('Upload Image') }}
+                        </x-nav-link>
                         @endif
                     @endauth
 

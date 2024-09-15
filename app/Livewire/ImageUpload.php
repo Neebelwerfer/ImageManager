@@ -104,14 +104,15 @@ class ImageUpload extends Component
         try {
 
             $imageInfo = ImageManager::imagick()->read($this->image);
-            $imageScaled = ImageManager::imagick()->read($imageInfo);
-            $imageModel->width = $imageInfo->width();
-            $imageModel->height = $imageInfo->height();
-            $thumbnail_path = 'thumbnails/' . $imageModel->uuid . '.webp';
+            $imageScaled = ImageManager::imagick()->read($this->image);
+            $imageScaled->scaleDown(2560, 1440);
 
-            $imageScaled = $imageScaled->scaleDown(2560, 1440);
-
+            $imageModel->width = $imageScaled->width();
+            $imageModel->height = $imageScaled->height();
             $imageInfo->scaleDown(512, 512);
+
+
+            $thumbnail_path = 'thumbnails/' . $imageModel->uuid . '.webp';
             $imageInfo->save(storage_path('app') . '/' . ($thumbnail_path));
 
 
