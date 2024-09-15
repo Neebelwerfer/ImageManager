@@ -1,5 +1,4 @@
 <div class="h-full" x-data="{ showOptions: false }">
-
     @if ($gridView)
         <x-grid>
             <x-slot name="header">

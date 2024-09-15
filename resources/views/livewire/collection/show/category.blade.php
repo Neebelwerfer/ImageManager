@@ -1,4 +1,4 @@
-<div x-data="{ showOptions: false }">
+<div x-data="{ showOptions: $wire.entangle('showOptions') }">
 
     @if ($gridView)
         <x-grid>
@@ -21,7 +21,7 @@
 
 
         </x-grid>
-    @else
+    @elseif (isset($image))
         <div class="flex justify-center w-full" x-on:keyup.left="$wire.previousImage()" x-on:keyup.right="$wire.nextImage()">
             <div class="relative flex flex-col">
                 <div class="flex justify-center">
@@ -34,13 +34,12 @@
                 </div>
                 <div class="flex flex-row justify-center flex-shrink-0 w-full">
                     <button wire:click="previousImage"  class="w-20 h-full @if(!$this->gotPrevious()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-l border-y"><</button>
-                    <div class="flex w-4/5"  x-on:click="showOptions = !showOptions">
+                    <div class="flex w-4/5"  x-on:click="$wire.showOptions = !$wire.showOptions">
                         <img class="object-scale-down " src="{{ asset($image->path) }}">
                     </div>
                     <button wire:click="nextImage" class="w-20 h-full @if(!$this->gotNext()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-r border-y">></button>
                 </div>
             </div>
-
             <livewire:image-show.options :image="$image"/>
         </div>
         @endif

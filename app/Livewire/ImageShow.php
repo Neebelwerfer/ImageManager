@@ -37,6 +37,7 @@ class ImageShow extends Component
         }
     }
 
+    #[On('deleteImage')]
     public function delete()
     {
         $this->image->delete();

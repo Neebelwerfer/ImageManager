@@ -10,8 +10,7 @@ use Livewire\Component;
 
 class Options extends Component
 {
-    public $image;
-
+    public Image $image;
     public $showCategory = false;
     public $showTags = false;
     public $showRating = false;
@@ -86,13 +85,20 @@ class Options extends Component
         $this->showRating = !$this->showRating;
     }
 
-    public function mount(Image $image)
+    public function delete()
     {
-        $this->image = $image;
+        $this->dispatch('deleteImage');
+    }
+
+    #[On('imageUpdated')]
+    public function imageUpdated($image)
+    {
+        $this->image = Image::find($image);
     }
 
     public function render()
     {
+
         return view('livewire.image-show.options');
     }
 }
