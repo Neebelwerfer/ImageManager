@@ -6,17 +6,17 @@
                 <div class="flex flex-row justify-center mx-2">
                     <button
                         class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
-                        wire:click="setGridView(true)">Grid</button>
+                        wire:click="setGridView(true)" @if($gridView) disabled @endif>Grid</button>
                     <button
                         class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
-                        wire:click="setGridView(false)">Single</button>
+                        wire:click="setGridView(false)" @if(!$gridView) disabled @endif>Single</button>
                 </div>
 
             </x-slot>
 
             @foreach ($images as $key => $image)
-                <x-grid.image-card :image="$image" x-on:click="$wire.show({{ $key }})" >
-                </x-grid.image-card>
+                <x-grid.image-card-button :image="$image" x-on:click="$wire.show({{ $key }})">
+                </x-grid.image-card-button>
             @endforeach
 
 
