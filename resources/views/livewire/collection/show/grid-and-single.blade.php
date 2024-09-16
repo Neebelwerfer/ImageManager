@@ -1,4 +1,8 @@
-<div x-data="{ showOptions: $wire.entangle('showOptions') }">
+<div class="relative overflow-hidden" x-data="{ showOptions: $wire.entangle('showOptions') }">
+
+    @if(isset($image))
+        <livewire:image-show.options :image="$image"/>
+    @endif
 
     @if ($gridView)
         <x-grid>
@@ -22,8 +26,8 @@
 
         </x-grid>
     @elseif (isset($image))
-        <div class="flex justify-center w-full" x-on:keyup.left="$wire.previousImage()" x-on:keyup.right="$wire.nextImage()">
-            <div class="relative flex flex-col">
+        <div class="relative flex flex-col justify-center w-full h-full" x-on:keyup.left="$wire.previousImage()" x-on:keyup.right="$wire.nextImage()">
+            <div class="flex flex-col">
                 <div class="flex justify-center">
                     <button
                         class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
@@ -40,7 +44,6 @@
                     <button wire:click="nextImage" class="w-20 h-full @if(!$this->gotNext()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-r border-y">></button>
                 </div>
             </div>
-            <livewire:image-show.options :image="$image"/>
         </div>
         @endif
 </div>

@@ -99,6 +99,6 @@ class Category extends Component
             $this->dirty = false;
         }
 
-        return view('livewire.collection.show.category');
+        return view('livewire.collection.show.grid-and-single');
     }
 }

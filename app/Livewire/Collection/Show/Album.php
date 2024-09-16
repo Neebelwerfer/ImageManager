@@ -76,6 +76,6 @@ class Album extends Component
         if($this->images->count() != 0) {
             $this->image = $this->images[$this->count];
         }
-        return view('livewire.collection.show.album');
+        return view('livewire.collection.show.grid-and-single');
     }
 }
