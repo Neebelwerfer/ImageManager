@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Livewire\Grid;
+namespace App\Livewire;
 
+use App\Models\Image as ModelsImage;
 use Livewire\Attributes\Lazy;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 #[Lazy()]
@@ -10,9 +12,12 @@ class Image extends Component
 {
     public $image;
 
-    public function mount($image)
+    public $classes = '';
+
+    #[On('imageUpdated')]
+    public function imageUpdated($imageUUID)
     {
-        $this->image = $image;
+        $this->image = ModelsImage::find($imageUUID);
     }
 
     public function placeholder()
@@ -27,8 +32,8 @@ class Image extends Component
     public function render()
     {
         return <<<'HTML'
-        <div>
-            <img class="object-scale-down" style="width: 256px; height: 300px;" src="{{ asset($image->thumbnail_path()) }}">
+        <div class="{{ $classes }}">
+            <img class="object-scale-down" src="{{ asset($image->path) }}"  alt="{{ $image->name }}">
         </div>
         HTML;
     }
