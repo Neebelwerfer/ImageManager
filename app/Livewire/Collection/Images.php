@@ -4,6 +4,7 @@ namespace App\Livewire\Collection;
 
 use App\Models\Image;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,11 +13,13 @@ class Images extends Component
     use WithPagination;
 
     public $name = '';
+
+    #[Url('r')]
     public $rating = 0;
 
     public function search()
     {
-        $this->resetPage();
+        $this->dispatch('reloadPage');
     }
 
     public function render()
