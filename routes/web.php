@@ -24,10 +24,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('collection/{collection}', Collection::class)
         ->name('collection.show');
 
-    Route::get('collection/albums/{albumID}', Album::class)
+    Route::get('collection/albums/{collectionID}', Album::class)
         ->name('collection.album');
 
-    Route::get('collection/categories/{categoryID}', Category::class)
+    Route::get('collection/categories/{collectionID}', Category::class)
         ->name('collection.category');
 
     Route::get('collection/images/{image}', ImageShow::class)

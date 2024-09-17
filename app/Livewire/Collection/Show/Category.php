@@ -2,12 +2,15 @@
 
 namespace App\Livewire\Collection\Show;
 
+use App\Models\Album;
 use App\Models\ImageCategory;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
+//TODO: Make this generic for all types of collections
 #[Layout('layouts.collection')]
 class Category extends Component
 {
@@ -16,15 +19,13 @@ class Category extends Component
     public $gridView = true;
     #[Url('i')]
     public $count = 0;
-
-    public $showOptions = false;
-    public $collection;
-    public $images;
-    public $image;
-
     #[Url('r')]
     public $minRating = 0;
 
+    public $showOptions = false;
+    public $collection;
+    public $image;
+    public $type;
     public $dirty = false;
 
     public function setGridView($value)
@@ -89,13 +90,30 @@ class Category extends Component
         $this->dispatch('reloadPage');
     }
 
-    public function updateImages(){
-        $this->images = $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values();
+    public function updateImages()
+    {
+        unset($this->images);
     }
 
-    public function mount($categoryID)
+    #[Computed(cache: true)]
+    public function images()
     {
-        $this->collection = ImageCategory::find($categoryID);
+        return $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values();
+    }
+
+    public function mount($collectionID)
+    {
+        // switch($this->type) {
+        //     case 'category':
+        //         $this->collection = ImageCategory::find($categoryID);
+        //         break;
+        //     case 'album':
+        //         $this->collection = Album::find($categoryID);
+        //         break;
+        //     default:
+        //         abort(404);
+        // }
+        $this->collection = ImageCategory::find($collectionID);
         if(!isset($this->collection)) {
             abort(404);
         }
@@ -104,14 +122,17 @@ class Category extends Component
 
     public function render()
     {
-        if($this->images->count() > 0 or $this->dirty) {
+        if($this->images->count() > 0) {
             if($this->count > $this->images->count() - 1)
             {
                 $this->count = $this->images->count() - 1;
             }
-            $this->image = $this->images[$this->count];
-            $this->dispatch('imageUpdated', $this->image->uuid);
-            $this->dirty = false;
+
+            if($this->dirty) {
+                $this->image = $this->images[$this->count];
+                $this->dispatch('imageUpdated', $this->image->uuid);
+                $this->dirty = false;
+            }
         }
 
         return view('livewire.collection.show.grid-and-single');

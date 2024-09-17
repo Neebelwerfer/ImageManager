@@ -19,8 +19,8 @@
     @livewireStyles
 </head>
 
-<body class="font-sans antialiased">
-    <div class="flex flex-col min-h-screen bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
+<body class="min-h-screen font-sans antialiased">
+    <div class="flex flex-col max-h-fit bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
 
         <livewire:layout.navbar />
 
@@ -33,7 +33,7 @@
             </header>
         @endif
 
-        <main class="flex flex-col flex-grow">
+        <main class="flex flex-col">
             {{ $slot }}
         </main>
 

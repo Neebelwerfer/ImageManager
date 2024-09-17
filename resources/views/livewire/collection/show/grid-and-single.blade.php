@@ -35,7 +35,7 @@
                     </div>
                 </x-slot>
 
-                @foreach ($images as $key => $image)
+                @foreach ($this->images as $key => $image)
                     <x-grid.image-card-button :image="$image" x-on:click="$wire.show({{ $key }})">
                     </x-grid.image-card-button>
                 @endforeach
