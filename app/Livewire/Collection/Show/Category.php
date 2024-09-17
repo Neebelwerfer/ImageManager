@@ -12,15 +12,18 @@ use Livewire\Component;
 class Category extends Component
 {
 
-    #[Url('grid')]
+    #[Url('g')]
     public $gridView = true;
     #[Url('i')]
     public $count = 0;
 
     public $showOptions = false;
-    public $category;
+    public $collection;
     public $images;
     public $image;
+
+    #[Url('r')]
+    public $minRating = 0;
 
     public $dirty = false;
 
@@ -75,16 +78,28 @@ class Category extends Component
     {
         $this->image->delete();
         $this->previousImage();
-        $this->images = $this->category->images->sortBy('rating', SORT_NUMERIC, true)->values();
+        $this->updateImages();
+    }
+
+    public function filter()
+    {
+        $this->updateImages();
+        $this->count = 0;
+        $this->dirty = true;
+        $this->dispatch('reloadPage');
+    }
+
+    public function updateImages(){
+        $this->images = $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values();
     }
 
     public function mount($categoryID)
     {
-        $this->category = ImageCategory::find($categoryID);
-        if(!isset($this->category)) {
+        $this->collection = ImageCategory::find($categoryID);
+        if(!isset($this->collection)) {
             abort(404);
         }
-        $this->images = $this->category->images->sortBy('rating', SORT_NUMERIC, true)->values();
+        $this->updateImages();
     }
 
     public function render()

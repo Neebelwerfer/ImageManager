@@ -15,7 +15,8 @@
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+    @livewireScripts
+    @livewireStyles
 </head>
 
 <body class="font-sans antialiased">
@@ -25,8 +26,8 @@
 
         <!-- Page Heading -->
         @if (isset($header))
-            <header class="bg-gray-300 shadow dark:bg-gray-800">
-                <div class="px-4 py-6 mx-auto max-w-fit sm:px-6 lg:px-8">
+            <header class="bg-gray-300 shadow dark:bg-gray-900">
+                <div class="px-4 py-4 mx-auto max-w-fit sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
             </header>
