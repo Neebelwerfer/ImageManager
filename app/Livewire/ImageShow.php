@@ -24,16 +24,16 @@ class ImageShow extends Component
     public function mount($image)
     {
         if(!isset($image) or empty($image)) {
-            abort(404);
+            abort(404, 'Image not found');
         }
 
         $this->image = Image::find($image);
         if(!isset($this->image)) {
-            abort(404);
+            abort(404, 'Image not found');
         }
 
         if(Auth::user()->id != $this->image->owner_id) {
-            abort(403);
+            abort(403, 'Forbidden');
         }
     }
 

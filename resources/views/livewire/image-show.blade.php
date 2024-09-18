@@ -1,4 +1,4 @@
-<div x-data="{ showOptions: false }" class="relative flex flex-grow">
+<div x-data="{ showOptions: false }" class="relative flex flex-grow h-full">
     <a class="absolute top-0 left-0 z-50 m-5" href="{{ url()->previous() }}">Back</a>
 
     <div class="flex justify-center w-full">
