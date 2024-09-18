@@ -3,6 +3,7 @@
 use App\Livewire\Collection;
 use App\Livewire\Collection\Show\Album;
 use App\Livewire\Collection\Show\Category;
+use App\Livewire\Collection\Show\Collection as ShowCollection;
 use App\Livewire\ImageShow;
 use App\Livewire\ImageUpload;
 use App\Livewire\Manage;
@@ -24,11 +25,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('collection/{collection}', Collection::class)
         ->name('collection.show');
 
-    Route::get('collection/albums/{collectionID}', Album::class)
-        ->name('collection.album');
-
-    Route::get('collection/categories/{collectionID}', Category::class)
-        ->name('collection.category');
+    Route::get('collection/{collectionType}/{collectionID}', ShowCollection::class)
+        ->name('collection.type.show');
 
     Route::get('collection/images/{image}', ImageShow::class)
         ->name('image.show');

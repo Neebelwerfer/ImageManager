@@ -6,11 +6,13 @@ use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTag;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class Options extends Component
 {
     public Image $image;
+
     public $showCategory = false;
     public $showTags = false;
     public $showRating = false;

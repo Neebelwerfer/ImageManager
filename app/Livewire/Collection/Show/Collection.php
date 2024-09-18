@@ -10,9 +10,8 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-//TODO: Make this generic for all types of collections
 #[Layout('layouts.collection')]
-class Category extends Component
+class Collection extends Component
 {
 
     #[Url('g')]
@@ -24,8 +23,8 @@ class Category extends Component
 
     public $showOptions = false;
     public $collection;
+
     public $image;
-    public $type;
     public $dirty = false;
 
     public function setGridView($value)
@@ -101,21 +100,21 @@ class Category extends Component
         return $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values();
     }
 
-    public function mount($collectionID)
+    public function mount($collectionType, $collectionID)
     {
-        // switch($this->type) {
-        //     case 'category':
-        //         $this->collection = ImageCategory::find($categoryID);
-        //         break;
-        //     case 'album':
-        //         $this->collection = Album::find($categoryID);
-        //         break;
-        //     default:
-        //         abort(404);
-        // }
-        $this->collection = ImageCategory::find($collectionID);
+        switch($collectionType) {
+            case 'categories':
+                $this->collection = ImageCategory::find($collectionID);
+                break;
+            case 'albums':
+                $this->collection = Album::find($collectionID);
+                break;
+            default:
+                abort(404, 'Collection not found');
+        }
+
         if(!isset($this->collection)) {
-            abort(404);
+            abort(404, 'Collection not found');
         }
         $this->updateImages();
     }

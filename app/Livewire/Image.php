@@ -5,20 +5,16 @@ namespace App\Livewire;
 use App\Models\Image as ModelsImage;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 #[Lazy()]
 class Image extends Component
 {
+    #[Reactive()]
     public $image;
 
     public $classes = '';
-
-    #[On('imageUpdated')]
-    public function imageUpdated($imageUUID)
-    {
-        $this->image = ModelsImage::find($imageUUID);
-    }
 
     public function placeholder()
     {
