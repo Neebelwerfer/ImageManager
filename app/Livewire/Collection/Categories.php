@@ -11,7 +11,7 @@ class Categories extends Component
 
     public function getImageFromCategory(ImageCategory $category)
     {
-        $image = $category->images()->first();
+        $image = $category->images->sortBy('rating', SORT_NUMERIC, true)->first();
         return $image;
     }
 
