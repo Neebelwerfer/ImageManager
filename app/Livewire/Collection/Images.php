@@ -22,11 +22,15 @@ class Images extends Component
         $this->dispatch('reloadPage');
     }
 
+    public function updatedPage($page)
+    {
+    }
+
     public function render()
     {
         return view('livewire.collection.images',
             [
-                'images' => Image::where('rating', '>=', $this->rating)->where('owner_id', Auth::user()->id)->paginate(20)
+                'images' => Image::where('rating', '>=', $this->rating)->where('owner_id', Auth::user()->id)->orderby('rating', 'desc')->paginate(20)
             ]);
     }
 }

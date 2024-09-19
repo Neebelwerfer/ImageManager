@@ -14,6 +14,6 @@
         </div>
     </x-slot>
     @foreach ($images as $image)
-        <x-grid.image-card :image="$image" route="{{ route('image.show', $image->uuid) }}" />
+        <x-grid.image-card :image="$image" route="{{ route('image.show', $image->uuid) }}" wire:key='grid-{{ $image->uuid }}' />
     @endforeach
 </x-grid>
