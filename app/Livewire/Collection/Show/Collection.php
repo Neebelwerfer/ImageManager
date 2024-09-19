@@ -24,7 +24,7 @@ class Collection extends Component
     public $showOptions = false;
     public $collection;
 
-    public $image;
+    public $singeleImage;
     public $dirty = false;
 
     public function setGridView($value)
@@ -128,8 +128,8 @@ class Collection extends Component
             }
 
             if($this->dirty) {
-                $this->image = $this->images[$this->count];
-                $this->dispatch('imageUpdated', $this->image->uuid);
+                $this->singeleImage = $this->images[$this->count];
+                $this->dispatch('imageUpdated', $this->singeleImage->uuid);
                 $this->dirty = false;
             }
         }
