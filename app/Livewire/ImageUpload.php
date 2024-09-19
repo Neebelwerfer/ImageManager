@@ -109,7 +109,7 @@ class ImageUpload extends Component
 
             $imageModel->width = $imageScaled->width();
             $imageModel->height = $imageScaled->height();
-            $imageInfo->scaleDown(512, 512);
+            $imageInfo->scaleDown(256, 256);
 
 
             $thumbnail_path = 'thumbnails/' . $imageModel->uuid . '.webp';

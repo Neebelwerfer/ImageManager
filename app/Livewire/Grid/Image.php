@@ -28,7 +28,7 @@ class Image extends Component
     {
         return <<<'HTML'
         <div>
-            <img class="object-scale-down" style="width: 256px; height: 300px;" src="{{ asset($image->thumbnail_path()) }}">
+            <img class="object-scale-down mt-1" style="width: 256px; height: 290px;" src="{{ asset($image->thumbnail_path()) }}">
         </div>
         HTML;
     }

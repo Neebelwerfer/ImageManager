@@ -22,10 +22,6 @@ class Images extends Component
         $this->dispatch('reloadPage');
     }
 
-    public function updatedPage($page)
-    {
-    }
-
     public function render()
     {
         return view('livewire.collection.images',
