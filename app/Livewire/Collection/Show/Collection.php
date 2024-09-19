@@ -4,6 +4,7 @@ namespace App\Livewire\Collection\Show;
 
 use App\Models\Album;
 use App\Models\ImageCategory;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -20,6 +21,8 @@ class Collection extends Component
     public $count = 0;
     #[Url('r')]
     public $minRating = 0;
+    #[Url('page')]
+    public $page = 0;
 
     public $showOptions = false;
     public $collection;
@@ -94,9 +97,18 @@ class Collection extends Component
         unset($this->images);
     }
 
+    #[Computed()]
+    public function chunkedImages()
+    {
+
+        return $this->images->chunk(20);
+    }
+
     #[Computed(cache: true)]
     public function images()
     {
+        $key = Auth::user()->id . '-' . $this->collection->id;
+
         return $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values();
     }
 
