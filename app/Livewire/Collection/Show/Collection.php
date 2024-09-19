@@ -127,6 +127,10 @@ class Collection extends Component
                 $this->count = $this->images->count() - 1;
             }
 
+            if($this->singeleImage == null) {
+                $this->singeleImage = $this->images[$this->count];
+            }
+
             if($this->dirty) {
                 $this->singeleImage = $this->images[$this->count];
                 $this->dispatch('imageUpdated', $this->singeleImage->uuid);

@@ -6,8 +6,8 @@
         </h2>
     </x-slot>
 
-    @if(isset($image))
-        <livewire:image-show.options :image="$image"/>
+    @if(isset($singeleImage))
+        <livewire:image-show.options :image="$singeleImage"/>
     @endif
 
     <div class="flex flex-row mx-2 mt-2">
@@ -19,8 +19,8 @@
             wire:click="setGridView(false)" @if(!$gridView) disabled @endif>Single</button>
     </div>
 
-    <div class="flex justify-center ">
-        <div class="@if($gridView)flex flex-col @else collapse @endif justify-center justify-items-center">
+    <div class="@if($gridView) flex  @else collapse @endif justify-center ">
+        <div class="flex flex-col justify-center justify-items-center">
             <x-grid>
                 <x-slot name="header">
                     <div>
