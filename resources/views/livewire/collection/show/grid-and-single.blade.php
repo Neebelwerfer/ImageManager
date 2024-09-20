@@ -50,7 +50,7 @@
         <div class="flex flex-col justify-center flex-shrink-0 w-full mt-2 border h-5/6">
             <div class="flex flex-row justify-center h-full">
                 <div class="flex justify-center"  x-on:click="$wire.showOptions = !$wire.showOptions">
-                    <livewire:image classes="flex justify-center w-5/6 h-full" :image="$singeleImage"/>
+                    <livewire:image classes="flex justify-center flex-grow-0 w-5/6 h-full" :image="$singeleImage"/>
                 </div>
             </div>
         </div>

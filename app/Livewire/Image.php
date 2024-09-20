@@ -29,7 +29,7 @@ class Image extends Component
     {
         return <<<'HTML'
         <div class="{{ $classes }}">
-            <img class="object-scale-down" src="{{ asset($image->path) }}"  alt="{{ $image->name }}">
+            <img class="object-scale-down"  src="{{ asset($image->path) }}"  alt="{{ $image->name }}">
         </div>
         HTML;
     }

@@ -104,7 +104,8 @@ class ImageUpload extends Component
         try {
 
             $imageInfo = ImageManager::imagick()->read($this->image);
-            $imageScaled = ImageManager::imagick()->read($this->image);
+            $imageScaled = ImageManager::gd()->read($this->image);
+
             $imageScaled->scaleDown(2560, 1440);
 
             $imageModel->width = $imageScaled->width();

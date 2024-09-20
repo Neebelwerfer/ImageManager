@@ -79,7 +79,7 @@ class Collection extends Component
     #[On('deleteImage')]
     public function delete()
     {
-        $this->image->delete();
+        $this->singeleImage->delete();
         $this->previousImage();
         $this->updateImages();
     }
