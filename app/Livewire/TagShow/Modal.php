@@ -4,6 +4,8 @@ namespace App\Livewire\TagShow;
 
 use App\Models\ImageTag;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Reactive;
 use Livewire\Attributes\Validate;
@@ -20,6 +22,10 @@ class Modal extends Component
     {
         $this->validate();
 
+        if(ImageTag::where('name', $this->newTag)->exists()) {
+            Session::flash('message', 'Tag already exists');
+            return;
+        }
         $tag = new ImageTag();
         $tag->name = $this->newTag;
         $tag->owner_id = Auth::user()->id;
@@ -40,12 +46,6 @@ class Modal extends Component
         $this->close();
     }
 
-    public function deleteTag($id)
-    {
-        $tag = ImageTag::find($id);
-        $tag->delete();
-    }
-
     #[Computed()]
     public function tags()
     {
@@ -60,11 +60,10 @@ class Modal extends Component
                 <div class="w-1/2 max-w-3xl p-8 bg-gray-700 rounded-lg shadow-lg"  x-on:click.away="$wire.close">
                     <h2 class="mb-4 text-2xl font-bold border-b">Tags</h2>
 
-                    <div class="mb-6 space-y-2 overflow-auto">
+                    <div class="grid grid-flow-row grid-cols-5 mb-6">
                         @foreach ($this->tags as $tag)
-                            <div class="flex justify-between py-2 border-t border-gray-900">
-                                <button class="w-auto px-5 py-2 text-white bg-gray-500 rounded-md" wire:click="selectTag({{ $tag->id }})">{{ $tag->name }}</button>
-                                <button class="px-4 py-2 text-white bg-red-500 rounded-md" wire:confirm="Are you sure?" wire:click="deleteTag({{ $tag->id }})">Delete</button>
+                            <div class="w-full py-2 border-gray-900">
+                                <button class="w-full px-5 py-2 mx-2 text-white rounded-md hover:bg-gray-500 hover:dark:bg-gray-500" wire:click="selectTag({{ $tag->id }})">{{ $tag->name }}</button>
                             </div>
                         @endforeach
                     </div>
@@ -84,8 +83,6 @@ class Modal extends Component
                                 @error('name')
                                     <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
                                 @enderror
-                            </div>
-                            <div class="mb-3">
                             </div>
                         </div>
                     </form>

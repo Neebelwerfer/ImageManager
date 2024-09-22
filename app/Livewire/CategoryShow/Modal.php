@@ -60,12 +60,10 @@ class Modal extends Component
                 <div class="w-1/2 max-w-3xl p-8 bg-gray-700 rounded-lg shadow-lg"  x-on:click.away="$wire.close">
                     <h2 class="mb-4 text-2xl font-bold border-b">Categories</h2>
 
-                    <div class="mb-6 space-y-2 overflow-auto">
-                        <button class="w-auto px-5 py-2 text-white bg-gray-500 rounded-md" wire:click="selectCategory(-1)">None</button>
-                        @foreach ($this->categories as $category)
-                            <div class="flex justify-between py-2 border-t border-gray-900">
-                                <button class="w-auto px-5 py-2 text-white bg-gray-500 rounded-md" wire:click="selectCategory({{ $category->id }})">{{ $category->name }}</button>
-                                <button class="px-4 py-2 text-white bg-red-500 rounded-md" wire:confirm="Are you sure?" wire:click="deleteCategory({{ $category->id }})">Delete</button>
+                    <div class="grid grid-flow-row grid-cols-5 mb-6">
+                    @foreach ($this->categories as $category)
+                        <div class="w-full py-2 border-gray-900">
+                                <button class="w-full px-5 py-2 mx-2 text-white rounded-md hover:bg-gray-500 hover:dark:bg-gray-500" wire:click="selectCategory({{ $category->id }})">{{ $category->name }}</button>
                             </div>
                         @endforeach
                     </div>
@@ -91,6 +89,9 @@ class Modal extends Component
                             </div>
                         </div>
                     </form>
+
+                    <button class="px-5 py-2 text-white border rounded hover:bg-gray-500 hover:dark:bg-gray-500" wire:click="selectCategory(-1)">None</button>
+
 
                     <!-- Close Button -->
                     <button wire:click="close" class="px-4 py-2 text-white bg-red-500 rounded-md">

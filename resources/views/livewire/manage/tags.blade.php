@@ -1,4 +1,4 @@
-<div class="flex flex-col justify-center gap-2 mt-16 w-96">
+<div class="flex flex-col justify-center w-full gap-2 mt-16">
     <h1 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Tags</h1>
     <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
@@ -7,15 +7,15 @@
     </div>
     @error('name') <span class="text-red-500">{{ $message }}</span> @enderror
 
-    <ul class="space-y-2">
-    @foreach ($tags as $tag)
-        <li class="flex flex-row justify-between p-2 bg-gray-800 border rounded ">
-            <div>
-                <h1>{{ $tag->name }}</h1>
-                <h1>Images: {{ $tag->images->count() }}</h1>
+    <div class="grid w-full grid-flow-row grid-cols-5 gap-2">
+        @foreach ($tags as $tag)
+            <div class="flex flex-row justify-between w-full p-2 bg-gray-800 border rounded">
+                <div class="w-full">
+                    <h1>{{ $tag->name }}</h1>
+                    <h1>Images: {{ $tag->images->count() }}</h1>
+                </div>
+                <button class="px-2 bg-red-700 border" wire:click='delete({{ $tag->id }})' wire:confirm="Are you sure you want to delete this tag?">Delete</button>
             </div>
-            <button class="px-2 bg-red-700 border" wire:click='delete({{ $tag->id }})' wire:confirm="Are you sure you want to delete this tag?">Delete</button>
-        </li>
-    @endforeach
-    </ul>
+        @endforeach
+    </div>
 </div>
