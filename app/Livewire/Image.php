@@ -35,8 +35,16 @@ class Image extends Component
     public function render()
     {
         return <<<'HTML'
-        <div class="@if(!$zoom) {{ $classes }} cursor-zoom-in @else absolute flex justify-center cursor-zoom-out bg-black/75 inset-0 z-50 scale-125 w-full @endif" wire:click="toggleZoom" >
+        <div class="{{ $classes }} cursor-zoom-in" wire:click="toggleZoom" >
             <img class="object-scale-down"  src="{{ asset($image->path) }}"  alt="{{ $image->name }}">
+
+            @teleport('body')
+                <div class="absolute inset-0 z-50 cursor-zoom-out @if(!$zoom) hidden @endif" wire:click="toggleZoom">
+                    <div class="flex justify-center h-full py-2 bg-gray-700/95">
+                        <img class="object-scale-down"  src="{{ asset($image->path) }}"  alt="{{ $image->name }}">
+                    </div>
+                </div>
+            @endteleport
         </div>
         HTML;
     }
