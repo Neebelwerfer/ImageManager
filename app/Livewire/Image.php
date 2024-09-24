@@ -17,6 +17,14 @@ class Image extends Component
 
     public $classes = '';
 
+    public $vWidth = 'w-5/6';
+
+    public $hWidth = 'w-3/4';
+
+    public $vertical = true;
+
+    public $width;
+
 
     public function toggleZoom()
     {
@@ -34,8 +42,17 @@ class Image extends Component
 
     public function render()
     {
+
+        if($this->image->width > $this->image->height) {
+            $this->width = $this->vWidth;
+        }
+        else
+        {
+            $this->width = $this->hWidth;
+        }
+
         return <<<'HTML'
-        <div class="{{ $classes }} cursor-zoom-in" wire:click="toggleZoom" >
+        <div class="{{ $classes }} {{ $width }} cursor-zoom-in" wire:click="toggleZoom" >
             <img class="object-scale-down"  src="{{ asset($image->path) }}"  alt="{{ $image->name }}">
 
             @teleport('body')
