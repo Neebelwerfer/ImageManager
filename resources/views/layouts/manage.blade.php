@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="flex flex-row min-h-screen">
+    <div class="flex flex-row flex-grow min-h-full">
         <x-sidebar>
             <x-sidebar.link-button route="{{ route('manage.albums') }}">Albums</x-sidebar.link-button>
             <x-sidebar.link-button route="{{ route('manage.categories') }}">Categories</x-sidebar.link-button>

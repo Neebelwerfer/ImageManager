@@ -1,4 +1,4 @@
-<div class="relative flex-grow-0 w-full h-full overflow-hidden" x-on:keyup.left="$wire.previousImage()" x-on:keyup.right="$wire.nextImage()" x-data="{ showOptions: $wire.entangle('showOptions') }">
+<div class="relative h-full overflow-hidden" x-on:keyup.left="$wire.previousImage()" x-on:keyup.right="$wire.nextImage()" x-data="{ showOptions: $wire.entangle('showOptions') }">
 
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -51,13 +51,13 @@
 
 
     @if (!$gridView && isset($singeleImage))
-        <button wire:click="previousImage" class="absolute z-30 mt-2 left-0 w-20 h-5/6 @if(!$this->gotPrevious()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-l border-y"><</button>
-        <button wire:click="nextImage" class="absolute z-30 mt-2 right-0 w-20 h-5/6 @if(!$this->gotNext()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-r border-y">></button>
+        <button wire:click="previousImage" class="absolute z-30 mt-2 left-0 w-20 h-full @if(!$this->gotPrevious()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-l border-y"><</button>
+        <button wire:click="nextImage" class="absolute z-30 mt-2 right-0 w-20 h-full @if(!$this->gotNext()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-r border-y">></button>
 
-        <div class="flex flex-col justify-center flex-shrink-0 w-full mt-2 border h-5/6">
+        <div class="flex flex-col justify-center w-full h-full mt-2 border">
             <div class="flex flex-row justify-center h-full">
-                <div class="flex justify-center" >
-                    <livewire:image classes="flex justify-center flex-grow-0 w-5/6 h-full" :image="$singeleImage"/>
+                <div class="flex justify-center ">
+                    <livewire:image classes="flex justify-center w-4/6 h-full max-h-full" :image="$singeleImage"/>
                 </div>
             </div>
         </div>
