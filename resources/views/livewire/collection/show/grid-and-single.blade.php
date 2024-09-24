@@ -1,4 +1,4 @@
-<div class="relative h-full overflow-hidden" x-on:keyup.left="$wire.previousImage()" x-on:keyup.right="$wire.nextImage()" x-data="{ showOptions: $wire.entangle('showOptions') }">
+<div class="relative h-full overflow-hidden" x-data="{ showOptions: $wire.entangle('showOptions') }">
 
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -26,7 +26,7 @@
 
 
 
-    <div class="@if($gridView) flex  @else collapse @endif justify-center ">
+    <div class="@if($gridView) flex  @else collapse @endif justify-center">
         <div class="flex flex-col justify-center justify-items-center">
             <x-grid>
                 <x-slot name="header">
@@ -54,7 +54,7 @@
         <button wire:click="previousImage" class="absolute z-30 mt-2 left-0 w-20 h-full @if(!$this->gotPrevious()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-l border-y"><</button>
         <button wire:click="nextImage" class="absolute z-30 mt-2 right-0 w-20 h-full @if(!$this->gotNext()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-r border-y">></button>
 
-        <div class="flex flex-col justify-center w-full h-full mt-2 border">
+        <div class="flex flex-col justify-center w-full h-full mt-2 border"  x-on:keyup.left.window="$wire.previousImage()" x-on:keyup.right.window="$wire.nextImage()">
             <div class="flex flex-row justify-center h-full">
                 <div class="flex justify-center ">
                     <livewire:image classes="flex justify-center w-4/6 h-full max-h-full" :image="$singeleImage"/>
