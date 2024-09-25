@@ -101,6 +101,6 @@ class Options extends Component
     public function render()
     {
 
-        return view('livewire.image-show.options');
+        return view('livewire.image-show.details');
     }
 }

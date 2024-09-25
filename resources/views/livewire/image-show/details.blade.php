@@ -1,5 +1,5 @@
 <div x-cloak x-show="showOptions" x-on:click.away="showOptions = false"
-    class="absolute left-0 z-40 flex flex-col w-full bg-black border-b border-gray-800 h-1/5">
+    class="static left-0 z-40 flex flex-col w-full bg-black border-t border-b border-gray-800 h-1/5">
     <div class="flex flex-col justify-center w-full h-full">
         <div class="flex flex-row h-full mx-5">
             <div class="flex flex-row w-full h-full space-x-6 justify-evenly">

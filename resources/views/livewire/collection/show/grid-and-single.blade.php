@@ -6,10 +6,6 @@
         </h2>
     </x-slot>
 
-    @if(isset($singeleImage))
-        <livewire:image-show.options :image="$singeleImage"/>
-    @endif
-
     <div class="relative flex flex-col h-full">
         <div class="flex flex-row justify-between pb-2">
             <div class="flex flex-row mx-2 mt-2">
@@ -25,7 +21,9 @@
             </div>
         </div>
 
-
+        @if(isset($singeleImage))
+            <livewire:image-show.options :image="$singeleImage"/>
+        @endif
 
         <div class="@if($gridView) flex  @else collapse @endif justify-center">
             <div class="flex flex-col justify-center justify-items-center">
