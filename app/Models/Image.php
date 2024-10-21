@@ -37,7 +37,7 @@ class Image extends Model
 
     public function thumbnail_path() : string
     {
-        $thumbnail_path = substr($this->uuid, 0, 4).'/'.substr($this->uuid, 4, 4).'/'.substr($this->uuid, 9, 4).'/'.substr($this->uuid, 14, 4);
+        $thumbnail_path = substr($this->uuid, 0, 1).'/'.substr($this->uuid, 1, 1).'/'.substr($this->uuid, 2, 1).'/'.substr($this->uuid, 3, 1);
         return 'thumbnails/' . $thumbnail_path . '/' . $this->uuid . '.webp';
     }
 

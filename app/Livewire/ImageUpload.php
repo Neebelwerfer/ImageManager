@@ -93,7 +93,7 @@ class ImageUpload extends Component
         $imageModel->uuid = Str::uuid();
         $imageModel->rating = $this->rating;
         $imageModel->owner_id = $user->id;
-        $uuidSplit = substr($imageModel->uuid, 0, 4).'/'.substr($imageModel->uuid, 4, 4).'/'.substr($imageModel->uuid, 9, 4).'/'.substr($imageModel->uuid, 14, 4);
+        $uuidSplit = substr($imageModel->uuid, 0, 1).'/'.substr($imageModel->uuid, 1, 1).'/'.substr($imageModel->uuid, 2, 1).'/'.substr($imageModel->uuid, 3, 1);
 
 
         if (isset($this->category)) {
