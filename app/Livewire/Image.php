@@ -40,20 +40,31 @@ class Image extends Component
         HTML;
     }
 
+    public function cappedWidth()
+    {
+        if(!$this->vertical)
+        {
+            return min($this->image->width, 1000);
+        }
+        return $this->image->width*0.9;
+    }
+
     public function render()
     {
 
         if($this->image->width > $this->image->height) {
             $this->width = $this->vWidth;
+            $this->vertical = true;
         }
         else
         {
             $this->width = $this->hWidth;
+            $this->vertical = false;
         }
 
         return <<<'HTML'
         <div class="{{ $classes }} {{ $width }} cursor-zoom-in" wire:click="toggleZoom" >
-            <img class="object-scale-down"  src="{{ asset($image->path) }}"  alt="{{ $image->name }}">
+            <img class="object-scale-down" width="{{ $this->cappedWidth() }}"  src="{{ asset($image->path) }}"  alt="{{ $image->name }}">
 
             @teleport('body')
                 <div class="absolute inset-0 z-50 cursor-zoom-out @if(!$zoom) hidden @endif" wire:click="toggleZoom">

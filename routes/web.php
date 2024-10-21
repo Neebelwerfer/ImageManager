@@ -26,7 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('collection/{collection}', Collection::class)
         ->name('collection.show');
 
-    Route::get('collection/{collectionType}/{collectionID}', ShowCollection::class)
+    Route::get('collection/{collectionType}/{collectionID?}', ShowCollection::class)
         ->name('collection.type.show');
 
     Route::view('profile', 'profile')

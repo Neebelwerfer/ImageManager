@@ -116,10 +116,10 @@ class Collection extends Component
     {
         switch($collectionType) {
             case 'categories':
-                $this->collection = ImageCategory::find($collectionID);
+                $this->collection = ImageCategory::where('owner_id', Auth::user()->id)::find($collectionID);
                 break;
             case 'albums':
-                $this->collection = Album::find($collectionID);
+                $this->collection = Album::where('owner_id', Auth::user()->id)::find($collectionID);
                 break;
             default:
                 abort(404, 'Collection not found');

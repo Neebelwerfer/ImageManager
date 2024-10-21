@@ -93,6 +93,8 @@ class ImageUpload extends Component
         $imageModel->uuid = Str::uuid();
         $imageModel->rating = $this->rating;
         $imageModel->owner_id = $user->id;
+        $uuidSplit = substr($imageModel->uuid, 0, 4).'/'.substr($imageModel->uuid, 4, 4).'/'.substr($imageModel->uuid, 9, 4).'/'.substr($imageModel->uuid, 14, 4);
+
 
         if (isset($this->category)) {
             $imageModel->category_id = $this->category->id;
@@ -106,14 +108,16 @@ class ImageUpload extends Component
             $imageInfo = ImageManager::imagick()->read($this->image);
             $imageScaled = ImageManager::gd()->read($this->image);
 
-            $imageScaled->scaleDown(2560, 1440);
 
             $imageModel->width = $imageScaled->width();
             $imageModel->height = $imageScaled->height();
             $imageInfo->scaleDown(256, 256);
 
 
-            $thumbnail_path = 'thumbnails/' . $imageModel->uuid . '.webp';
+            $thumbnail_path = 'thumbnails/' . $uuidSplit . '/' . $imageModel->uuid . '.webp';
+            if(!Storage::disk('local')->exists('thumbnails/' . $uuidSplit)) {
+                Storage::disk('local')->makeDirectory('thumbnails/' . $uuidSplit);
+            }
             $imageInfo->save(storage_path('app') . '/' . ($thumbnail_path));
 
 
@@ -131,7 +135,12 @@ class ImageUpload extends Component
                 }
             }
 
-            $imageModel->path = 'images/' . $imageModel->uuid . '.' . $this->image->extension();
+            $imageModel->path = 'images/' . $uuidSplit . '/' . $imageModel->uuid . '.' . $this->image->extension();
+
+            if(!Storage::disk('local')->exists('images/' . $uuidSplit)) {
+                Storage::disk('local')->makeDirectory('images/' . $uuidSplit);
+            }
+
             $imageScaled->save(storage_path('app') . '/' . $imageModel->path);
             $imageModel->save();
 
