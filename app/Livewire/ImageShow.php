@@ -3,10 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Image;
-use App\Models\ImageCategory;
-use App\Models\ImageTag;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;

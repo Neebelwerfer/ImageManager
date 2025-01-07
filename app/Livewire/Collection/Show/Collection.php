@@ -112,14 +112,14 @@ class Collection extends Component
         return $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values();
     }
 
-    public function mount($collectionType, $collectionID)
+    public function mount($collectionType, $collectionID = null)
     {
         switch($collectionType) {
             case 'categories':
-                $this->collection = ImageCategory::where('owner_id', Auth::user()->id)::find($collectionID);
+                $this->collection = ImageCategory::find($collectionID);
                 break;
             case 'albums':
-                $this->collection = Album::where('owner_id', Auth::user()->id)::find($collectionID);
+                $this->collection = Album::find($collectionID);
                 break;
             default:
                 abort(404, 'Collection not found');
@@ -127,6 +127,10 @@ class Collection extends Component
 
         if(!isset($this->collection)) {
             abort(404, 'Collection not found');
+        }
+
+        if(Auth::user()->id != $this->collection->owner_id) {
+            abort(403, 'Forbidden');
         }
         $this->updateImages();
     }
