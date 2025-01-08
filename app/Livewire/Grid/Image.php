@@ -28,7 +28,7 @@ class Image extends Component
     {
         return <<<'HTML'
         <div>
-            <img class="object-scale-down px-1 mt-1" style="width: 255px; height: 290px;" src="{{ asset($image->thumbnail_path()) }}">
+            <img class="object-scale-down px-1 mt-1" style="width: 255px; height: 290px;" src="{{ url('thumbnail/'.$image->uuid) }}">
         </div>
         HTML;
     }

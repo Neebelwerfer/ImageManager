@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ImageController;
 use App\Livewire\Collection;
 use App\Livewire\Collection\Show\Collection as ShowCollection;
 use App\Livewire\ImageShow;
@@ -46,6 +47,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('manage/albums', Albums::class)
         ->name('manage.albums');
+
+    Route::get('images/{image}', [ImageController::class, 'getImage']);
+    Route::get('thumbnail/{thumbnail}', [ImageController::class, 'getThumbnail']);
 
 });
 

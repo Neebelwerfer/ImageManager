@@ -64,12 +64,12 @@ class Image extends Component
 
         return <<<'HTML'
         <div class="{{ $classes }} {{ $width }} cursor-zoom-in" wire:click="toggleZoom" >
-            <img class="object-scale-down" width="{{ $this->cappedWidth() }}"  src="{{ asset($image->path) }}"  alt="{{ $image->name }}">
+            <img class="object-scale-down" width="{{ $this->cappedWidth() }}"  src="{{ url('images/'.$image->uuid) }}"  alt="{{ $image->name }}">
 
             @teleport('body')
                 <div class="absolute inset-0 z-50 cursor-zoom-out @if(!$zoom) hidden @endif" wire:click="toggleZoom">
                     <div class="flex justify-center h-full py-2 bg-gray-700/95">
-                        <img class="object-scale-down"  src="{{ asset($image->path) }}"  alt="{{ $image->name }}">
+                        <img class="object-scale-down"  src="{{ url('images/'.$image->uuid) }}"  alt="{{ $image->name }}">
                     </div>
                 </div>
             @endteleport
