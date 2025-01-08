@@ -130,7 +130,6 @@ class Images extends Component
                 $this->dispatch('imageUpdated', $this->singleImage->uuid);
             }
         }
-
         return view('livewire.collection.show.grid-and-single');
     }
 }

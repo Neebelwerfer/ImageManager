@@ -10,25 +10,24 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.collection')]
 class Collection extends Component
 {
 
+    use WithPagination;
+
     #[Url('g')]
     public $gridView = true;
     #[Url('i')]
     public $count = 0;
-    #[Url('r')]
     public $minRating = 0;
-    #[Url('page')]
-    public $page = 0;
 
     public $showOptions = false;
     public $collection;
 
-    public $singeleImage;
-    public $dirty = false;
+    public $singleImage;
 
     public function setGridView($value)
     {
@@ -38,22 +37,28 @@ class Collection extends Component
     public function nextImage()
     {
         $this->count++;
-        if($this->count >= count($this->images)) {
-            $this->count = count($this->images) - 1;
+        if($this->count > count($this->images())) {
+            $this->count = count($this->images());
         }
-        $this->dirty = true;
+
+        if($this->count == count($this->images())) {
+            if($this->gotNext())
+            {
+                $this->count = 0;
+                $this->updatePage(true);
+            }
+        }
     }
 
     public function show($count)
     {
         $this->count = $count;
         $this->gridView = false;
-        $this->dirty = true;
     }
 
     public function gotPrevious()
     {
-        if($this->count > 0) {
+        if($this->count > 0 || !$this->images->onFirstPage()) {
             return true;
         }
         return false;
@@ -61,7 +66,7 @@ class Collection extends Component
 
     public function gotNext()
     {
-        if($this->count < count($this->images) - 1) {
+        if($this->count < count($this->images()) - 1 || !$this->images->onLastPage()) {
             return true;
         }
         return false;
@@ -72,8 +77,11 @@ class Collection extends Component
         $this->count--;
         if($this->count < 0) {
             $this->count = 0;
+            if($this->gotPrevious()) {
+                $this->count = 19;
+                $this->updatePage(false);
+            }
         }
-        $this->dirty = true;
     }
 
     #[On('deleteImage')]
@@ -88,7 +96,6 @@ class Collection extends Component
     {
         $this->updateImages();
         $this->count = 0;
-        $this->dirty = true;
         $this->dispatch('reloadPage');
     }
 
@@ -97,11 +104,13 @@ class Collection extends Component
         unset($this->images);
     }
 
-    #[Computed()]
-    public function chunkedImages()
-    {
-
-        return $this->images->chunk(20);
+    public function updatePage(bool $increment){
+        if($increment) {
+            $this->nextPage();
+        } else {
+            $this->previousPage();
+        }
+        $this->updateImages();
     }
 
     #[Computed(cache: true)]
@@ -109,7 +118,7 @@ class Collection extends Component
     {
         $key = Auth::user()->id . '-' . $this->collection->id;
 
-        return $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values();
+        return $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values()->paginate(20);
     }
 
     public function mount($collectionType, $collectionID = null)
@@ -143,17 +152,11 @@ class Collection extends Component
                 $this->count = $this->images->count() - 1;
             }
 
-            if($this->singeleImage == null) {
-                $this->singeleImage = $this->images[$this->count];
-            }
-
-            if($this->dirty) {
-                $this->singeleImage = $this->images[$this->count];
-                $this->dispatch('imageUpdated', $this->singeleImage->uuid);
-                $this->dirty = false;
+            if($this->singleImage == null || $this->singleImage != $this->images()[$this->count]) {
+                $this->singleImage = $this->images()[$this->count];
+                $this->dispatch('imageUpdated', $this->singleImage->uuid);
             }
         }
-
         return view('livewire.collection.show.grid-and-single');
     }
 }
