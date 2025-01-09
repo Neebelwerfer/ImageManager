@@ -129,6 +129,13 @@ $logout = function (Logout $logout) {
                             </x-slot>
 
                             <x-slot name="content">
+                                <!-- Admin -->
+                                @if (Auth::user()->is_admin && Route::has('admin'))
+                                    <x-dropdown-link :href="route('admin')" wire:navigate>
+                                        {{ __('Administration') }}
+                                    </x-dropdown-link>
+                                @endif
+
                                 <x-dropdown-link :href="route('profile')" wire:navigate>
                                     {{ __('Profile') }}
                                 </x-dropdown-link>

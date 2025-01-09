@@ -25,6 +25,7 @@ class Images extends CollectionView
     #[Computed()]
     public function images()
     {
+        $key = Auth::user()->id.'-images';
         return Image::where('rating', '>=', $this->minRating)->where('owner_id', Auth::user()->id)->orderby('rating', 'desc')->paginate(20);
     }
 }

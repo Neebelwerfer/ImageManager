@@ -50,7 +50,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('images/{image}', [ImageController::class, 'getImage']);
     Route::get('thumbnail/{thumbnail}', [ImageController::class, 'getThumbnail']);
-
 });
 
 
