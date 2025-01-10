@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\ImageController;
+use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Users;
 use App\Livewire\Collection;
 use App\Livewire\Collection\Show\Collection as ShowCollection;
 use App\Livewire\ImageShow;
@@ -53,4 +56,16 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+Route::middleware(['auth', EnsureUserIsAdmin::class])->group(function () {
+    Route::get('admin', Dashboard::class)
+        ->name('admin');
+
+    Route::get('admin/users', Users::class)
+        ->name('admin.users');
+});
+
 require __DIR__.'/auth.php';
+
+Route::fallback(function () {
+    return view('404');
+});
