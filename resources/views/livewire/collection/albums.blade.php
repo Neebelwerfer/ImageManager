@@ -16,13 +16,17 @@
             {{ $albums->links() }}
         </div>
     </x-slot>
-    @foreach ($albums as $album)
-        <x-grid.image-card :image="$this->getImageFromAlbum($album)" route="{{ route('collection.type.show', [ 'albums', $album->id]) }}">
-            <div class="absolute inset-0 flex items-end">
-                <div class="flex justify-center w-full border-t border-gray-700 bg-slate-800/60">
-                {{ $album->name }}
+    @if($albums->isEmpty())
+        <h1 class="text-2xl font-semibold leading-tight text-gray-800 dark:text-gray-200">No albums found</h1>
+    @else
+        @foreach ($albums as $album)
+            <x-grid.image-card :image="$this->getImageFromAlbum($album)" route="{{ route('collection.type.show', [ 'albums', $album->id]) }}">
+                <div class="absolute inset-0 flex items-end">
+                    <div class="flex justify-center w-full border-t border-gray-700 bg-slate-800/60">
+                    {{ $album->name }}
+                    </div>
                 </div>
-            </div>
-        </x-grid.image-card>
-    @endforeach
+            </x-grid.image-card>
+        @endforeach
+    @endif
 </x-grid>

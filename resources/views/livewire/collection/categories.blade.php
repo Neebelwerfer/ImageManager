@@ -16,13 +16,17 @@
             {{ $categories->links() }}
         </div>
     </x-slot>
-    @foreach ($categories as $category)
-        <x-grid.image-card :image="$this->getImageFromCategory($category)" route="{{ route('collection.type.show', [ 'categories', $category->id]) }}">
-            <div class="absolute inset-0 flex items-end">
-                <div class="flex justify-center w-full border-t border-gray-700 bg-slate-800/80">
-                {{ $category->name }}
+    @if($categories->isEmpty())
+        <h1 class="text-2xl font-semibold leading-tight text-gray-800 dark:text-gray-200">No categories found</h1>
+    @else
+        @foreach ($categories as $category)
+            <x-grid.image-card :image="$this->getImageFromCategory($category)" route="{{ route('collection.type.show', [ 'categories', $category->id]) }}">
+                <div class="absolute inset-0 flex items-end">
+                    <div class="flex justify-center w-full border-t border-gray-700 bg-slate-800/80">
+                    {{ $category->name }}
+                    </div>
                 </div>
-            </div>
-        </x-grid.image-card>
-    @endforeach
+            </x-grid.image-card>
+        @endforeach
+    @endif
 </x-grid>
