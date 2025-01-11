@@ -16,6 +16,11 @@ class Image extends Model
     use HasFactory;
     use HasUuids;
 
+    protected $fillable = [
+        'category_id',
+        'rating',
+    ];
+
     public $primaryKey = 'uuid';
     public $incrementing = false;
     protected $keyType = 'string';
