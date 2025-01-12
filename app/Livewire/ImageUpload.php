@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Http\Controllers\ImageController;
 use App\Models\ImageCategory;
 use App\Models\ImageTag;
 use App\Repository\ImageRepository;
@@ -85,11 +86,12 @@ class ImageUpload extends Component
         $data = [
             'rating' => $this->rating,
             'category' => $this->category->id ?? null,
+            'tags' => array_keys($this->tags),
         ];
 
-        $imageRepository = app()->make(ImageRepository::class);
+        $imageController = app()->make(ImageController::class);
 
-        $imageModel = $imageRepository->create($this->image, $data);
+        $imageModel = $imageController->create($this->image, $data);
 
         return redirect()->route('image.upload')->with('status', 'Image uploaded successfully!');
     }

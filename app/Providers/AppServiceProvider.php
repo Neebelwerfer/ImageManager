@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Repository\ImageRepository;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -16,9 +15,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
-        $this->app->singleton(ImageRepository::class, function ($app) {
-            return new ImageRepository();
-        });
+
     }
 
     /**

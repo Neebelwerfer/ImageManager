@@ -2,27 +2,24 @@
 
 namespace App\Repository;
 
-use App\Models\Image;
+use App\Models\ImageTag;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class ImageRepository
+class TagRepository
 {
     public function find($id)
     {
-        $image = Image::find($id);
+        $image = ImageTag::where('owner_id', Auth::user()->id)->find($id);
 
         if(isset($image)) {
-            if(Auth::user()->id != $image->owner_id) {
-                abort(403, 'Forbidden');
-            }
             return $image;
         }
     }
 
     public function all()
     {
-        return Image::where('owner_id', Auth::user()->id)->get();
+        return ImageTag::where('owner_id', Auth::user()->id)->get();
     }
 
     public function delete($id)
