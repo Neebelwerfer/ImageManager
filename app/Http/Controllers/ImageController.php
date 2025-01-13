@@ -117,8 +117,13 @@ class ImageController extends Controller
         //
     }
 
-    // Adds image to database and creates thumbnail
-    // Returns imageModel
+    /**
+     * Adds image to database and creates thumbnail
+     *
+     * @param mixed $image
+     * @param array $data
+     * @return void
+     */
     public function create($image, $data)
     {
         $user = Auth::user();
