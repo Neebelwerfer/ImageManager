@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Image;
+use App\Models\ImageCategory;
 use App\Models\ImageTag;
 use App\Repository\ImageRepository;
 use App\Repository\TagRepository;
@@ -32,7 +33,6 @@ class ImageController extends Controller
      */
     public function index()
     {
-        //
         return $this->imageRepository->index();
     }
 
@@ -117,6 +117,28 @@ class ImageController extends Controller
         //
     }
 
+    public function addTags(Image $image, array $tags)
+    {
+        $image->tags()->saveMany($tags);
+    }
+
+    public function removeTags(Image $image, array $tags)
+    {
+        $image->tags()->detach($tags);
+        $image->push();
+    }
+
+    public function addCategory(Image $image, ImageCategory $category)  {
+        $image->categories()->save($category);
+    }
+
+    public function removeCategory(Image $image, ImageCategory $category) {
+        $image->categories()->detach($category);
+        $image->push();
+    }
+
+
+
     /**
      * Adds image to database and creates thumbnail
      *
@@ -153,11 +175,11 @@ class ImageController extends Controller
             // Check if image already exists via image hash
             // Currently only compares images with same width and height
             $imageModel->image_hash = $this->createImageHash(storage_path('app') . '/' . $full_thumbnail_path);
-            $potentialIdenticalImage = $this->compareHashes($imageModel->image_hash);
+            $hit = $this->compareHashes($imageModel->image_hash);
 
-            if (isset($potentialIdenticalImage)) {
+            if (isset($hit)) {
                 Storage::disk('local')->delete($full_thumbnail_path);
-                return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'duplicate' => $potentialIdenticalImage->path, 'hash' => $imageModel->image_hash, 'error' => true]);
+                return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'duplicate' => $hit->path, 'error' => true]);
             }
 
             $imageModel->path = 'images/' . $uuidSplit . '/' . $imageModel->uuid . '.' . $image->extension();
@@ -208,10 +230,5 @@ class ImageController extends Controller
     {
         $hash = $this->comparator->hashImage($thumbnail_path);
         return $this->comparator->convertHashToBinaryString($hash);
-    }
-
-    public function addTags(Image $image, array $tags)
-    {
-        $image->tags()->saveMany($tags);
     }
 }

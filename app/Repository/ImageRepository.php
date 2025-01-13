@@ -3,13 +3,14 @@
 namespace App\Repository;
 
 use App\Models\Image;
+use App\Support\ImagePaths;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\LazyCollection;
 
 class ImageRepository
 {
-
     public function index() : Collection
     {
         return Image::where('owner_id', Auth::user()->id)->get();
@@ -61,6 +62,15 @@ class ImageRepository
     public function delete($id)
     {
         $image = $this->find($id);
+
+        if(!isset($image))
+        {
+            return;
+        }
+
+        Storage::disk('local')->delete(ImagePaths::getImagePath($image));
+        Storage::disk('local')->delete(ImagePaths::getThumbnailPath($image));
+
         $image->delete();
     }
 }
