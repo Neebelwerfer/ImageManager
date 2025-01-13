@@ -18,11 +18,13 @@ class ImageController extends Controller
 {
     private ImageRepository $imageRepository;
     private TagRepository $tagRepository;
+    private ImageComparator $comparator;
 
     public function __construct()
     {
         $this->imageRepository = App::make(ImageRepository::class);
         $this->tagRepository = App::make(TagRepository::class);
+        $this->comparator = new ImageComparator();
     }
 
     /**
@@ -31,7 +33,7 @@ class ImageController extends Controller
     public function index()
     {
         //
-        return Image::where('owner_id', Auth::user()->id)->get();
+        return $this->imageRepository->index();
     }
 
     /**
@@ -39,7 +41,7 @@ class ImageController extends Controller
      * @return Illuminate\Database\Eloquent\Collection
      */
     public function pagedIndex() {
-        return Image::where('owner_id', Auth::user()->id)->paginate(20);
+        return $this->imageRepository->pagedIndex();
     }
 
     /**
@@ -122,10 +124,8 @@ class ImageController extends Controller
         $user = Auth::user();
 
         try {
-            $comparator = new ImageComparator();
             $imageInfo = ImageManager::imagick()->read($image);
             $imageScaled = ImageManager::gd()->read($image);
-
 
             $imageModel = new Image($data);
             $imageModel->uuid = Str::uuid();
@@ -147,16 +147,12 @@ class ImageController extends Controller
 
             // Check if image already exists via image hash
             // Currently only compares images with same width and height
-            $hash = $comparator->hashImage(storage_path('app') . '/' . $full_thumbnail_path);
-            $imageModel->image_hash = $comparator->convertHashToBinaryString($hash);
-            $sameSizeImages = Image::where('owner_id', $user->id)->where('width', $imageModel->width)->where('height', $imageModel->height)->get();
-            if (isset($sameSizeImages) && $sameSizeImages->count() > 0) {
-                foreach ($sameSizeImages as $sameSizeImage) {
-                    if ($comparator->compareHashStrings($sameSizeImage->image_hash, $imageModel->image_hash) > 95) {
-                        Storage::disk('local')->delete($full_thumbnail_path);
-                        return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'duplicate' => $sameSizeImage->path, 'hash' => $imageModel->image_hash, 'error' => true]);
-                    }
-                }
+            $imageModel->image_hash = $this->createImageHash(storage_path('app') . '/' . $full_thumbnail_path);
+            $potentialIdenticalImage = $this->compareHashes($imageModel->image_hash);
+
+            if (isset($potentialIdenticalImage)) {
+                Storage::disk('local')->delete($full_thumbnail_path);
+                return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'duplicate' => $potentialIdenticalImage->path, 'hash' => $imageModel->image_hash, 'error' => true]);
             }
 
             $imageModel->path = 'images/' . $uuidSplit . '/' . $imageModel->uuid . '.' . $image->extension();
@@ -188,10 +184,29 @@ class ImageController extends Controller
             return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true, 'error_message' => $e->getMessage()]);
         }
 
-        return $imageModel;
+        return redirect()->route('image.upload')->with('status', 'Image uploaded successfully!');
     }
 
-    public function addTags(Image $image, array $tags) {
+    private function compareHashes($newHash, $threshold = 95) : ?Image
+    {
+        $sameSizeImages = $this->imageRepository->lazyIndex();
+
+        foreach ($sameSizeImages as $sameSizeImage) {
+            if ($this->comparator->compareHashStrings($sameSizeImage->image_hash, $newHash) > $threshold) {
+                return $sameSizeImage;
+            }
+        }
+        return null;
+    }
+
+    private function createImageHash($thumbnail_path) : string
+    {
+        $hash = $this->comparator->hashImage($thumbnail_path);
+        return $this->comparator->convertHashToBinaryString($hash);
+    }
+
+    public function addTags(Image $image, array $tags)
+    {
         $image->tags()->saveMany($tags);
     }
 }

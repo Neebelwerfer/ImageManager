@@ -7,6 +7,7 @@ use App\Models\ImageCategory;
 use App\Models\ImageTag;
 use App\Repository\ImageRepository;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
@@ -91,9 +92,7 @@ class ImageUpload extends Component
 
         $imageController = app()->make(ImageController::class);
 
-        $imageModel = $imageController->create($this->image, $data);
-
-        return redirect()->route('image.upload')->with('status', 'Image uploaded successfully!');
+        return $imageController->create($this->image, $data);
     }
 
     public function render()
