@@ -40,10 +40,28 @@ class Image extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    /**
+     * @deprecated
+     *
+     * @return string
+     */
     public function thumbnail_path() : string
     {
-        $thumbnail_path = substr($this->uuid, 0, 1).'/'.substr($this->uuid, 1, 1).'/'.substr($this->uuid, 2, 1).'/'.substr($this->uuid, 3, 1);
+        $thumbnail_path = Image::splitUUID($this->uuid);
         return 'thumbnails/' . $thumbnail_path . '/' . $this->uuid . '.webp';
+    }
+
+
+    public function getThumbnailPath() : string
+    {
+        $split = Image::splitUUID($this->uuid);
+        return 'thumbnails/' . $split . '/' . $this->uuid . '.webp';
+    }
+
+    public function getImagePath() : string
+    {
+        $split = Image::splitUUID($this->uuid);
+        return 'images/' . $split . '/' . $this->uuid . '.webp';
     }
 
     public function albums() : BelongsToMany
@@ -55,8 +73,14 @@ class Image extends Model
     {
         static::deleting(function (Image $image) {
             Storage::disk('local')->delete($image->path);
-            Storage::disk('local')->delete($image->thumbnail_path());
+            Storage::disk('local')->delete($image->getThumbnailPath());
         });
+    }
+
+    public static function splitUUID(string $uuid) : string
+    {
+        $split = substr($uuid, 0, 1).'/'.substr($uuid, 1, 1).'/'.substr($uuid, 2, 1).'/'.substr($uuid, 3, 1);
+        return $split;
     }
 
 }

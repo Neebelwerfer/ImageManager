@@ -68,8 +68,8 @@ class ImageRepository
             return;
         }
 
-        Storage::disk('local')->delete(ImagePaths::getImagePath($image));
-        Storage::disk('local')->delete(ImagePaths::getThumbnailPath($image));
+        Storage::disk('local')->delete($image->getImagePath());
+        Storage::disk('local')->delete($image->getThumbnailPath());
 
         $image->delete();
     }

@@ -7,13 +7,26 @@ use App\Models\ImageCategory;
 use App\Models\ImageTag;
 use App\Repository\ImageRepository;
 use App\Repository\TagRepository;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use SapientPro\ImageComparator\ImageComparator;
+
+class DuplicateImageException extends Exception
+{
+    public array $duplicates = [];
+
+    public function __construct(string $message, array $duplicates = [])
+    {
+        parent::__construct($message);
+        $this->duplicates = $duplicates;
+    }
+}
 
 class ImageController extends Controller
 {
@@ -142,11 +155,11 @@ class ImageController extends Controller
     /**
      * Adds image to database and creates thumbnail
      *
-     * @param mixed $image
+     * @param TemporaryUploadedFile $image
      * @param array $data
      * @return void
      */
-    public function create($image, $data)
+    public function create(TemporaryUploadedFile $image, array $data)
     {
         $user = Auth::user();
 
@@ -179,7 +192,7 @@ class ImageController extends Controller
 
             if (isset($hit)) {
                 Storage::disk('local')->delete($full_thumbnail_path);
-                return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'duplicate' => $hit->path, 'error' => true]);
+                return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'duplicate' => $hit->path, 'uploaded' => $image->serializeForLivewireResponse(), 'error' => true]);
             }
 
             $imageModel->path = 'images/' . $uuidSplit . '/' . $imageModel->uuid . '.' . $image->extension();
@@ -194,18 +207,12 @@ class ImageController extends Controller
             $tags = [];
             foreach ($data['tags'] as $tag) {
                 $tagResponse = $this->tagRepository->find($tag);
-                if(!isset($tagResponse)) {
-                    $newTag = new ImageTag();
-                    $newTag->name = $tag;
-                    $newTag->owner_id = $user->id;
-                    $newTag->save();
-                    $tagResponse = $newTag;
+                if(isset($tagResponse)) {
+                    $tags[$tag] = $tagResponse;
                 }
-                $tags[$tag] = $tagResponse;
             }
 
             $this->addTags($imageModel, $tags);
-
         } catch (\Exception $e) {
             Storage::disk('local')->delete($full_thumbnail_path);
             return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true, 'error_message' => $e->getMessage()]);

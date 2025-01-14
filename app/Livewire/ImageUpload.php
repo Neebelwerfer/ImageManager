@@ -12,6 +12,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 #[Layout('layouts.app')]
 class ImageUpload extends Component
@@ -70,6 +71,13 @@ class ImageUpload extends Component
     public function toggleTagsModal()
     {
         $this->showTags = !$this->showTags;
+    }
+
+    public function mount(){
+
+        if(session('uploaded') !== null) {
+            $this->image = TemporaryUploadedFile::unserializeFromLivewireRequest(session('uploaded'));;
+        }
     }
 
     #[Computed()]
