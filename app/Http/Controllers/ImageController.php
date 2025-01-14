@@ -141,10 +141,6 @@ class ImageController extends Controller
         $image->push();
     }
 
-    public function addCategory(Image $image, ImageCategory $category)  {
-        $image->categories()->save($category);
-    }
-
     public function removeCategory(Image $image, ImageCategory $category) {
         $image->categories()->detach($category);
         $image->push();
@@ -163,19 +159,20 @@ class ImageController extends Controller
     {
         $user = Auth::user();
 
+        $imageModel = new Image($data);
+        $imageModel->uuid = Str::uuid();
+        $imageModel->owner_id = $user->id;
+
         try {
             $imageInfo = ImageManager::imagick()->read($image);
             $imageScaled = ImageManager::gd()->read($image);
 
-            $imageModel = new Image($data);
-            $imageModel->uuid = Str::uuid();
-            $imageModel->owner_id = $user->id;
+
             $uuidSplit = substr($imageModel->uuid, 0, 1).'/'.substr($imageModel->uuid, 1, 1).'/'.substr($imageModel->uuid, 2, 1).'/'.substr($imageModel->uuid, 3, 1);
             $imageModel->width = $imageScaled->width();
             $imageModel->height = $imageScaled->height();
             $imageModel->format = $image->extension();
             $imageInfo->scaleDown(256, 256);
-
 
             $thumbnail_path = 'thumbnails/' . $uuidSplit;
             $fileName = $imageModel->uuid . '.webp';
@@ -204,6 +201,10 @@ class ImageController extends Controller
 
             $imageScaled->save(storage_path('app') . '/' . 'images/' . $imagePath);
 
+            if(isset($data['category']) && $data['category'] >= 0) {
+                $imageModel->category_id = $data['category'];
+            }
+
             $imageModel->save();
             $tags = [];
             foreach ($data['tags'] as $tag) {
@@ -213,12 +214,19 @@ class ImageController extends Controller
                 }
             }
 
-            $this->addCategory($imageModel, $data['category']);
-
             $this->addTags($imageModel, $tags);
+
         } catch (\Exception $e) {
-            Storage::disk('local')->delete($full_thumbnail_path);
-            Storage::disk('local')->delete('images/' . $imagePath);
+            if(isset($imageModel)) {
+                $imageModel->delete();
+            }
+            else {
+                Storage::disk('local')->delete($full_thumbnail_path);
+                Storage::disk('local')->delete('images/' . $imagePath);
+
+            }
+
+
             return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true, 'error_message' => $e->getMessage()]);
         }
 

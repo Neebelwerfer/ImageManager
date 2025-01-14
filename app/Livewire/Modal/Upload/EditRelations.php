@@ -8,6 +8,7 @@ use App\Models\ImageCategory;
 use App\Models\ImageTag;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use LivewireUI\Modal\ModalComponent;
 
 class EditRelations extends ModalComponent
@@ -36,6 +37,11 @@ class EditRelations extends ModalComponent
             case 'album':
                 return 'album-selected';
         }
+    }
+
+    #[On('refresh')]
+    public function refresh() {
+        unset($this->entries);
     }
 
     #[Computed()]
