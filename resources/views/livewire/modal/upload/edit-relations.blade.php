@@ -13,6 +13,9 @@
                 @endforeach
             </div>
         @endif
+        @if($this->noneOption)
+            <button class="p-1 mt-4 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="selectEntry(-1)">None</button>
+        @endif
     </x-slot>
 
     <x-slot name="buttons">

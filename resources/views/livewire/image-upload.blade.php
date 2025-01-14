@@ -52,7 +52,7 @@
                                     <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
                                 @enderror
                                 <button class="px-2 border rounded" type="button"
-                                    wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: ['category']})">+</button>
+                                    wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type:'category', noneOption: true}})">+</button>
                             </div>
                         </div>
 

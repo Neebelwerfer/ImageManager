@@ -3,12 +3,35 @@
 namespace App\Livewire\Modal\Image;
 
 use App\Models\Image;
+use App\Models\ImageCategory;
+use App\Models\ImageTag;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 use LivewireUI\Modal\ModalComponent;
 
 class Details extends ModalComponent
 {
     public Image $image;
+
+    #[On('categorySelected')]
+    public function categorySelected($category)
+    {
+        $category = ImageCategory::find($category);
+
+        if(isset($category) && Auth::user()->id == $category->owner_id) {
+            $this->image->update(['category_id' => $category->id]);
+        }
+    }
+
+    #[On('tagSelected')]
+    public function tagSelected($tag)
+    {
+        if (isset($this->tags[$tag])) {
+            return;
+        }
+
+        $this->tags[$tag] = ImageTag::find($tag);
+    }
 
     public function mount(string $imageUuid)
     {

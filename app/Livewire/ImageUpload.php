@@ -35,6 +35,10 @@ class ImageUpload extends Component
     #[On('categorySelected')]
     public function categorySelected($category)
     {
+        if($category == -1) {
+            $this->category = null;
+            return;
+        }
         $this->category = ImageCategory::find($category);
     }
 

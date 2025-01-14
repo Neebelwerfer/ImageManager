@@ -14,22 +14,22 @@
                             @else
                                 No Category
                             @endisset
-                            <button class="border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600">Edit</button>
+                            <button class="border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type: 'category', noneOption: true }})">Edit</button>
                         </li>
                         <li>Width x Height: {{ $image->width }}x{{ $image->height }}</li>
                         <li>Format: .{{ $image->format }}</li>
                         <li>Uploaded By: {{ $image->user->name }}</li>
-                        <li>Created: {{ $image->created_at->diffForHumans() }}</li>
+                        <li>Added: {{ $image->created_at->diffForHumans() }}</li>
                         <li>Updated: {{ $image->updated_at->diffForHumans() }}</li>
                     </ol>
                 </div>
             </div>
 
             <div class="flex flex-row justify-between w-full gap-2 columns-2">
-                <div class="overflow-scroll ">
+                <div class="w-1/2 overflow-scroll ">
                     <div class="flex flex-row border-b border-black">
                         <h1>Tags</h1>
-                        <button class="ml-2 border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600">Edit</button>
+                        <button class="ml-2 border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: ['tag']})">Edit</button>
                     </div>
                     <div>
                         @foreach ($image->tags as $tag)
@@ -38,7 +38,7 @@
                     </div>
                 </div>
 
-                <div class="overflow-scroll">
+                <div class="w-1/2 overflow-scroll">
                     <div class="flex flex-row border-b border-black">
                         <h1>Albums</h1>
                         <button class="ml-2 border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600">Edit</button>

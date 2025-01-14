@@ -15,10 +15,12 @@ class EditRelations extends ModalComponent
 {
 
     public $type = 'category';
+    public $noneOption = false;
 
-    public function mount(string $type = 'category')
+    public function mount(string $type = 'category', $noneOption = false)
     {
         $this->type = $type;
+        $this->noneOption = $noneOption;
     }
 
     public function selectEntry(int $id)
