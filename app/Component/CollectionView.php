@@ -2,9 +2,12 @@
 
 namespace App\Component;
 
+use App\Models\Image;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -81,9 +84,14 @@ abstract class CollectionView extends Component
     #[On('deleteImage')]
     public function delete()
     {
-        $this->singleImage->delete();
-        $this->previousImage();
+        if($this->singleImage->owner_id != Auth::user()->id) {
+            return;
+        }
+
         $this->updateImages();
+        $this->singleImage->delete();
+
+        redirect(route('collection.show', 'images'));
     }
 
     public function filter()

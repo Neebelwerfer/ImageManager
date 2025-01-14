@@ -22,7 +22,8 @@
                         wire:click="setGridView(false)" @if(!$gridView) disabled @endif>Single</button>
                 </div>
                 <div class="mt-2 mr-4 @if($gridView) hidden @endif">
-                    <button x-on:click="$wire.showOptions = !$wire.showOptions" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>
+                    <!--<button x-on:click="$wire.showOptions = !$wire.showOptions" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>-->
+                    <button wire:click="$dispatch('openModal', {component: 'modal.image.details', arguments: {imageUuid: '{{ $singleImage->uuid }}' }})" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>
                 </div>
                 {{ $this->images->links() }}
             </div>

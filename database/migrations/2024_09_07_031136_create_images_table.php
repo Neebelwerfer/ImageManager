@@ -34,6 +34,7 @@ return new class extends Migration
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->tinyText('image_hash');
             $table->tinyText('format');
+            $table->timestamp('date_created')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
