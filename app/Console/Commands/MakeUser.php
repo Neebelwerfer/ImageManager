@@ -29,6 +29,7 @@ class MakeUser extends Command
         $user = new User();
         $user->name = $this->ask('Name');
         $user->email = $this->ask('Email');
+        $user->is_admin = $this->confirm('Is admin?');
         $user->password = bcrypt($this->secret('Password'));
         $user->save();
     }

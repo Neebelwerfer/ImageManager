@@ -76,15 +76,15 @@ class ImageController extends Controller
     public function getImage(string $uuid) {
         $image = Image::where('uuid', $uuid)->first();
 
-        if(!isset($image)) {
+        if(!Auth::hasUser()) {
+            return redirect(route('login'));
+        }
+
+        if(!isset($image) || Auth::user()->id != $image->owner_id) {
             abort(404);
         }
 
-        if(Auth::user()->id != $image->owner_id) {
-            abort(403);
-        }
-
-        return response()->file(storage_path('app/' . $image->path));
+        return response()->file(storage_path('app/' . $image->getImagePath()));
     }
 
     public function getThumbnail(string $uuid) {
@@ -173,6 +173,7 @@ class ImageController extends Controller
             $uuidSplit = substr($imageModel->uuid, 0, 1).'/'.substr($imageModel->uuid, 1, 1).'/'.substr($imageModel->uuid, 2, 1).'/'.substr($imageModel->uuid, 3, 1);
             $imageModel->width = $imageScaled->width();
             $imageModel->height = $imageScaled->height();
+            $imageModel->format = $image->extension();
             $imageInfo->scaleDown(256, 256);
 
 
@@ -188,22 +189,22 @@ class ImageController extends Controller
             // Check if image already exists via image hash
             // Currently only compares images with same width and height
             $imageModel->image_hash = $this->createImageHash(storage_path('app') . '/' . $full_thumbnail_path);
-            $hit = $this->compareHashes($imageModel->image_hash);
+            $hits = $this->compareHashes($imageModel->image_hash);
 
-            if (isset($hit)) {
+            if (count($hits) > 0) {
                 Storage::disk('local')->delete($full_thumbnail_path);
-                return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'duplicate' => $hit->path, 'uploaded' => $image->serializeForLivewireResponse(), 'error' => true]);
+                return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'uploaded' => $image->serializeForLivewireResponse(), 'error' => true]);
             }
 
-            $imageModel->path = 'images/' . $uuidSplit . '/' . $imageModel->uuid . '.' . $image->extension();
+            $imagePath = $uuidSplit . '/' . $imageModel->uuid . '.' . $image->extension();
 
             if(!Storage::disk('local')->exists('images/' . $uuidSplit)) {
                 Storage::disk('local')->makeDirectory('images/' . $uuidSplit);
             }
 
-            $imageScaled->save(storage_path('app') . '/' . $imageModel->path);
-            $imageModel->save();
+            $imageScaled->save(storage_path('app') . '/' . 'images/' . $imagePath);
 
+            $imageModel->save();
             $tags = [];
             foreach ($data['tags'] as $tag) {
                 $tagResponse = $this->tagRepository->find($tag);
@@ -215,22 +216,27 @@ class ImageController extends Controller
             $this->addTags($imageModel, $tags);
         } catch (\Exception $e) {
             Storage::disk('local')->delete($full_thumbnail_path);
+            Storage::disk('local')->delete('images/' . $imagePath);
             return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true, 'error_message' => $e->getMessage()]);
         }
 
         return redirect()->route('image.upload')->with('status', 'Image uploaded successfully!');
     }
 
-    private function compareHashes($newHash, $threshold = 95) : ?Image
+    private function compareHashes($newHash, $threshold = 95) : array
     {
         $sameSizeImages = $this->imageRepository->lazyIndex();
 
+        $hits = [];
+
+        $counter = 0;
         foreach ($sameSizeImages as $sameSizeImage) {
             if ($this->comparator->compareHashStrings($sameSizeImage->image_hash, $newHash) > $threshold) {
-                return $sameSizeImage;
+                $hits[$counter] = $sameSizeImage;
+                $counter++;
             }
         }
-        return null;
+        return $hits;
     }
 
     private function createImageHash($thumbnail_path) : string

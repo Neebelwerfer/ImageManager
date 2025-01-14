@@ -27,7 +27,6 @@ return new class extends Migration
 
         Schema::create('images', function (Blueprint $table) {
             $table->uuid()->primary();
-            $table->string('path');
             $table->smallInteger('width', false, true);
             $table->smallInteger('height', false, true);
             $table->tinyInteger('rating')->default(5)->unsigned();

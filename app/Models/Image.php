@@ -61,7 +61,7 @@ class Image extends Model
     public function getImagePath() : string
     {
         $split = Image::splitUUID($this->uuid);
-        return 'images/' . $split . '/' . $this->uuid . '.webp';
+        return 'images/' . $split . '/' . $this->uuid . '.' . $this->format;
     }
 
     public function albums() : BelongsToMany
