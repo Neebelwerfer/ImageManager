@@ -72,7 +72,7 @@ class Image extends Model
     protected static function booted(): void
     {
         static::deleting(function (Image $image) {
-            Storage::disk('local')->delete($image->path);
+            Storage::disk('local')->delete($image->getImagePath());
             Storage::disk('local')->delete($image->getThumbnailPath());
         });
     }

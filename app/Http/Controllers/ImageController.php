@@ -213,6 +213,8 @@ class ImageController extends Controller
                 }
             }
 
+            $this->addCategory($imageModel, $data['category']);
+
             $this->addTags($imageModel, $tags);
         } catch (\Exception $e) {
             Storage::disk('local')->delete($full_thumbnail_path);

@@ -32,25 +32,10 @@ class ImageUpload extends Component
 
     public $duplicate;
 
-    public bool $showCategory = false;
-    public bool $showTags = false;
-
-    #[On('closeModal')]
-    public function closeModal()
-    {
-        $this->showCategory = false;
-        $this->showTags = false;
-    }
-
     #[On('categorySelected')]
     public function categorySelected($category)
     {
         $this->category = ImageCategory::find($category);
-    }
-
-    public function toggleCategoryModal()
-    {
-        $this->showCategory = !$this->showCategory;
     }
 
     #[On('tagSelected')]
@@ -66,11 +51,6 @@ class ImageUpload extends Component
     public function removeTag($tagID)
     {
         unset($this->tags[$tagID]);
-    }
-
-    public function toggleTagsModal()
-    {
-        $this->showTags = !$this->showTags;
     }
 
     public function mount(){

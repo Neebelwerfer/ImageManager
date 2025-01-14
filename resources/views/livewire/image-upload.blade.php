@@ -52,7 +52,7 @@
                                     <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
                                 @enderror
                                 <button class="px-2 border rounded" type="button"
-                                    wire:click="toggleCategoryModal">+</button>
+                                    wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: ['category']})">+</button>
                             </div>
                         </div>
 
@@ -65,7 +65,7 @@
                                     <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
                                 @enderror
                                 <button class="px-2 border rounded" type="button"
-                                    wire:click="toggleTagsModal">+</button>
+                                    wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: ['tag']})">+</button>
                             </div>
                         </div>
 
@@ -90,13 +90,6 @@
                 </div>
             @endif
         </form>
-        @if ($showCategory)
-            <livewire:category-show.modal />
-        @endif
-
-        @if ($showTags)
-            <livewire:tag-show.modal />
-        @endif
 
         @if (session('status'))
             <x-status-modal>
