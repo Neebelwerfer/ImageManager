@@ -2,9 +2,9 @@
 
 namespace App\Livewire;
 
-use App\Http\Controllers\ImageController;
 use App\Models\ImageCategory;
 use App\Models\ImageTag;
+use App\Services\ImageService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -80,7 +80,7 @@ class ImageUpload extends Component
             'tags' => array_keys($this->tags),
         ];
 
-        $imageController = app()->make(ImageController::class);
+        $imageController = app()->make(ImageService::class);
 
         return $imageController->create($this->image, $data);
     }
