@@ -31,10 +31,6 @@
                 {{ $this->images->links() }}
             </div>
 
-            @if(isset($singleImage))
-                <livewire:image-show.options :image="$singleImage"/>
-            @endif
-
             <div class="@if($gridView) flex  @else collapse @endif justify-center">
                 <div class="flex flex-col justify-center justify-items-center">
                     <x-grid>
