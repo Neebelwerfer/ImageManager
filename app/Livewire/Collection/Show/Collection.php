@@ -18,9 +18,13 @@ class Collection extends CollectionView
     public $showOptions = false;
     public $collection;
 
+    public $collectionType;
+
     public function mount($collectionType, $collectionID = null)
     {
+        $this->showBackButton = true;
 
+        $this->collectionType = $collectionType;
         switch($collectionType) {
             case 'categories':
                 $this->collection = ImageCategory::find($collectionID);
@@ -43,7 +47,12 @@ class Collection extends CollectionView
         $this->updateImages();
     }
 
-    #[Computed(cache: true)]
+    public function goBack()
+    {
+        return redirect()->route('collection.show', $this->collectionType);
+    }
+
+    #[Computed()]
     public function images()
     {
         return $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values()->paginate(20);

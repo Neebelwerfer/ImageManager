@@ -48,7 +48,15 @@
                 <div class="w-1/2 overflow-scroll">
                     <div class="flex flex-row border-b border-black">
                         <h1>Albums</h1>
-                        <button class="ml-2 border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600">Edit</button>
+                        <button class="ml-2 border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: ['album']})">Edit</button>
+                    </div>
+                    <div>
+                        @foreach ($this->getAlbums() as $album)
+                            <div class="flex flex-row justify-between">
+                                <p>{{ $album->name }}</p>
+                                <button class="border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="removeAlbum({{ $album->id }})">X</button>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>

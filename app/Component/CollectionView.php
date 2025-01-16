@@ -27,6 +27,8 @@ abstract class CollectionView extends Component
 
     public $singleImage;
 
+    public bool $showBackButton = false;
+
     public function setGridView($value)
     {
         $this->gridView = $value;
@@ -98,6 +100,11 @@ abstract class CollectionView extends Component
         $this->updateImages();
         $this->count = 0;
         $this->dispatch('reloadPage');
+    }
+
+    public function goBack()
+    {
+        return redirect()->route('collection');
     }
 
     public function updateImages()

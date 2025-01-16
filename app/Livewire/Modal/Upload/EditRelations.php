@@ -37,7 +37,7 @@ class EditRelations extends ModalComponent
             case 'tag':
                 return 'tagSelected';
             case 'album':
-                return 'album-selected';
+                return 'albumSelected';
         }
     }
 

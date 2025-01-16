@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
@@ -16,9 +17,9 @@ class Album extends Model
         'owner_id'
     ];
 
-    public function images() : HasMany
+    public function images() : BelongsToMany
     {
-        return $this->hasMany(Image::class, 'category_id', 'id');
+        return $this->belongsToMany(Image::class, 'album_images', 'album_id', 'image_uuid');
     }
 
     public function tags() : HasManyThrough

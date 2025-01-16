@@ -17,7 +17,7 @@
                 </div>
             </div>
 
-            <div class="px-4 pb-5 bg-slate-500 sm:px-4 sm:flex">
+            <div class="px-4 pb-5 bg-slate-600 sm:px-4 sm:flex">
                 {{ $buttons }}
             </div>
     @if($formAction)
@@ -25,7 +25,7 @@
     @endif
 
     @if(isset($footer))
-        <div class="w-full px-4 border-t border-black bg-slate-700 sm:px-4 sm:flex">
+        <div class="w-full px-4 border-t border-black bg-slate-600 sm:px-4 sm:flex">
             {{ $footer }}
         </div>
     @endif

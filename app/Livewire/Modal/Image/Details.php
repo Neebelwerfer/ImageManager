@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Modal\Image;
 
+use App\Models\Album;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTag;
@@ -33,8 +34,28 @@ class Details extends ModalComponent
         $res = ImageTag::where('owner_id', Auth::user()->id)->find($tag);
 
         if(isset($res)) {
+            if($this->image->tags()->find($res->id) != null) {
+                return;
+            }
             $this->image->tags()->save($res);
         }
+    }
+
+    #[On('albumSelected')]
+    public function albumSelected($album)
+    {
+        if(Auth::user()->id != $this->image->owner_id) {
+            return;
+        }
+        $res = Album::where('owner_id', Auth::user()->id)->find($album);
+
+        if(!isset($res)) return;
+
+        if($this->image->albums()->find($res->id) != null) {
+            return;
+        }
+
+        $this->image->albums()->attach($res->id);
     }
 
     public function removeTag($tagID)
@@ -54,6 +75,11 @@ class Details extends ModalComponent
         $this->image->delete();
         $this->closeModal();
         $this->dispatch('deleteImage');
+    }
+
+    public function getAlbums()
+    {
+        return $this->image->albums()->where('owner_id', Auth::user()->id)->get();
     }
 
     public function mount(string $imageUuid)
