@@ -51,7 +51,7 @@
     <x-slot name="buttons">
         <div class="flex flex-row gap-2">
             <button class="p-1 mt-4 bg-gray-700 border rounded btn dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="closeModal">Close</button>
-            <button class="p-1 mt-4 bg-red-700 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="deleteImage">Delete</button>
+            <button class="p-1 mt-4 bg-red-700 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:confirm="Are your sure you want to delete this image?" wire:click="deleteImage">Delete</button>
         </div>
     </x-slot>
 </x-modal>

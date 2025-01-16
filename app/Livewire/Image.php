@@ -51,6 +51,9 @@ class Image extends Component
 
     public function render()
     {
+        if(!isset($this->image)) {
+            return $this->placeholder();
+        }
 
         if($this->image->width > $this->image->height) {
             $this->width = $this->vWidth;

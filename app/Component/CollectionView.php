@@ -3,6 +3,7 @@
 namespace App\Component;
 
 use App\Models\Image;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -84,14 +85,12 @@ abstract class CollectionView extends Component
     #[On('deleteImage')]
     public function delete()
     {
-        if($this->singleImage->owner_id != Auth::user()->id) {
+        if(!isset($this->singleImage) && Auth::user()->id != $this->singleImage->owner_id) {
             return;
         }
-
+        $this->gridView = true;
+        $this->count = 0;
         $this->updateImages();
-        $this->singleImage->delete();
-
-        redirect(route('collection.show', 'images'));
     }
 
     public function filter()
@@ -128,7 +127,6 @@ abstract class CollectionView extends Component
 
             if($this->singleImage == null || $this->singleImage != $this->images()[$this->count]) {
                 $this->singleImage = $this->images()[$this->count];
-                $this->dispatch('imageUpdated', $this->singleImage->uuid);
             }
         }
         return view('livewire.collection.show.grid-and-single');

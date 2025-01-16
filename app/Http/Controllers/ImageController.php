@@ -81,7 +81,7 @@ class ImageController extends Controller
         }
 
         if(!isset($image) || Auth::user()->id != $image->owner_id) {
-            abort(404);
+            redirect()->back();
         }
 
         return response()->file(storage_path('app/' . $image->getImagePath()));
@@ -95,7 +95,7 @@ class ImageController extends Controller
         }
 
         if(Auth::user()->id != $image->owner_id) {
-            abort(404);
+            redirect()->back();
         }
 
         if(empty($image->thumbnail_path())) {

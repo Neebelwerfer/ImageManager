@@ -33,6 +33,16 @@ class Details extends ModalComponent
         $this->tags[$tag] = ImageTag::find($tag);
     }
 
+    public function deleteImage()
+    {
+        if(Auth::user()->id != $this->image->owner_id) {
+            return;
+        }
+        $this->image->delete();
+        $this->closeModal();
+        $this->dispatch('deleteImage');
+    }
+
     public function mount(string $imageUuid)
     {
         $this->image = Image::where('owner_id', Auth::user()->id)->where('uuid', $imageUuid)->first();
