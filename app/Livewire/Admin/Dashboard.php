@@ -52,6 +52,18 @@ class Dashboard extends Component
 
     }
 
+    #[Computed()]
+    public function softDeletedImages(){
+        return Image::onlyTrashed()->count();
+    }
+
+    public function deleteSoftDeletedImages(){
+        $softDeletedImages = Image::onlyTrashed()->get();
+        foreach ($softDeletedImages as $image) {
+            $image->forceDelete();
+        }
+    }
+
     public function deleteTempImages(){
         $temp = Storage::disk('local')->allFiles('livewire-tmp');
         foreach ($temp as $file) {

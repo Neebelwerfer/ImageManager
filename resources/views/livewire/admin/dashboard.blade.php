@@ -1,3 +1,10 @@
+<x-slot name="header">
+    <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+        Dashboard
+    </h2>
+</x-slot>
+
+
 <div class="relative w-full h-full overflow-hidden">
 
     <div class="relative flex flex-col w-full h-full">
@@ -17,6 +24,14 @@
                                 <button class="p-1 ml-2 border rounded bg-red-600/90" wire:click="deleteTempImages()"
                                     wire:confirm="Are you sure you want to delete all temporary images? It might brick ongoing upload session">Delete
                                     temporary images</button>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="flex flex-row">
+                                <p class="p-1">Soft-deleted images: {{ $this->softDeletedImages() }} </p>
+                                <button class="p-1 ml-2 border rounded bg-red-600/90" wire:click="deleteSoftDeletedImages()"
+                                    wire:confirm="Are you sure you want to delete all soft-deleted images?">Delete
+                                    all soft-deleted images</button>
                             </div>
                         </li>
                     </ul>

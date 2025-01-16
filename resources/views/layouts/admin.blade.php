@@ -8,7 +8,8 @@
 
     <div class="flex flex-row flex-grow min-h-full">
         <x-sidebar>
-            <x-sidebar.link-button route="{{ route('admin.users') }}">User Management</x-sidebar.link-button>
+            <x-sidebar.link-button active="{{ request()->routeIs('admin') }}" route="{{ route('admin') }} ">Dashboard</x-sidebar.link-button>
+            <x-sidebar.link-button active="{{ request()->routeIs('admin.users') }}" route="{{ route('admin.users') }}">User Management</x-sidebar.link-button>
 
         </x-sidebar>
 

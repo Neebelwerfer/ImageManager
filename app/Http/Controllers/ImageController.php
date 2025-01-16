@@ -219,17 +219,17 @@ class ImageController extends Controller
         } catch (\Exception $e) {
             if(isset($imageModel)) {
                 $imageModel->delete();
+                $image->delete();
             }
             else {
                 Storage::disk('local')->delete($full_thumbnail_path);
                 Storage::disk('local')->delete('images/' . $imagePath);
 
             }
-
-
             return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true, 'error_message' => $e->getMessage()]);
         }
 
+        $image->delete();
         return redirect()->route('image.upload')->with('status', 'Image uploaded successfully!');
     }
 
