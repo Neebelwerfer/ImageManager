@@ -25,8 +25,6 @@
                         <li>Width x Height: {{ $image->width }}x{{ $image->height }}</li>
                         <li>Format: .{{ $image->format }}</li>
                         <li>Uploaded By: {{ $image->user->name }}</li>
-                        <li>Added: {{ $image->created_at->diffForHumans() }}</li>
-                        <li>Updated: {{ $image->updated_at->diffForHumans() }}</li>
                     </ol>
                 </div>
             </div>
@@ -61,6 +59,13 @@
         <div class="flex flex-row gap-2">
             <button class="p-1 mt-4 bg-gray-700 border rounded btn dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="closeModal">Close</button>
             <button class="p-1 mt-4 bg-red-700 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:confirm="Are your sure you want to delete this image?" wire:click="deleteImage">Delete</button>
+        </div>
+    </x-slot>
+
+    <x-slot name="footer">
+        <div class="flex flex-row justify-between w-full gap-2">
+            <p>Added: {{ $image->created_at->diffForHumans() }}</p>
+            <p>Updated: {{ $image->updated_at->diffForHumans() }}</p>
         </div>
     </x-slot>
 </x-modal>

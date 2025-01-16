@@ -23,4 +23,10 @@
     @if($formAction)
         </form>
     @endif
+
+    @if(isset($footer))
+        <div class="w-full px-4 border-t border-black bg-slate-700 sm:px-4 sm:flex">
+            {{ $footer }}
+        </div>
+    @endif
 </div>
