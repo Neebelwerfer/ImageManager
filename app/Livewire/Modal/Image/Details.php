@@ -26,11 +26,24 @@ class Details extends ModalComponent
     #[On('tagSelected')]
     public function tagSelected($tag)
     {
-        if (isset($this->tags[$tag])) {
+        if(Auth::user()->id != $this->image->owner_id) {
             return;
         }
 
-        $this->tags[$tag] = ImageTag::find($tag);
+        $res = ImageTag::where('owner_id', Auth::user()->id)->find($tag);
+
+        if(isset($res)) {
+            $this->image->tags()->save($res);
+        }
+    }
+
+    public function removeTag($tagID)
+    {
+        if(Auth::user()->id != $this->image->owner_id) {
+            return;
+        }
+        $tag = ImageTag::where('owner_id', Auth::user()->id)->find($tagID);
+        $this->image->tags()->detach($tag);
     }
 
     public function deleteImage()

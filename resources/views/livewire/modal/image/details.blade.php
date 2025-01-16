@@ -16,6 +16,12 @@
                             @endisset
                             <button class="border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type: 'category', noneOption: true }})">Edit</button>
                         </li>
+                        <li>
+                            <div>
+                                Rating: {{ $image->rating }}
+                                <button class="border border-gray-500 rounded bg-slate-500/55 w-fit hover:bg-slate-600" wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type: 'tag'}})">Edit</button>
+                            </div>
+                        </li>
                         <li>Width x Height: {{ $image->width }}x{{ $image->height }}</li>
                         <li>Format: .{{ $image->format }}</li>
                         <li>Uploaded By: {{ $image->user->name }}</li>
@@ -33,7 +39,10 @@
                     </div>
                     <div>
                         @foreach ($image->tags as $tag)
-                            <p>{{ $tag->name }}</p>
+                            <div class="flex flex-row justify-between">
+                                <p>{{ $tag->name }}</p>
+                                <button class="border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="removeTag({{ $tag->id }})">X</button>
+                            </div>
                         @endforeach
                     </div>
                 </div>
