@@ -20,6 +20,6 @@
 
     <x-slot name="buttons">
         <button class="p-1 mt-4 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="closeModal">Close</button>
-        <button class="p-1 mt-4 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="$dispatch('openModal', {component: 'modal.image.create-relation-classification', type: '{{ $this->type }}'})">Create {{ $type }}</button>
+        <button class="p-1 mt-4 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="$dispatch('openModal', {component: 'modal.image.create-relation-classification', arguments: {type: '{{ $type }}'}})">Create {{ $type }}</button>
     </x-slot>
 </x-modal>

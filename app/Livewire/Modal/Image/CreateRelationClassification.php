@@ -62,7 +62,7 @@ class CreateRelationClassification extends ModalComponent
         }
     }
 
-    public function mount(string $type = 'category')
+    public function mount(string $type)
     {
         $this->type = $type;
     }

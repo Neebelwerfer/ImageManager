@@ -7,6 +7,7 @@ use App\Models\ImageTag;
 use App\Services\ImageService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Intervention\Image\ImageManager;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
@@ -72,7 +73,6 @@ class ImageUpload extends Component
     public function save(ImageService $imageService)
     {
         $this->validate();
-
 
         $this->hash = $imageService->getHashFromUploadedImage($this->image);
         $duplicates = $imageService->compareHashes($this->hash);

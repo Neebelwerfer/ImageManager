@@ -15,8 +15,9 @@ class Albums extends Component
     public string $name = '';
 
     public function delete($id){
+
         $album = Album::find($id);
-        if(isset($category)) {
+        if(isset($album)) {
             $album->delete();
         }
     }
