@@ -54,9 +54,9 @@ class ImageController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Image $image)
+    public function show(string $imageUuid)
     {
-        return view('image.show', compact('image'));
+        return view('image.show', $imageUuid);
     }
 
     public function getImage(string $uuid) {

@@ -70,20 +70,20 @@ class ImageService
         $user = Auth::user();
 
         $imageModel = new Image($data);
-        $imageModel->uuid = Str::uuid();
-        $imageModel->owner_id = $user->id;
 
         try {
             $imageInfo = ImageManager::imagick()->read($image);
             $imageScaled = ImageManager::gd()->read($image);
 
-
-            $uuidSplit = substr($imageModel->uuid, 0, 1).'/'.substr($imageModel->uuid, 1, 1).'/'.substr($imageModel->uuid, 2, 1).'/'.substr($imageModel->uuid, 3, 1);
+            $imageModel->uuid = Str::uuid();
+            $imageModel->owner_id = $user->id;
             $imageModel->width = $imageScaled->width();
+            $imageModel->image_hash = $data['hash'];
             $imageModel->height = $imageScaled->height();
             $imageModel->format = $image->extension();
-            $imageInfo->scaleDown(256, 256);
+            $uuidSplit = substr($imageModel->uuid, 0, 1).'/'.substr($imageModel->uuid, 1, 1).'/'.substr($imageModel->uuid, 2, 1).'/'.substr($imageModel->uuid, 3, 1);
 
+            $imageInfo->scaleDown(256, 256);
             $thumbnail_path = 'thumbnails/' . $uuidSplit;
             $fileName = $imageModel->uuid . '.webp';
             $full_thumbnail_path = 'thumbnails/' . $uuidSplit . '/' . $fileName;
@@ -91,17 +91,6 @@ class ImageService
                 Storage::disk('local')->makeDirectory($thumbnail_path);
             }
             $imageInfo->save(storage_path('app') . '/' . $full_thumbnail_path);
-
-
-            // Check if image already exists via image hash
-            // Currently only compares images with same width and height
-            $imageModel->image_hash = $this->createImageHash(storage_path('app') . '/' . $full_thumbnail_path);
-            $hits = $this->compareHashes($imageModel->image_hash);
-
-            if (count($hits) > 0) {
-                Storage::disk('local')->delete($full_thumbnail_path);
-                return redirect()->route('image.upload')->with(['status' => 'Image already exists!', 'uploaded' => $image->serializeForLivewireResponse(), 'error' => true]);
-            }
 
             $imagePath = $uuidSplit . '/' . $imageModel->uuid . '.' . $image->extension();
 
@@ -129,13 +118,12 @@ class ImageService
         } catch (\Exception $e) {
             if(isset($imageModel)) {
                 $imageModel->delete();
-                $image->delete();
             }
             else {
                 Storage::disk('local')->delete($full_thumbnail_path);
                 Storage::disk('local')->delete('images/' . $imagePath);
-
             }
+            $image->delete();
             return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true, 'error_message' => $e->getMessage()]);
         }
 
@@ -143,7 +131,7 @@ class ImageService
         return redirect()->route('image.upload')->with('status', 'Image uploaded successfully!');
     }
 
-    private function compareHashes($newHash, $threshold = 95) : array
+    public function compareHashes($newHash, $threshold = 95) : array
     {
         $sameSizeImages = $this->lazyIndex();
 
@@ -152,16 +140,22 @@ class ImageService
         $counter = 0;
         foreach ($sameSizeImages as $sameSizeImage) {
             if ($this->comparator->compareHashStrings($sameSizeImage->image_hash, $newHash) > $threshold) {
-                $hits[$counter] = $sameSizeImage;
+                $hits[$counter] = $sameSizeImage->uuid;
                 $counter++;
             }
         }
         return $hits;
     }
 
-    private function createImageHash($thumbnail_path) : string
+    public function getHashFromUploadedImage(TemporaryUploadedFile $image) : string
     {
-        $hash = $this->comparator->hashImage($thumbnail_path);
+        $img = ImageManager::gd()->read($image);
+        return $this->createImageHash($img->core()->native());
+    }
+
+    private function createImageHash($image) : string
+    {
+        $hash = $this->comparator->hashImage($image);
         return $this->comparator->convertHashToBinaryString($hash);
     }
 

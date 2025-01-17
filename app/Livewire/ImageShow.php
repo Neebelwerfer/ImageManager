@@ -18,13 +18,13 @@ class ImageShow extends Component
         return $this->redirect(url()->previous(), true);
     }
 
-    public function mount($image)
+    public function mount($imageUuid)
     {
-        if(!isset($image) or empty($image)) {
+        if(!isset($imageUuid) or empty($imageUuid)) {
             abort(404, 'Image not found');
         }
 
-        $this->image = Image::find($image);
+        $this->image = Image::find($imageUuid);
         if(!isset($this->image)) {
             abort(404, 'Image not found');
         }

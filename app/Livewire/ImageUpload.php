@@ -6,6 +6,7 @@ use App\Models\ImageCategory;
 use App\Models\ImageTag;
 use App\Services\ImageService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
@@ -27,10 +28,9 @@ class ImageUpload extends Component
     public $rating = 5;
 
     public $category;
-
     public $tags = [];
 
-    public $duplicate;
+    public $hash;
 
     #[On('categorySelected')]
     public function categorySelected($category)
@@ -58,7 +58,6 @@ class ImageUpload extends Component
     }
 
     public function mount(){
-
         if(session('uploaded') !== null) {
             $this->image = TemporaryUploadedFile::unserializeFromLivewireRequest(session('uploaded'));;
         }
@@ -70,19 +69,38 @@ class ImageUpload extends Component
         return ImageCategory::where('owner_id', Auth::user()->id)->get();
     }
 
-    public function save()
+    public function save(ImageService $imageService)
     {
         $this->validate();
 
+
+        $this->hash = $imageService->getHashFromUploadedImage($this->image);
+        $duplicates = $imageService->compareHashes($this->hash);
+
+        if(count($duplicates) > 0) {
+            $this->dispatch('openModal', 'modal.upload.duplicate-images', ['duplicates' => $duplicates]);
+            return;
+        }
+
+        return $this->upload($imageService);
+    }
+
+    #[On('accepted')]
+    public function upload(ImageService $imageService) {
         $data = [
             'rating' => $this->rating,
             'category' => $this->category->id ?? null,
             'tags' => array_keys($this->tags),
+            'hash' => $this->hash
         ];
 
-        $imageController = app()->make(ImageService::class);
+        return $imageService->create($this->image, $data);
+    }
 
-        return $imageController->create($this->image, $data);
+    #[On('cancelled')]
+    public function cancelled() {
+        $this->image->delete();
+        return redirect()->route('image.upload');
     }
 
     public function render()

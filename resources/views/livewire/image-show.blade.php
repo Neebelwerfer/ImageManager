@@ -1,9 +1,15 @@
-<div x-data="{ showOptions: false }" class="relative flex flex-grow h-full">
+<div class="relative flex flex-col flex-grow h-full">
     <a class="absolute top-0 left-0 z-50 m-5" href="{{ url()->previous() }}">Back</a>
 
+    <div class="flex flex-col justify-center w-full mt-5">
+        <div class="flex flex-row justify-center gap-2">
+            <button class="border rounded w-fit bg-slate-600/75 hover:bg-slate-500" wire:click="$dispatch('openModal', {component: 'modal.image.details', arguments: {imageUuid: '{{ $image->uuid }}'}})">Details</button>
+        </div>
+    </div>
+
     <div class="flex justify-center w-full">
-        <div x-on:click="showOptions = !showOptions" class="flex justify-center w-4/5 m-5">
-            <img class="object-scale-down" src="{{ asset($image->path) }}" alt="{{ $image->name }}">
+        <div class="flex justify-center w-4/5 m-5">
+            <img class="object-scale-down" style="width: 1920px; height: 1080px" src="{{ url('images/'.$image->uuid) }}">
         </div>
     </div>
 
@@ -20,7 +26,4 @@
             </div>
         </x-status-modal>
     @endif
-
-
-    <livewire:image-show.options :image="$image" />
 </div>

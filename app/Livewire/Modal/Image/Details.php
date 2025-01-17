@@ -82,6 +82,11 @@ class Details extends ModalComponent
         return $this->image->albums()->where('owner_id', Auth::user()->id)->get();
     }
 
+    public function show()
+    {
+        $this->redirect(route('image.show', $this->image->uuid));
+    }
+
     public function mount(string $imageUuid)
     {
         $this->image = Image::where('owner_id', Auth::user()->id)->where('uuid', $imageUuid)->first();
