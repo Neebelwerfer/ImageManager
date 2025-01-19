@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
+use Illuminate\Support\Carbon;
 
 class LoginActivity extends Model
 {
@@ -18,6 +19,14 @@ class LoginActivity extends Model
         'ip',
         'is_successful',
     ];
+
+
+    protected function casts(): array
+    {
+        return [
+            'time' => 'datetime',
+        ];
+    }
 
     public function user()
     {

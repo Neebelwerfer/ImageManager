@@ -49,7 +49,12 @@ class User extends Authenticatable
 
     public function lastLogin()
     {
-        return $this->loginActivity()->orderBy('time', 'desc')->first()->time ?? 'n/a';
+
+        $login = $this->loginActivity()->where('is_successful', true)->first();
+        if(isset($login)) {
+            return $login->time->diffForHumans() ?? 'n/a';
+        }
+        return 'n/a';
     }
 
     public function images() : HasMany
