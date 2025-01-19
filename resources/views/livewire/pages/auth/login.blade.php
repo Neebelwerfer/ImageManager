@@ -4,6 +4,7 @@ use App\Livewire\Forms\LoginForm;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use App\Models\LoginActivity;
 
 new #[Layout('layouts.guest')] class extends Component
 {
@@ -19,6 +20,15 @@ new #[Layout('layouts.guest')] class extends Component
         $this->form->authenticate();
 
         Session::regenerate();
+
+        if (Auth::user() !== null) {
+            $loginActivity = LoginActivity::create([
+                'user_id' => Auth::user()->id,
+                'time' => now(),
+                'ip' => request()->ip(),
+                'is_successful' => true
+            ]);
+        }
 
         $this->redirectIntended(default: route('home', absolute: false), navigate: true);
     }

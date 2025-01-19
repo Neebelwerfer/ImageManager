@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\LoginActivity;
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -32,6 +34,16 @@ class LoginForm extends Form
 
         if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
             RateLimiter::hit($this->throttleKey());
+
+            $user = User::where('email', $this->email)->first();
+            if (isset($user)) {
+                $loginActivity = LoginActivity::create([
+                    'user_id' => $user->id,
+                    'time' => now(),
+                    'ip' => request()->ip(),
+                    'is_successful' => false
+                ]);
+            }
 
             throw ValidationException::withMessages([
                 'form.email' => trans('auth.failed'),

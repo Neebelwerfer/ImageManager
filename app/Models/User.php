@@ -61,4 +61,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ImageTag::class, 'owner_id', 'id');
     }
+
+    public function loginActivity() : HasMany
+    {
+        return $this->hasMany(LoginActivity::class, 'user_id', 'id');
+    }
 }

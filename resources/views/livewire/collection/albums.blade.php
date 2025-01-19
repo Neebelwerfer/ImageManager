@@ -17,8 +17,10 @@
         </div>
     </x-slot>
     @if($albums->isEmpty())
-        <h1 class="text-2xl font-semibold leading-tight text-gray-800 dark:text-gray-200">No albums found</h1>
-    @else
+        <div class="flex items-center justify-center w-full h-full">
+            <h1 class="text-2xl font-semibold leading-tight text-gray-800 dark:text-gray-200">No albums found</h1>
+        </div>
+     @else
         @foreach ($albums as $album)
             <x-grid.image-card :image="$this->getImageFromAlbum($album)" route="{{ route('collection.type.show', [ 'albums', $album->id]) }}">
                 <div class="absolute inset-0 flex items-end">

@@ -17,7 +17,9 @@
         </div>
     </x-slot>
     @if($categories->isEmpty())
-        <h1 class="text-2xl font-semibold leading-tight text-gray-800 dark:text-gray-200">No categories found</h1>
+        <div class="flex items-center justify-center w-full h-full">
+            <h1 class="text-2xl font-semibold leading-tight text-gray-800 dark:text-gray-200">No categories found</h1>
+        </div>
     @else
         @foreach ($categories as $category)
             <x-grid.image-card :image="$this->getImageFromCategory($category)" route="{{ route('collection.type.show', [ 'categories', $category->id]) }}">
