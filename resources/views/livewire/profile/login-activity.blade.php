@@ -6,14 +6,16 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Volt\Component;
+use Livewire\WithPagination;
 
 new class extends Component
 {
+    use withPagination;
 
     #[Computed()]
     public function loginActivity()
     {
-        return Auth::user()->loginActivity()->get()->sortByDesc('time');
+        return Auth::user()->loginActivity()->get()->sortByDesc('time')->paginate(10);
     }
 
 }; ?>
@@ -26,7 +28,8 @@ new class extends Component
 
     </header>
 
-    <div class="flex justify-center w-full">
+    <div class="flex flex-col justify-center w-full">
+        {{ $this->loginActivity()->links() }}
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-800">
                 <tr>

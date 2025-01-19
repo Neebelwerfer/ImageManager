@@ -15,3 +15,5 @@ Schedule::call(function () {
         $image->forceDelete();
     }
 })->everyTenMinutes();
+
+Schedule::command('model:prune')->daily();
