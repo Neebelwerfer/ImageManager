@@ -27,7 +27,6 @@ class Collection extends CollectionView
     #[Locked()]
     public AccessLevel $accessLevel = AccessLevel::view;
 
-
     public function mount($collectionType, $collectionID = null)
     {
         $this->showBackButton = true;
@@ -52,8 +51,13 @@ class Collection extends CollectionView
         }
 
         if($collectionType == 'albums') {
-            if(Album::owned()->find($collectionID) == null) {
-                abort(404, 'Album not found');
+            if(Album::ownedOrShared()->find($collectionID) == null) {
+                abort(404, 'Category not found');
+            }
+
+            if(!Album::owned()->exists($collectionID)) {
+                $resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
+                $this->accessLevel = $resource->level;
             }
         }
 

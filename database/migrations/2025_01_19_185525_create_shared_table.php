@@ -18,7 +18,7 @@ return new class extends Migration
             $table->uuid('resource_uuid')->nullable();
             $table->foreignId('shared_by_user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('shared_with_user_id')->constrained('users')->onDelete('cascade');
-            $table->enum('level', ['read', 'edit']);
+            $table->enum('level', ['view', 'edit']);
             $table->timestamps();
         });
 

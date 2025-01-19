@@ -3,6 +3,7 @@
 namespace App\Livewire\Manage;
 
 use App\Models\Album;
+use App\Models\Image;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -21,6 +22,12 @@ class Albums extends Component
             $album->delete();
         }
     }
+
+    public function imageCount($id) : int
+    {
+        return Album::find($id)->images()->count();
+    }
+
 
     public function create()
     {
@@ -41,6 +48,7 @@ class Albums extends Component
         return view('livewire.manage.albums',
             [
                 'albums' => Album::where('owner_id', Auth::user()->id)->paginate(50),
+                'shared' => Album::shared()->where('name', 'like', '%' . $this->name . '%')->paginate(20)
             ]);
     }
 }

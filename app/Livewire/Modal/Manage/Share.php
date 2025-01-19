@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Modal\Manage;
 
+use App\Models\Album;
 use App\Models\ImageCategory;
 use App\Models\SharedResources;
 use App\Models\User;
@@ -18,7 +19,7 @@ class Share extends ModalComponent
     #[Validate('required', 'email')]
     public $email;
     #[Validate('required')]
-    public $accessLevel;
+    public $accessLevel = 'view';
 
     #[Locked()]
     public $type;
@@ -45,6 +46,24 @@ class Share extends ModalComponent
                     $shared_resource = new SharedResources();
                     $shared_resource->resource_id = $category->id;
                     $shared_resource->type = 'category';
+                    $shared_resource->shared_by_user_id = Auth::user()->id;
+                    $shared_resource->shared_with_user_id = $sharedTo->id;
+                    $shared_resource->level = $this->accessLevel;
+                    $shared_resource->save();
+                    return $this->closeModal();
+                }
+            }
+        }
+        else if($this->type == 'album') {
+            $album = Album::owned()->find($this->id);
+
+            if(isset($album)) {
+                $sharedTo = User::where('email', $this->email)->first();
+
+                if(isset($sharedTo) && $sharedTo->id != Auth::user()->id) {
+                    $shared_resource = new SharedResources();
+                    $shared_resource->resource_id = $album->id;
+                    $shared_resource->type = 'album';
                     $shared_resource->shared_by_user_id = Auth::user()->id;
                     $shared_resource->shared_with_user_id = $sharedTo->id;
                     $shared_resource->level = $this->accessLevel;
