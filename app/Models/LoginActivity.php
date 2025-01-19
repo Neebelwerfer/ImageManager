@@ -26,6 +26,6 @@ class LoginActivity extends Model
 
     public function prunable()
     {
-        return $this->where('last_login_at', '<', now()->subDays(30));
+        return $this->where('time', '<', now()->subDays(30));
     }
 }
