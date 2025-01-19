@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ImageCategory;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class CategoryService
@@ -27,11 +28,33 @@ class CategoryService
         return $cat;
     }
 
+    public function share($id, $email) : void
+    {
+        $cat = ImageCategory::owned()->find($id);
+        if(isset($cat)) {
+            $sharedTo = User::where('email', $email)->first();
+
+            if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && $sharedTo->sharedCategories()->find($cat->id) == null) {
+
+            }
+        }
+    }
+
     public function delete($id) : void
     {
         $cat = ImageCategory::owned()->find($id);
         if(isset($cat)) {
             $cat->delete();
         }
+    }
+
+    public function find($id) : ?ImageCategory
+    {
+        return ImageCategory::owned()->find($id);
+    }
+
+    public function findWhereOwnedAndShared($id) : ?ImageCategory
+    {
+        return ImageCategory::ownedOrShared()->find($id);
     }
 }

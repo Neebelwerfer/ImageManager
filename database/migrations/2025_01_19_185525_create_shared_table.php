@@ -11,18 +11,35 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('shared_images', function (Blueprint $table) {
+        Schema::create('shared_resources', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignUuid('image_uuid')->constrained('images', 'uuid')->onDelete('cascade');
+            $table->enum('type', ['image', 'album', 'category']);
+            $table->integer('resource_id')->nullable();
+            $table->uuid('resource_uuid')->nullable();
+            $table->foreignId('shared_by_user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('shared_with_user_id')->constrained('users')->onDelete('cascade');
+            $table->enum('level', ['read', 'edit']);
             $table->timestamps();
         });
 
-        Schema::create('shared_categories', function (Blueprint $table) {
+        Schema::create('shared_audit_log', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('category_id')->constrained('image_categories')->onDelete('cascade');
+            $table->foreignId('resource_id')->constrained('shared_resources')->onDelete('cascade');
+            $table->string('action');
             $table->timestamps();
+        });
+
+        Schema::table('images', function (Blueprint $table) {
+            $table->boolean('is_shared')->default(false);
+        });
+
+        Schema::table('albums', function (Blueprint $table) {
+            $table->boolean('is_shared')->default(false);
+        });
+
+        Schema::table('image_categories', function (Blueprint $table) {
+            $table->boolean('is_shared')->default(false);
         });
     }
 
@@ -31,6 +48,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('shared_images');
+        Schema::dropIfExists('shared_audit_log');
+        Schema::dropIfExists('shared_resources');
+        Schema::table('images', function (Blueprint $table) {
+            $table->dropColumn('is_shared');
+        });
+        Schema::table('albums', function (Blueprint $table) {
+            $table->dropColumn('is_shared');
+        });
+        Schema::table('image_categories', function (Blueprint $table) {
+            $table->dropColumn('is_shared');
+        });
     }
 };

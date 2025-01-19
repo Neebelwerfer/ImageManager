@@ -14,8 +14,6 @@ class OwnerOnly implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $builder->whereHas('ownership', function ($query) {
-            $query->where('owner_id', Auth::user()->id);
-        });
+        $builder->where('user_id', Auth::id());
     }
 }

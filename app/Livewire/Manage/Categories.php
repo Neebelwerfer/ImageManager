@@ -54,7 +54,8 @@ class Categories extends Component
     {
         return view('livewire.manage.categories',
             [
-                'categories' => ImageCategory::ownedOrShared()->paginate(50),
+                'categories' => ImageCategory::owned()->where('name', 'like', '%' . $this->name . '%')->paginate(50),
+                'shared' => ImageCategory::shared()->where('name', 'like', '%' . $this->name . '%')->paginate(20)
             ]);
     }
 }

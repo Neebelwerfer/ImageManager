@@ -18,29 +18,25 @@ class TagService
 
     public function create($name) : ImageTag
     {
-        $tag = ImageTag::withoutGlobalScopes()->where('name', $name)->first();
+        $tag = ImageTag::where('name', $name)->first();
 
         if(isset($tag)) {
-            if(!$tag->ownership()->where('owner_id', Auth::user()->id)->exists()) {
-                $tag->ownership()->attach(Auth::user()->id);
-            }
             return $tag;
         }
 
         $tag = ImageTag::create([
             'name' => $name,
+            'user_id' => Auth::user()->id
         ]);
-
-        $tag->ownership()->attach(Auth::user()->id);
 
         return $tag;
     }
 
     public function delete($id) : void
     {
-        $tag = ImageTag::find($id);
-        if(isset($tag)) {
-            $tag->ownership()->detach(Auth::user()->id);
+        $cat = ImageTag::owned()->find($id);
+        if(isset($cat)) {
+            $cat->delete();
         }
     }
 }

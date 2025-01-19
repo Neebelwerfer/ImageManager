@@ -58,14 +58,9 @@ class User extends Authenticatable
         return 'n/a';
     }
 
-    public function sharedImages() : BelongsToMany
+    public function shared_resources() : HasMany
     {
-        return $this->belongsToMany(Image::class, 'shared_images', 'user_id', 'image_uuid');
-    }
-
-    public function sharedCategories() : BelongsToMany
-    {
-        return $this->belongsToMany(ImageCategory::class, 'shared_categories', 'user_id', 'category_id');
+        return $this->hasMany(SharedResources::class, 'shared_with_user_id', 'id');
     }
 
     public function images() : HasMany

@@ -41,17 +41,10 @@ return new class extends Migration
 
         Schema::create('image_tags' , function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
-
-        Schema::create('tag_ownership', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('tag_id')->constrained('image_tags')->onDelete('cascade');
-            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
-            $table->timestamps();
-        });
-
 
         Schema::create('album_images', function (Blueprint $table) {
             $table->id();

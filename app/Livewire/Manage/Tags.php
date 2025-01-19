@@ -3,6 +3,7 @@
 namespace App\Livewire\Manage;
 
 use App\Models\ImageTag;
+use App\Services\TagService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -16,32 +17,21 @@ class Tags extends Component
     public string $name = '';
 
     public function delete($id){
-        $tag = ImageTag::find($id);
-        if(isset($tag)) {
-            $tag->ownership()->detach(Auth::user()->id);
-        }
+        app(TagService::class)->delete($id);
     }
 
     public function create()
     {
         $this->validate();
 
-        $tag = ImageTag::withoutGlobalScopes()->where('name', $this->name)->first();
+        $tag = ImageTag::owned()->where('name', $this->name)->first();
 
         if(isset($tag)) {
-            if($tag->ownership()->where('owner_id', Auth::user()->id)->exists()) {
-                return $this->addError('name', 'Tag already exists');
-            }
-
-            $tag->ownership()->attach(Auth::user()->id);
+           return $this->addError('name', 'Category already exists');
         }
         else {
-            $tag = ImageTag::create([
-                'name' => $this->name,
-            ]);
-
-            $tag->ownership()->attach(Auth::user()->id);
-        }
+            $tag = app(TagService::class)->create($this->name);
+        };
 
     }
 

@@ -3,6 +3,8 @@
 namespace App\Livewire\Modal\Manage;
 
 use App\Models\ImageCategory;
+use App\Models\SharedResources;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use LivewireUI\Modal\ModalComponent;
 
@@ -22,6 +24,16 @@ class EditCategory extends ModalComponent
     {
         $this->category->delete();
         $this->closeModal();
+    }
+
+    public function removeShared($id) {
+        SharedResources::find($id)->delete();
+        $this->closeModal();
+    }
+
+    #[Computed()]
+    public function sharedWith() {
+        return SharedResources::where('resource_id', $this->category->id)->where('type', 'category')->get();
     }
 
     public function mount($category)

@@ -32,9 +32,9 @@ class ImageCategory extends Model
         return $this->hasManyThrough(ImageTag::class, Image::class, 'category_id', 'image_id');
     }
 
-    public function sharedWith() : BelongsToMany
+    public function shared_resources() : HasMany
     {
-        return $this->belongsToMany(User::class, 'shared_categories', 'category_id', 'user_id');
+        return $this->hasMany(SharedResources::class, 'resource_id', 'id')->where('type', 'category');
     }
 
     public function scopeOwned($query)
@@ -44,15 +44,15 @@ class ImageCategory extends Model
 
     public function scopeShared($query)
     {
-        $query->whereHas('sharedWith', function ($query) {
-            $query->where('user_id', Auth::user()->id);
+        $query->whereHas('shared_resources', function ($query) {
+            $query->where('shared_with_user_id', Auth::user()->id)->where('type', 'category')->select('resource_id');
         });
     }
 
     public function scopeOwnedOrShared($query)
     {
-        $query->where('user_id', Auth::user()->id)->orwhereHas('sharedWith', function ($query) {
-            $query->where('user_id', Auth::user()->id);
+        $query->where('user_id', Auth::user()->id)->orwhereHas('shared_resources', function ($query) {
+            $query->where('type', 'category')->where('shared_with_user_id', Auth::user()->id);
         });
     }
 }

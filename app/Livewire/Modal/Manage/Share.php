@@ -3,8 +3,10 @@
 namespace App\Livewire\Modal\Manage;
 
 use App\Models\ImageCategory;
+use App\Models\SharedResources;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -15,6 +17,8 @@ class Share extends ModalComponent
 
     #[Validate('required', 'email')]
     public $email;
+    #[Validate('required')]
+    public $accessLevel;
 
     #[Locked()]
     public $type;
@@ -37,8 +41,14 @@ class Share extends ModalComponent
             if(isset($category)) {
                 $sharedTo = User::where('email', $this->email)->first();
 
-                if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && $sharedTo->sharedCategories()->find($category->id) == null) {
-                    $sharedTo->sharedCategories()->attach($category->id);
+                if(isset($sharedTo) && $sharedTo->id != Auth::user()->id) {
+                    $shared_resource = new SharedResources();
+                    $shared_resource->resource_id = $category->id;
+                    $shared_resource->type = 'category';
+                    $shared_resource->shared_by_user_id = Auth::user()->id;
+                    $shared_resource->shared_with_user_id = $sharedTo->id;
+                    $shared_resource->level = $this->accessLevel;
+                    $shared_resource->save();
                     return $this->closeModal();
                 }
             }

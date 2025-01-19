@@ -15,26 +15,15 @@ use Illuminate\Support\Facades\Auth;
 #[ScopedBy(OwnerOnly::class)]
 class ImageTag extends Model
 {
-    use HasFactory, Prunable;
+    use HasFactory;
 
     protected $fillable = [
         'name',
+        'user_id',
     ];
-
-    public function ownership() : BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'tag_ownership', 'tag_id', 'owner_id');
-    }
 
     public function images() : BelongsToMany
     {
         return $this->belongsToMany(Image::class);
-    }
-
-    public function prunable(): Builder
-    {
-        return static::withoutGlobalScopes()->whereDoesntHave('ownership' , function ($query) {
-            $query->where('owner_id', Auth::user()->id);
-        });
     }
 }

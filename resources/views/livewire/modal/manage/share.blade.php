@@ -9,6 +9,13 @@
                 <label for="email" class="">Email</label>
                 <input type="text" class="text-black form-control" wire:model="email" placeholder="Email..."/>
             </div>
+            <div class="flex flex-col">
+                <label for="accessLevel" class="">AccessLevel</label>
+                <select class="text-black form-control" wire:model="accessLevel">
+                    <option value="view">View</option>
+                    <option value="edit">Edit</option>
+                </select>
+            </div>
         </form>
     </x-slot>
 

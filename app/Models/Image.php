@@ -29,6 +29,18 @@ class Image extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
+    public function getThumbnailPath() : string
+    {
+        $split = Image::splitUUID($this->uuid);
+        return 'thumbnails/' . $split . '/' . $this->uuid . '.webp';
+    }
+
+    public function getImagePath() : string
+    {
+        $split = Image::splitUUID($this->uuid);
+        return 'images/' . $split . '/' . $this->uuid . '.' . $this->format;
+    }
+
     public function category() : BelongsTo
     {
         return $this->belongsTo(ImageCategory::class);
@@ -44,26 +56,14 @@ class Image extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function getThumbnailPath() : string
-    {
-        $split = Image::splitUUID($this->uuid);
-        return 'thumbnails/' . $split . '/' . $this->uuid . '.webp';
-    }
-
-    public function getImagePath() : string
-    {
-        $split = Image::splitUUID($this->uuid);
-        return 'images/' . $split . '/' . $this->uuid . '.' . $this->format;
-    }
-
     public function albums() : BelongsToMany
     {
         return $this->belongsToMany(Album::class, 'album_images', 'image_uuid', 'album_id');
     }
 
-    public function sharedWith() : BelongsToMany
+    public function shared_resources() : HasMany
     {
-        return $this->belongsToMany(User::class, 'shared_images', 'image_uuid', 'user_id');
+        return $this->hasMany(SharedResources::class, 'resource_uuid', 'id')->where('type', 'image');
     }
 
     public function scopeOwned($query)
