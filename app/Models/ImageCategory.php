@@ -13,13 +13,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Auth;
 
-#[ScopedBy(OwnerOnly::class)]
 class ImageCategory extends Model
 {
-    use HasFactory, Prunable;
+    use HasFactory;
 
     protected $fillable = [
         'name',
+        'user_id',
     ];
 
     public function images() : HasMany
@@ -27,20 +27,32 @@ class ImageCategory extends Model
         return $this->hasMany(Image::class, 'category_id', 'id');
     }
 
-    public function ownership() : BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'category_ownership', 'category_id', 'owner_id');
-    }
-
     public function tags() : HasManyThrough
     {
         return $this->hasManyThrough(ImageTag::class, Image::class, 'category_id', 'image_id');
     }
 
-    public function prunable(): Builder
+    public function sharedWith() : BelongsToMany
     {
-        return static::withoutGlobalScopes()->whereDoesntHave('ownership' , function ($query) {
-            $query->where('owner_id', Auth::user()->id);
+        return $this->belongsToMany(User::class, 'shared_categories', 'category_id', 'user_id');
+    }
+
+    public function scopeOwned($query)
+    {
+        $query->where('user_id', Auth::user()->id);
+    }
+
+    public function scopeShared($query)
+    {
+        $query->whereHas('sharedWith', function ($query) {
+            $query->where('user_id', Auth::user()->id);
+        });
+    }
+
+    public function scopeOwnedOrShared($query)
+    {
+        $query->where('user_id', Auth::user()->id)->orwhereHas('sharedWith', function ($query) {
+            $query->where('user_id', Auth::user()->id);
         });
     }
 }

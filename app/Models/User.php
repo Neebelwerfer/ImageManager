@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -55,6 +56,16 @@ class User extends Authenticatable
             return $login->time->diffForHumans() ?? 'n/a';
         }
         return 'n/a';
+    }
+
+    public function sharedImages() : BelongsToMany
+    {
+        return $this->belongsToMany(Image::class, 'shared_images', 'user_id', 'image_uuid');
+    }
+
+    public function sharedCategories() : BelongsToMany
+    {
+        return $this->belongsToMany(ImageCategory::class, 'shared_categories', 'user_id', 'category_id');
     }
 
     public function images() : HasMany

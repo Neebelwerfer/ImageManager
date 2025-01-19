@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Manage;
 
+use App\Models\Image;
 use App\Models\ImageCategory;
+use App\Services\CategoryService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
@@ -19,29 +21,32 @@ class Categories extends Component
     public function delete($id){
         $category = ImageCategory::find($id);
         if(isset($category)) {
-            $category->ownership()->detach(Auth::user()->id);
+            $category->delete();
         }
+    }
+
+    public function isOwned($id) : bool
+    {
+        $category = ImageCategory::owned()->find($id);
+        return isset($category);
+    }
+
+    public function imageCount($id) : int
+    {
+        return Image::owned()->where('category_id', $id)->count();
     }
 
     public function create()
     {
         $this->validate();
 
-        $cat = ImageCategory::withoutGlobalScopes()->where('name', $this->name)->first();
+        $cat = ImageCategory::owned()->where('name', $this->name)->first();
 
         if(isset($cat)) {
-            if($cat->ownership()->where('owner_id', Auth::user()->id)->exists()) {
-                return $this->addError('name', 'Tag already exists');
-            }
-
-            $cat->ownership()->attach(Auth::user()->id);
+           return $this->addError('name', 'Category already exists');
         }
         else {
-            $cat = ImageCategory::create([
-                'name' => $this->name,
-            ]);
-
-            $cat->ownership()->attach(Auth::user()->id);
+            $cat = app(CategoryService::class)->create($this->name);
         }
     }
 
@@ -49,7 +54,7 @@ class Categories extends Component
     {
         return view('livewire.manage.categories',
             [
-                'categories' => ImageCategory::all()->paginate(50)
+                'categories' => ImageCategory::ownedOrShared()->paginate(50),
             ]);
     }
 }

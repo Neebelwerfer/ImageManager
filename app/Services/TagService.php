@@ -11,6 +11,11 @@ class TagService
         //
     }
 
+    public function find($id) : ?ImageTag
+    {
+        return ImageTag::find($id);
+    }
+
     public function create($name) : ImageTag
     {
         $tag = ImageTag::withoutGlobalScopes()->where('name', $name)->first();

@@ -13,29 +13,25 @@ class CategoryService
 
     public function create($name) : ImageCategory
     {
-        $cat = ImageCategory::withoutGlobalScopes()->where('name', $name)->first();
+        $cat = ImageCategory::owned()->where('name', $name)->first();
 
         if(isset($cat)) {
-            if(!$cat->ownership()->where('owner_id', Auth::user()->id)->exists()) {
-                $cat->ownership()->attach(Auth::user()->id);
-            }
             return $cat;
         }
 
         $cat = ImageCategory::create([
             'name' => $name,
+            'user_id' => Auth::user()->id
         ]);
-
-        $cat->ownership()->attach(Auth::user()->id);
 
         return $cat;
     }
 
     public function delete($id) : void
     {
-        $cat = ImageCategory::find($id);
+        $cat = ImageCategory::owned()->find($id);
         if(isset($cat)) {
-            $cat->ownership()->detach(Auth::user()->id);
+            $cat->delete();
         }
     }
 }

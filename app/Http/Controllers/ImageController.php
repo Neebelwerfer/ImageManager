@@ -84,12 +84,12 @@ class ImageController extends Controller
             redirect()->back();
         }
 
-        if(empty($image->thumbnail_path())) {
+        if(empty($image->getThumbnailPath ())) {
             abort(404);
         }
 
 
-        return response()->file(storage_path('app') . '/' . $image->thumbnail_path());
+        return response()->file(storage_path('app') . '/' . $image->getThumbnailPath());
     }
 
 }

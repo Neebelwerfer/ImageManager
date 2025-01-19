@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
@@ -43,18 +44,6 @@ class Image extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    /**
-     * @deprecated
-     *
-     * @return string
-     */
-    public function thumbnail_path() : string
-    {
-        $thumbnail_path = Image::splitUUID($this->uuid);
-        return 'thumbnails/' . $thumbnail_path . '/' . $this->uuid . '.webp';
-    }
-
-
     public function getThumbnailPath() : string
     {
         $split = Image::splitUUID($this->uuid);
@@ -70,6 +59,11 @@ class Image extends Model
     public function albums() : BelongsToMany
     {
         return $this->belongsToMany(Album::class, 'album_images', 'image_uuid', 'album_id');
+    }
+
+    public function sharedWith() : BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'shared_images', 'image_uuid', 'user_id');
     }
 
     public function scopeOwned($query)
@@ -90,5 +84,4 @@ class Image extends Model
         $split = substr($uuid, 0, 1).'/'.substr($uuid, 1, 1).'/'.substr($uuid, 2, 1).'/'.substr($uuid, 3, 1);
         return $split;
     }
-
 }

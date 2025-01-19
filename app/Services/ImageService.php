@@ -107,7 +107,7 @@ class ImageService
             $imageModel->save();
             $tags = [];
             foreach ($data['tags'] as $tag) {
-                $tagResponse = ImageTag::where('owner_id', Auth::user()->id)->find($tag);
+                $tagResponse = ImageTag::find($tag);
                 if(isset($tagResponse)) {
                     $tags[$tag] = $tagResponse;
                 }

@@ -20,14 +20,8 @@ return new class extends Migration
 
         Schema::create('image_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->timestamps();
-        });
-
-        Schema::create('category_ownership', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('category_id')->constrained('image_categories')->onDelete('cascade');
-            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->string('name');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -80,6 +74,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('image_image_tag');
+        Schema::dropIfExists('tag_ownership');
+        Schema::dropIfExists('category_ownership');
         Schema::dropIfExists('album_images');
         Schema::dropIfExists('image_tags');
         Schema::dropIfExists('images');

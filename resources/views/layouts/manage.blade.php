@@ -7,7 +7,7 @@
         </x-sidebar>
 
         <div class="flex justify-center flex-grow">
-            <div class="flex flex-col flex-grow-0">
+            <div class="flex flex-col flex-grow-0 w-full">
                 {{ $slot }}
             </div>
         </div>
