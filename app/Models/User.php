@@ -47,6 +47,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function lastLogin()
+    {
+        return $this->loginActivity()->orderBy('time', 'desc')->first()->time ?? 'n/a';
+    }
+
     public function images() : HasMany
     {
         return $this->hasMany(Image::class, 'owner_id', 'id');
