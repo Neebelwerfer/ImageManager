@@ -50,9 +50,9 @@ class User extends Authenticatable
     public function lastLogin()
     {
 
-        $login = $this->loginActivity()->where('is_successful', true)->first();
+        $login = $this->loginActivity()->where('is_successful', true)->orderBy('time', 'desc')->first();
         if(isset($login)) {
-            return $login->time->diffForHumans() ?? 'n/a';
+            return $login->time->diffForHumans()     ?? 'n/a';
         }
         return 'n/a';
     }

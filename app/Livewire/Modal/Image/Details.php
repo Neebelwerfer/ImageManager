@@ -31,7 +31,7 @@ class Details extends ModalComponent
             return;
         }
 
-        $res = ImageTag::where('owner_id', Auth::user()->id)->find($tag);
+        $res = ImageTag::find($tag);
 
         if(isset($res)) {
             if($this->image->tags()->find($res->id) != null) {
@@ -63,7 +63,7 @@ class Details extends ModalComponent
         if(Auth::user()->id != $this->image->owner_id) {
             return;
         }
-        $tag = ImageTag::where('owner_id', Auth::user()->id)->find($tagID);
+        $tag = ImageTag::find($tagID);
         $this->image->tags()->detach($tag);
     }
 

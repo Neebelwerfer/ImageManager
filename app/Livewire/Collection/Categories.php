@@ -3,6 +3,7 @@
 namespace App\Livewire\Collection;
 
 use App\Models\ImageCategory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -20,7 +21,7 @@ class Categories extends Component
     {
         return view('livewire.collection.categories',
             [
-                'categories' => ImageCategory::where('owner_id', Auth::user()->id)->where('name', 'like', '%' . $this->name . '%')->paginate(20)
+                'categories' => ImageCategory::where('name', 'like', '%' . $this->name . '%')->paginate(20)
             ]);
     }
 }

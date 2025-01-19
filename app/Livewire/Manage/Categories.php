@@ -19,7 +19,7 @@ class Categories extends Component
     public function delete($id){
         $category = ImageCategory::find($id);
         if(isset($category)) {
-            $category->delete();
+            $category->ownership()->detach(Auth::user()->id);
         }
     }
 
@@ -27,21 +27,29 @@ class Categories extends Component
     {
         $this->validate();
 
-        if(ImageCategory::where('name', $this->name)->where('owner_id', Auth::user()->id)->exists()) {
-            return $this->addError('name', 'Category already exists');
-        }
+        $cat = ImageCategory::withoutGlobalScopes()->where('name', $this->name)->first();
 
-        ImageCategory::create([
-            'name' => $this->name,
-            'owner_id' => Auth::user()->id
-        ]);
+        if(isset($cat)) {
+            if($cat->ownership()->where('owner_id', Auth::user()->id)->exists()) {
+                return $this->addError('name', 'Tag already exists');
+            }
+
+            $cat->ownership()->attach(Auth::user()->id);
+        }
+        else {
+            $cat = ImageCategory::create([
+                'name' => $this->name,
+            ]);
+
+            $cat->ownership()->attach(Auth::user()->id);
+        }
     }
 
     public function render()
     {
         return view('livewire.manage.categories',
             [
-                'categories' => ImageCategory::where('owner_id', Auth::user()->id)->paginate(50)
+                'categories' => ImageCategory::all()->paginate(50)
             ]);
     }
 }

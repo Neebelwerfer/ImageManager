@@ -20,7 +20,13 @@ return new class extends Migration
 
         Schema::create('image_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
+            $table->timestamps();
+        });
+
+        Schema::create('category_ownership', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('category_id')->constrained('image_categories')->onDelete('cascade');
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
@@ -41,7 +47,13 @@ return new class extends Migration
 
         Schema::create('image_tags' , function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
+            $table->timestamps();
+        });
+
+        Schema::create('tag_ownership', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('tag_id')->constrained('image_tags')->onDelete('cascade');
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

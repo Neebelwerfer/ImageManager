@@ -18,7 +18,7 @@ class Tags extends Component
     public function delete($id){
         $tag = ImageTag::find($id);
         if(isset($tag)) {
-            $tag->delete();
+            $tag->ownership()->detach(Auth::user()->id);
         }
     }
 
@@ -26,21 +26,30 @@ class Tags extends Component
     {
         $this->validate();
 
-        if(ImageTag::where('name', $this->name)->where('owner_id', Auth::user()->id)->exists()) {
-            return $this->addError('name', 'Tag already exists');
+        $tag = ImageTag::withoutGlobalScopes()->where('name', $this->name)->first();
+
+        if(isset($tag)) {
+            if($tag->ownership()->where('owner_id', Auth::user()->id)->exists()) {
+                return $this->addError('name', 'Tag already exists');
+            }
+
+            $tag->ownership()->attach(Auth::user()->id);
+        }
+        else {
+            $tag = ImageTag::create([
+                'name' => $this->name,
+            ]);
+
+            $tag->ownership()->attach(Auth::user()->id);
         }
 
-        ImageTag::create([
-            'name' => $this->name,
-            'owner_id' => Auth::user()->id
-        ]);
     }
 
     public function render()
     {
         return view('livewire.manage.tags',
             [
-                'tags' => ImageTag::where('owner_id', Auth::user()->id)->paginate(50)
+                'tags' => ImageTag::all()->paginate(50)
             ]);
     }
 }
