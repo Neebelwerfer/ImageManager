@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -69,6 +70,11 @@ class Image extends Model
     public function albums() : BelongsToMany
     {
         return $this->belongsToMany(Album::class, 'album_images', 'image_uuid', 'album_id');
+    }
+
+    public function scopeOwned($query)
+    {
+        $query->where('owner_id', Auth::user()->id);
     }
 
     protected static function booted(): void

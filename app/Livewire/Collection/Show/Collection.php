@@ -2,13 +2,11 @@
 
 namespace App\Livewire\Collection\Show;
 
-use App\Models\Album;
 use App\Models\Image;
 use App\Component\CollectionView;
-use App\Models\ImageCategory;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 
 #[Layout('layouts.collection')]
 class Collection extends CollectionView
@@ -16,32 +14,21 @@ class Collection extends CollectionView
     public $minRating = 0;
 
     public $showOptions = false;
-    public $collection;
 
+    #[Locked()]
     public $collectionType;
+    #[Locked()]
+    public $collectionID;
 
     public function mount($collectionType, $collectionID = null)
     {
         $this->showBackButton = true;
 
         $this->collectionType = $collectionType;
-        switch($collectionType) {
-            case 'categories':
-                $this->collection = ImageCategory::find($collectionID);
-                break;
-            case 'albums':
-                $this->collection = Album::find($collectionID);
-                break;
-            default:
-                abort(404, 'Collection not found');
-        }
+        $this->collectionID = $collectionID;
 
-        if(!isset($this->collection)) {
+        if($collectionType != 'categories' && $collectionType != 'albums'  && $collectionType != 'images') {
             abort(404, 'Collection not found');
-        }
-
-        if(Auth::user()->id != $this->collection->owner_id) {
-            abort(403, 'Forbidden');
         }
 
         $this->updateImages();
@@ -55,7 +42,17 @@ class Collection extends CollectionView
     #[Computed()]
     public function images()
     {
-        return $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values()->paginate(20);
+        if($this->collectionType == 'categories') {
+            return Image::owned()->where('category_id', $this->collectionID)->where('rating', '>=', $this->minRating)->orderby('rating', 'desc')->paginate(20);
+        }
+        else if($this->collectionType == 'albums') {
+            return Image::owned()->whereHas('albums', function ($query) {
+                $query->where('album_id', $this->collectionID);
+            })->where('rating', '>=', $this->minRating)->orderby('rating', 'desc')->paginate(20);
+        }
+        else if($this->collectionType == 'images') {
+            return Image::owned()->where('rating', '>=', $this->minRating)->orderby('rating', 'desc')->paginate(20);
+        }
     }
 
 }

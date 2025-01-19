@@ -19,7 +19,7 @@ class Details extends ModalComponent
     {
         $category = ImageCategory::find($category);
 
-        if(isset($category) && Auth::user()->id == $category->owner_id) {
+        if(isset($category)) {
             $this->image->update(['category_id' => $category->id]);
         }
     }
