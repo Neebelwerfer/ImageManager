@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
@@ -26,6 +27,9 @@ abstract class CollectionView extends Component
     public $minRating = 0;
 
     public $singleImage;
+
+    #[Locked()]
+    public $collectionType;
 
     public bool $showBackButton = false;
 

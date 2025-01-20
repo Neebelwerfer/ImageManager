@@ -20,8 +20,6 @@ class Collection extends CollectionView
     public $showOptions = false;
 
     #[Locked()]
-    public $collectionType;
-    #[Locked()]
     public $collectionID;
 
     #[Locked()]

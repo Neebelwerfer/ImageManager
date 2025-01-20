@@ -22,6 +22,8 @@ class Images extends CollectionView
     public $showOptions = false;
     public $collection;
 
+    public $collectionType = 'images';
+
     #[Computed()]
     public function images()
     {
