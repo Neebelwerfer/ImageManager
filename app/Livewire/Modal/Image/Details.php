@@ -17,10 +17,13 @@ class Details extends ModalComponent
     #[On('categorySelected')]
     public function categorySelected($category)
     {
-        $category = ImageCategory::find($category);
+        $category = ImageCategory::ownedOrShared()->find($category);
 
         if(isset($category)) {
             $this->image->update(['category_id' => $category->id]);
+        }
+        else {
+            $this->image->update(['category_id' => null]);
         }
     }
 

@@ -4,6 +4,9 @@ function load(){
     let dark = document.getElementById('dark');
     let system = document.getElementById('system');
 
+    if(themeText === null || light === null || dark === null || system === null) {
+        return;
+    }
 
     // On page load or when changing themes, best to add inline in `head` to avoid FOUC
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {

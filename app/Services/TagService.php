@@ -26,7 +26,7 @@ class TagService
 
         $tag = ImageTag::create([
             'name' => $name,
-            'user_id' => Auth::user()->id
+            'owner_id' => Auth::user()->id
         ]);
 
         return $tag;

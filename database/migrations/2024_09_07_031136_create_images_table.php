@@ -21,7 +21,7 @@ return new class extends Migration
         Schema::create('image_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -29,7 +29,6 @@ return new class extends Migration
             $table->uuid()->primary();
             $table->smallInteger('width', false, true);
             $table->smallInteger('height', false, true);
-            $table->tinyInteger('rating')->default(5)->unsigned();
             $table->foreignId('category_id')->nullable()->constrained('image_categories')->nullOnDelete();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->tinyText('image_hash');
@@ -42,7 +41,7 @@ return new class extends Migration
         Schema::create('image_tags' , function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
 

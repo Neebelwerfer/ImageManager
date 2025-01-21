@@ -19,7 +19,7 @@ class ImageCategory extends Model
 
     protected $fillable = [
         'name',
-        'user_id',
+        'owner_id',
     ];
 
     public function images() : HasMany
@@ -39,7 +39,7 @@ class ImageCategory extends Model
 
     public function scopeOwned($query)
     {
-        $query->where('user_id', Auth::user()->id);
+        $query->where('owner_id', Auth::user()->id);
     }
 
     public function scopeShared($query)
@@ -51,7 +51,7 @@ class ImageCategory extends Model
 
     public function scopeOwnedOrShared($query)
     {
-        $query->where('user_id', Auth::user()->id)->orwhereHas('shared_resources', function ($query) {
+        $query->where('owner_id', Auth::user()->id)->orwhereHas('shared_resources', function ($query) {
             $query->where('type', 'category')->where('shared_with_user_id', Auth::user()->id);
         });
     }

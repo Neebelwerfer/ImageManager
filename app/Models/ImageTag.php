@@ -19,7 +19,7 @@ class ImageTag extends Model
 
     protected $fillable = [
         'name',
-        'user_id',
+        'owner_id',
     ];
 
     public function images() : BelongsToMany

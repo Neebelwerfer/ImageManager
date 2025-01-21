@@ -161,8 +161,6 @@ $logout = function (Logout $logout) {
                     @endif
                 @endauth
             </div>
-
         </div>
     </div>
-
 </nav>
