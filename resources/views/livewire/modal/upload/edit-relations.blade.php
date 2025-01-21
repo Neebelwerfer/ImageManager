@@ -7,7 +7,7 @@
         @if ($this->entries->count() > 0)
         <div class="grid w-full h-full grid-cols-5 grid-rows-4 gap-2 rounded">
                 @foreach ($this->entries as $entry)
-                    <button class="flex items-center justify-center w-full h-full p-2 border rounded @if($entry->user_id == Auth::user()->id) bg-slate-600 @else bg-cyan-700/80 @endif hover:bg-slate-500" wire:click="selectEntry({{ $entry->id }})">
+                    <button class="flex items-center justify-center w-full h-full p-2 border rounded @if($entry->owner_id == Auth::user()->id) bg-slate-600 @else bg-cyan-700/80 @endif hover:bg-slate-500" wire:click="selectEntry({{ $entry->id }})">
                         {{ $entry->name }}
                     </button>
                 @endforeach

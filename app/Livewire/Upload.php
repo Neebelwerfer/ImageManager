@@ -70,9 +70,7 @@ class Upload extends Component
 
     public function save(ImageService $imageService)
     {
-        $this->validate();
-
-        $this->hash = $imageService->getHashFromUploadedImage($this->image);
+        $this->hash = $imageService->getHashFromUploadedImage($this->imageUpload);
         $duplicates = $imageService->compareHashes($this->hash);
 
         if(count($duplicates) > 0) {
@@ -91,7 +89,7 @@ class Upload extends Component
             'hash' => $this->hash
         ];
 
-        return $imageService->create($this->image, $data, $this->traits);
+        return $imageService->create($this->imageUpload, $data, $this->traits);
     }
 
     public function onUploadFinished() {

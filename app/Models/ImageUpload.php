@@ -25,6 +25,11 @@ class ImageUpload extends Model
         return 'temp/' . $this->uuid . '.' . $this->extension;
     }
 
+    public function fullPath() : string
+    {
+        return Storage::disk('local')->path($this->path());
+    }
+
     public function prunable()
     {
         return $this->where('created_at', '<', now()->subMinutes(30));
@@ -32,6 +37,6 @@ class ImageUpload extends Model
 
     protected function pruning()
     {
-        Storage::disk('local')->delete($this->path());
+        Storage::disk('local')->delete('app/' . $this->path());
     }
 }
