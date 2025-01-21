@@ -142,8 +142,7 @@ class Upload extends Component
 
     #[On('cancelled')]
     public function cancelled() {
-        $this->image->delete();
-        return redirect()->route('image.upload');
+        $this->cancel();
     }
 
     public function render()

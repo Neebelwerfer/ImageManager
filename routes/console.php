@@ -21,4 +21,4 @@ Schedule::command('model:prune')->daily();
 
 Schedule::command('model:prune', [
     '--model' => ImageUpload::class
-])->hourly();
+])->everyFifteenMinutes();

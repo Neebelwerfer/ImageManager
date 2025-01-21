@@ -15,6 +15,7 @@
                     <ul class="w-full space-y-2">
                         <li><p class="p-1">Users: {{ $this->UserCount() }}</p></li>
                         <li><p class="p-1">Images: {{ $this->ImageCount() }}</p></li>
+                        <li><p class="p-1">Memory Usage: {{ $this->MemoryUsage() }} MB</p></li>
                         <li><p class="p-1">Storage available: {{ $this->SizeUsage()['free'] }} GB</p></li>
                         <li><p class="p-1">Storagespace used by images: {{ $this->SizeUsage()['usedByImages'] }} MB</p></li>
                         <li><p class="p-1">Storagespace used by thumbnails: {{ $this->SizeUsage()['usedByThumbnails'] }} MB</p></li>
