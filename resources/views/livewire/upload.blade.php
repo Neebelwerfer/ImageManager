@@ -4,8 +4,10 @@
     </h2>
 </x-slot>
 
-<div class="flex justify-center mt-5">
-    <div class="flex items-center justify-center w-1/2 p-1">
+<div class="flex justify-center mt-5" wire:poll.visible.60s>
+    <div class="flex items-center justify-center w-1/2 p-1"
+        x-on:livewire-upload-start="$wire.onUploadStarted"
+        x-on:livewire-upload-finish="$wire.onUploadFinished">
 
         <div wire:loading wire:target="image">
             Uploading...
@@ -13,23 +15,24 @@
         </div>
         <form wire:submit="save">
             @csrf
+            @empty($uuid)
             <div class="flex flex-col">
                 <div class="mb-3">
                     <input type="file" wire:model='image' name="image" placeholder="Choose image" id="imageInput">
                     @error('image')
                         <div class="mt-1 mb-1 text-red-600 alert">{{ $message }}</div>
                     @enderror
-
-                    @if ($image)
-                        <div class="mb-3">
-                            <img id="image-preview" src="{{ $image->temporaryUrl() }}" style="max-height: 500px;">
-                        </div>
-                    @endif
                 </div>
             </div>
 
-            @if ($image)
-                <div class="flex flex-col">
+            @else
+            <div class="mb-3 border-slate-800">
+                <img id="image-preview" src="{{ url('temp/'.$uuid) }}" style="max-height: 500px;">
+            </div>
+            @endempty
+
+            @if ($imageUpload)
+                <div class="flex flex-row justify-between">
                     <div class="inline-flex gap-4">
                         <label for="category" class="form-label">Category: @if (isset($category))
                                 {{ $category->name }}
@@ -71,11 +74,18 @@
                         </div>
                     @endif
                 </div>
-
-                <div class="mb-3">
+                <div class="flex flex-row gap-2">
+                    <div class="mb-3">
                     <button type="submit"
                         class="p-1 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
                         id="submit">Submit</button>
+                    </div>
+
+                    <div class="mb-3">
+                        <button
+                            class="p-1 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
+                            wire:click='cancel' type="button">Cancel</button>
+                    </div>
                 </div>
             @endif
         </form>

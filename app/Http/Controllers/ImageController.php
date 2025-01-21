@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTag;
+use App\Models\ImageUpload;
 use App\Repository\ImageRepository;
 use App\Repository\TagRepository;
 use App\Services\ImageService;
@@ -90,6 +91,20 @@ class ImageController extends Controller
 
 
         return response()->file(storage_path('app') . '/' . $image->getThumbnailPath());
+    }
+
+    public function getTempImage(string $uuid) {
+        $image = ImageUpload::where('uuid', $uuid)->first();
+
+        if(!Auth::hasUser()) {
+            return redirect(route('login'));
+        }
+
+        if(Auth::user()->id != $image->owner_id) {
+            redirect()->back();
+        }
+
+        return response()->file(storage_path('app/') . $image->path());
     }
 
 }

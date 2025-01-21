@@ -7,20 +7,21 @@ use App\Livewire\Admin\Users;
 use App\Livewire\Collection;
 use App\Livewire\Collection\Show\Collection as ShowCollection;
 use App\Livewire\ImageShow;
-use App\Livewire\ImageUpload;
 use App\Livewire\Manage;
 use App\Livewire\Manage\Albums;
 use App\Livewire\Manage\Categories;
 use App\Livewire\Manage\Tags;
 use App\Livewire\Manage\Traits;
+use App\Livewire\Upload;
+use App\Livewire\Upload\Processing;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'home')->name('home');
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('image/upload', ImageUpload::class)
-        ->name('image.upload');
+    Route::get('upload', Upload::class)
+        ->name('upload');
 
     Route::get('collection/images/{image}', ImageShow::class)
         ->name('image.show');
@@ -57,6 +58,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('images/{image}', [ImageController::class, 'getImage']);
     Route::get('thumbnail/{thumbnail}', [ImageController::class, 'getThumbnail']);
+    Route::get('temp/{imageUuid}', [ImageController::class, 'getTempImage']);
+
 
     Route::get('image/{imageUuid}', ImageShow::class)
         ->name('image.show');
