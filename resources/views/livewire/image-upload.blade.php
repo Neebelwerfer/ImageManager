@@ -29,64 +29,53 @@
             </div>
 
             @if ($image)
-                <div>
-                    <label for="rating" class="form-label">Rating</label>
-                    <div class="mb-3">
-                        <input type="number" class="text-black form-control" wire:model="rating" value="5">
+                <div class="flex flex-col">
+                    <div class="inline-flex gap-4">
+                        <label for="category" class="form-label">Category: @if (isset($category))
+                                {{ $category->name }}
+                            @endif
+                        </label>
+                        <div class="mb-3">
+                            <input type="hidden" class="text-black form-control" wire:model="category"></textarea>
 
-                        @error('rating')
-                            <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
-                        @enderror
+                            @error('category')
+                                <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
+                            @enderror
+                            <button class="px-2 border rounded" type="button"
+                                wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type:'category', noneOption: true}})">+</button>
+                        </div>
                     </div>
 
-                    <div class="flex flex-col">
-                        <div class="inline-flex gap-4">
-                            <label for="category" class="form-label">Category: @if (isset($category))
-                                    {{ $category->name }}
-                                @endif
-                            </label>
-                            <div class="mb-3">
-                                <input type="hidden" class="text-black form-control" wire:model="category"></textarea>
+                    <div class="inline-flex gap-4">
+                        <label for="tags">Tags:</label>
+                        <div class="mb-3">
+                            <input type="hidden" class="text-black form-control" wire:model="tags"></textarea>
 
-                                @error('category')
-                                    <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
-                                @enderror
-                                <button class="px-2 border rounded" type="button"
-                                    wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type:'category', noneOption: true}})">+</button>
-                            </div>
+                            @error('tags')
+                                <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
+                            @enderror
+                            <button class="px-2 border rounded" type="button"
+                                wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: ['tag']})">+</button>
                         </div>
+                    </div>
 
-                        <div class="inline-flex gap-4">
-                            <label for="tags">Tags:</label>
-                            <div class="mb-3">
-                                <input type="hidden" class="text-black form-control" wire:model="tags"></textarea>
-
-                                @error('tags')
-                                    <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
-                                @enderror
-                                <button class="px-2 border rounded" type="button"
-                                    wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: ['tag']})">+</button>
-                            </div>
-                        </div>
-
-                        @if (count($tags) > 0)
-                            <div class="flex flex-col mx-5 mb-4">
-                                @foreach ($tags as $tag)
-                                    <div class="inline-flex justify-around w-20 gap-2 border-y">
-                                        <h1>{{ $tag->name }}</h1>
-                                        <button class="border rounded h-fit" type="button"
+                    @if (count($tags) > 0)
+                        <div class="flex flex-col mx-5 mb-4">
+                            @foreach ($tags as $tag)
+                                <div class="inline-flex justify-around w-20 gap-2 border-y">
+                                    <h1>{{ $tag->name }}</h1>
+                                    <button class="border rounded h-fit" type="button"
                                             wire:click='removeTag({{ $tag->id }})'>X</button>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
 
-                    <div class="mb-3">
-                        <button type="submit"
-                            class="p-1 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
-                            id="submit">Submit</button>
-                    </div>
+                <div class="mb-3">
+                    <button type="submit"
+                        class="p-1 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
+                        id="submit">Submit</button>
                 </div>
             @endif
         </form>

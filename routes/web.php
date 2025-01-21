@@ -12,6 +12,7 @@ use App\Livewire\Manage;
 use App\Livewire\Manage\Albums;
 use App\Livewire\Manage\Categories;
 use App\Livewire\Manage\Tags;
+use App\Livewire\Manage\Traits;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'home')->name('home');
@@ -50,6 +51,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('manage/albums', Albums::class)
         ->name('manage.albums');
+
+    Route::get('manage/traits', Traits::class)
+        ->name('manage.traits');
 
     Route::get('images/{image}', [ImageController::class, 'getImage']);
     Route::get('thumbnail/{thumbnail}', [ImageController::class, 'getThumbnail']);

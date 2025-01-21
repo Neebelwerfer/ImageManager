@@ -25,11 +25,10 @@ class ImageUpload extends Component
     #[Validate('image')]
     public $image;
 
-    #[Validate('required|min:0|max:10')]
-    public $rating = 5;
-
     public $category;
+
     public $tags = [];
+    public $traits = [];
 
     public $hash;
 
@@ -88,13 +87,12 @@ class ImageUpload extends Component
     #[On('accepted')]
     public function upload(ImageService $imageService) {
         $data = [
-            'rating' => $this->rating,
             'category' => $this->category->id ?? null,
             'tags' => array_keys($this->tags),
             'hash' => $this->hash
         ];
 
-        return $imageService->create($this->image, $data);
+        return $imageService->create($this->image, $data, $this->traits);
     }
 
     #[On('cancelled')]

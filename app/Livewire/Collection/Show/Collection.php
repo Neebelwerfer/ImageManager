@@ -73,12 +73,12 @@ class Collection extends CollectionView
         if($this->collectionType == 'categories') {
             return Image::whereHas('category', function ($query) {
                 $query->where('category_id', $this->collectionID);
-            })->where('rating', '>=', $this->minRating)->orderby('rating', 'desc')->paginate(20);
+            })->paginate(20);
         }
         else if($this->collectionType == 'albums') {
             return Image::owned()->whereHas('albums', function ($query) {
                 $query->where('album_id', $this->collectionID);
-            })->where('rating', '>=', $this->minRating)->orderby('rating', 'desc')->paginate(20);
+            })->paginate(20);
         }
     }
 

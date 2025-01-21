@@ -33,9 +33,27 @@ return new class extends Migration
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->tinyText('image_hash');
             $table->tinyText('format');
-            $table->timestamp('date_created')->nullable();
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        Schema::create('traits', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->integer('min')->nullable();
+            $table->integer('max')->nullable();
+            $table->boolean('global')->default(false);
+            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->enum('type', ['integer', 'float', 'text', 'boolean', 'date']);
+        });
+
+        Schema::create('image_traits', function (Blueprint $table) {
+            $table->foreignUuid('image_uuid')->constrained('images', 'uuid')->onDelete('cascade');
+            $table->foreignId('trait_id')->constrained('traits')->onDelete('cascade');
+            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->primary(['image_uuid', 'trait_id', 'owner_id']);
+            $table->string('value');
+            $table->timestamps();
         });
 
         Schema::create('image_tags' , function (Blueprint $table) {
@@ -71,6 +89,8 @@ return new class extends Migration
         Schema::dropIfExists('album_images');
         Schema::dropIfExists('image_tags');
         Schema::dropIfExists('images');
+        Schema::dropIfExists('image_traits');
+        Schema::dropIfExists('traits');
         Schema::dropIfExists('image_categories');
         Schema::dropIfExists('albums');
     }

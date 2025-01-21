@@ -24,7 +24,7 @@ class Images extends Component
     {
         return view('livewire.collection.images',
             [
-                'images' => Image::where('rating', '>=', $this->minRating)->where('owner_id', Auth::user()->id)->orderby('rating', 'desc')->paginate(20)
+                'images' => Image::owned()->orderby('rating', 'desc')->paginate(20)
             ]);
     }
 }

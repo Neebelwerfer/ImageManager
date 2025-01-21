@@ -65,7 +65,7 @@ class ImageService
      * @param array $data
      * @return void
      */
-    public function create(TemporaryUploadedFile $image, array $data)
+    public function create(TemporaryUploadedFile $image, array $data, array $traits)
     {
         $user = Auth::user();
 

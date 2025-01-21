@@ -24,7 +24,6 @@ abstract class CollectionView extends Component
     public $gridView = true;
     #[Url('i')]
     public $count = 0;
-    public $minRating = 0;
 
     public $singleImage;
 
