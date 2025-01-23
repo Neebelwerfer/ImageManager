@@ -13,7 +13,8 @@ class Traits extends Model
         'min',
         'max',
         'global',
-        'owner_id'
+        'owner_id',
+        'default'
     ];
 
     public $timestamps = false;

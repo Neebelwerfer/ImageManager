@@ -8,7 +8,7 @@
             <form wire:submit.prevent="createTrait">
                 <div class="flex flex-col">
                     <div class="flex flex-row justify-between">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                        <label class="block text-lg font-medium text-gray-700 dark:text-gray-300">Type</label>
                         <select class="px-2 py-1 ml-1 text-black border rounded" wire:model.live ="type">
                             <option value="integer">Integer</option>
                             <option value="float">Float</option>
@@ -20,7 +20,7 @@
                         <span class="text-red-500">{{ $message }}</span>
                     @enderror
                     <div class="flex flex-row justify-between">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                        <label class="block text-lg font-medium text-gray-700 dark:text-gray-300">Name</label>
                         <input class="px-2 py-1 ml-1 text-black border rounded" type="text" placeholder="Name..."
                             wire:model="name">
                     </div>
@@ -31,12 +31,12 @@
                     @if ($type == 'integer' || $type == 'float' || $type == 'text')
                         <div class="flex flex-row justify-between">
                             <div class="flex flex-col justify-between">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Min</label>
+                                <label class="block text-lg font-medium text-gray-700 dark:text-gray-300">Min</label>
                                 <input class="px-2 py-1 ml-1 text-black border rounded" type="number" size="4"
                                     placeholder="Min..." wire:model="min">
                             </div>
                             <div class="flex flex-col justify-between">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Max</label>
+                                <label class="block text-lg font-medium text-gray-700 dark:text-gray-300">Max</label>
                                 <input class="px-2 py-1 ml-1 text-black border rounded" type="number" size="4"
                                     placeholder="Max..." wire:model="max">
                             </div>
@@ -49,12 +49,31 @@
                         @enderror
                     @endif
 
+                    <div class="flex flex-row justify-between border-t">
+                        <label class="block text-lg font-medium text-gray-700 dark:text-gray-300">Default</label>¨
+                        <input class="px-2 py-1 ml-1 text-black border rounded"
+                            @if($type == 'text')
+                            type="text"
+                            @elseif($type == 'integer' || $type == 'float')
+                            type="number"
+                            size="4"
+                            @elseif($type == 'boolean')
+                            type="checkbox"
+                            @endif
+                            placeholder="Default..."
+                            wire:model="default">
+                    </div>
+                    @error('default')
+                        <span class="text-red-500">{{ $message }}</span>
+                    @enderror
+
                     @if (Auth::user()->is_admin)
-                        <div class="flex flex-row justify-between">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Global</label>
+                        <div class="flex flex-row justify-between border-t">
+                            <label class="block text-lg font-medium text-gray-700 dark:text-gray-300">Global</label>
                             <input class="px-2 py-1 ml-1 text-black border rounded" type="checkbox" wire:model="global">
                         </div>
                     @endif
+
                 </div>
             </form>
         </div>

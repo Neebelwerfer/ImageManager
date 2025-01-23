@@ -48,6 +48,11 @@ class Image extends Model
         return $this->belongsToMany(ImageTag::class);
     }
 
+    public function traits() : HasMany
+    {
+        return $this->hasMany(ImageTraits::class)->where('owner_id', Auth::user()->id);
+    }
+
     public function user() : BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');

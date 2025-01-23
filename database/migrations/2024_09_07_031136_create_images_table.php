@@ -42,16 +42,18 @@ return new class extends Migration
             $table->string('name');
             $table->integer('min')->nullable();
             $table->integer('max')->nullable();
+            $table->string('default');
             $table->boolean('global')->default(false);
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->enum('type', ['integer', 'float', 'text', 'boolean', 'date']);
         });
 
         Schema::create('image_traits', function (Blueprint $table) {
+            $table->id();
             $table->foreignUuid('image_uuid')->constrained('images', 'uuid')->onDelete('cascade');
             $table->foreignId('trait_id')->constrained('traits')->onDelete('cascade');
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
-            $table->primary(['image_uuid', 'trait_id', 'owner_id']);
+            $table->unique(['image_uuid', 'trait_id', 'owner_id']);
             $table->string('value');
             $table->timestamps();
         });

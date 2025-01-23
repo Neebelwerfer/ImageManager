@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTag;
+use App\Models\ImageTraits;
 use App\Models\ImageUpload;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -109,6 +110,20 @@ class ImageService
                 $tagResponse = ImageTag::find($tag);
                 if(isset($tagResponse)) {
                     $tags[$tag] = $tagResponse;
+                }
+            }
+
+            if(count($traits) > 0) {
+                foreach ($traits as $trait) {
+                    $t = new ImageTraits(
+                        [
+                            'image_uuid' => $imageModel->uuid,
+                            'trait_id' => $trait->getTrait()->id,
+                            'owner_id' => $user->id,
+                            'value' => $trait->getValue()
+                        ]
+                    );
+                    $t->save();
                 }
             }
 

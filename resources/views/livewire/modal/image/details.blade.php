@@ -18,6 +18,9 @@
                         </li>
                         <li>Width x Height: {{ $image->width }}x{{ $image->height }}</li>
                         <li>Format: .{{ $image->format }}</li>
+                        @foreach ($image->traits as $trait)
+                        <li>{{ $trait->getString() }}</li>
+                        @endforeach
                         <li>Uploaded By: {{ $image->user->name }}</li>
                     </ol>
                 </div>
@@ -58,9 +61,12 @@
     </x-slot>
 
     <x-slot name="buttons">
-        <div class="flex flex-row gap-2">
+        <div class="flex flex-row justify-between w-full gap-2">
+            <div>
             <x-button wire:click="closeModal">Close</x-button>
             <x-button wire:confirm='This will redirect you to the image' wire:click="show">Show Image</x-button>
+            <button class="p-1 mt-4 bg-teal-700 border rounded btn dark:bg-teal-700 hover:bg-teal-400 hover:dark:bg-teal-500" wire:click="">Share</button>
+            </div>
             <button class="p-1 mt-4 bg-red-700 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:confirm="Are your sure you want to delete this image?" wire:click="deleteImage">Delete</button>
         </div>
     </x-slot>

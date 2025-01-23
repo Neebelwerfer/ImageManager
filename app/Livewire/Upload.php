@@ -5,7 +5,9 @@ namespace App\Livewire;
 use App\Models\ImageCategory;
 use App\Models\ImageTag;
 use App\Models\ImageUpload;
+use App\Models\Traits;
 use App\Services\ImageService;
+use App\Support\Traits\AddedTrait;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -13,7 +15,6 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
 
@@ -62,12 +63,6 @@ class Upload extends Component
         unset($this->tags[$tagID]);
     }
 
-    #[Computed()]
-    public function categories()
-    {
-        return ImageCategory::where('owner_id', Auth::user()->id)->get();
-    }
-
     public function save(ImageService $imageService)
     {
         $this->hash = $imageService->getHashFromUploadedImage($this->imageUpload);
@@ -79,6 +74,11 @@ class Upload extends Component
         }
 
         return $this->upload($imageService);
+    }
+
+    #[On('traitUpdated')]
+    public function traitUpdated($id, $value) {
+        $this->traits[$id]->setValue($value);
     }
 
     #[On('accepted')]
@@ -107,8 +107,17 @@ class Upload extends Component
 
         $this->uuid = $upload->uuid;
         $this->imageUpload = $upload;
+
+        $this->setupTraits();
     }
 
+    public function setupTraits() {
+        $traits = Traits::personalOrGlobal()->get();
+        foreach($traits as $trait) {
+            $at = new AddedTrait($trait, $trait->default);
+            $this->traits[$trait->id] = $at;
+        }
+    }
 
     public function onUploadStarted()
     {
@@ -122,6 +131,7 @@ class Upload extends Component
             $this->imageUpload = null;
         }
         $this->uuid = '';
+        $this->traits = [];
     }
 
     public function boot()
@@ -131,6 +141,9 @@ class Upload extends Component
             $res = ImageUpload::where('user_id', Auth::user()->id)->where('uuid', $this->uuid)->first();
             if(isset($res)) {
                 $this->imageUpload = $res;
+                if($this->traits == []) {
+                    $this->setupTraits();
+                }
             }
             else
             {

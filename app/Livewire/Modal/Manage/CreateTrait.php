@@ -20,6 +20,8 @@ class CreateTrait extends ModalComponent
     public int $max = 255;
     #[Validate('boolean')]
     public bool $global = false;
+    #[Validate('required')]
+    public string $default = '';
 
     public function CreateTrait()
     {
@@ -39,7 +41,8 @@ class CreateTrait extends ModalComponent
             'min' => $this->min,
             'max' => $this->max,
             'global' => $this->global,
-            'owner_id' => Auth::user()->id
+            'owner_id' => Auth::user()->id,
+            'default' => $this->default
         ]);
 
         $this->closeModalWithEvents([
