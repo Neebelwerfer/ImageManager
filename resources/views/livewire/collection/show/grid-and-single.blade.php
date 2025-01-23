@@ -50,7 +50,7 @@
                         </x-slot>
 
                         @foreach ($this->images as $key => $image)
-                            <x-grid.image-card-button :image="$image" x-on:click="$wire.show({{ $key }})" wire:key='grid-{{ $image->uuid }}'>
+                            <x-grid.image-card-button :image="$image" x-on:click="$wire.show({{ $key }})" owned="{{ $image->owner_id == Auth::user()->id }}" wire:key='grid-{{ $image->uuid }}'>
                             </x-grid.image-card-button>
                         @endforeach
                     </x-grid>

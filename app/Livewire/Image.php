@@ -49,7 +49,7 @@ class Image extends Component
         return min($this->image->width*0.9, 1920);
     }
 
-    public function render()
+    public function boot()
     {
         if(!isset($this->image)) {
             return $this->placeholder();
@@ -64,6 +64,10 @@ class Image extends Component
             $this->width = $this->hWidth;
             $this->vertical = false;
         }
+    }
+
+    public function render()
+    {
 
         return <<<'HTML'
         <div class="{{ $classes }} {{ $width }} cursor-zoom-in overflow-y-hidden" wire:click="toggleZoom" >
