@@ -63,8 +63,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('image/{imageUuid}', ImageShow::class)
         ->name('image.show');
-
-
 });
 
 

@@ -37,6 +37,6 @@ class ImageUpload extends Model
 
     protected function pruning()
     {
-        Storage::disk('local')->delete('app/' . $this->path());
+        Storage::disk('local')->delete($this->path());
     }
 }

@@ -27,4 +27,9 @@ class Traits extends Model
     {
         return $query->where('global', true);
     }
+
+    public function scopePersonalOrGlobal($query)
+    {
+        return $query->where('global', true)->orWhere('owner_id', Auth::user()->id);
+    }
 }
