@@ -6,7 +6,10 @@ use App\Models\Album;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTag;
+use App\Models\Traits;
+use App\Support\Traits\DisplayTrait;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use LivewireUI\Modal\ModalComponent;
 
@@ -88,6 +91,26 @@ class Details extends ModalComponent
     public function show()
     {
         $this->redirect(route('image.show', $this->image->uuid));
+    }
+
+    #[Computed()]
+    public function traits()
+    {
+        $res = [];
+        $traits = Traits::personalOrGlobal()->get();
+        $imageTrait = $this->image->traits();
+
+        foreach($traits as $trait) {
+            $dT = new DisplayTrait($trait->id, $trait->name, $trait->type, $trait->default);
+            foreach($imageTrait as $imageTrait) {
+                if($imageTrait->id == $trait->id) {
+                    $dT->setValue($imageTrait->value);
+                }
+            }
+            $res[$trait->id] = $dT;
+        }
+
+        return $res;
     }
 
     public function mount(string $imageUuid)
