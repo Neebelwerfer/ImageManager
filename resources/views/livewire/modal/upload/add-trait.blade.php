@@ -11,8 +11,4 @@
         @endforeach
         </div>
     </x-slot>
-
-    <x-slot name="buttons">
-
-    </x-slot>
 </x-modal>
