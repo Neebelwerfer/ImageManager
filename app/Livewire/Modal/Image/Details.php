@@ -17,6 +17,8 @@ class Details extends ModalComponent
 {
     public Image $image;
 
+    public bool $owned = true;
+
     #[On('categorySelected')]
     public function categorySelected($category)
     {
@@ -115,7 +117,9 @@ class Details extends ModalComponent
 
     public function mount(string $imageUuid)
     {
-        $this->image = Image::where('owner_id', Auth::user()->id)->where('uuid', $imageUuid)->first();
+        $this->image = Image::ownedOrShared()->where('uuid', $imageUuid)->first();
+
+        $this->owned = Auth::user()->id == $this->image->owner_id;
 
         if(!isset($this->image)) {
             $this->closeModal();
@@ -124,6 +128,11 @@ class Details extends ModalComponent
 
     public function render()
     {
-        return view('livewire.modal.image.details');
+        if($this->owned) {
+            return view('livewire.modal.image.details');
+        }
+        else {
+            return view('livewire.modal.image.shared-details');
+        }
     }
 }

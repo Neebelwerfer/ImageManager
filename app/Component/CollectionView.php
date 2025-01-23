@@ -2,6 +2,7 @@
 
 namespace App\Component;
 
+use App\Models\SharedResources;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -122,6 +123,11 @@ abstract class CollectionView extends Component
             $this->previousPage();
         }
         $this->updateImages();
+    }
+
+    public function isImageShared($id)
+    {
+        return SharedResources::where('type', 'image')->where('resource_uuid', $id)->where('shared_with_user_id', Auth::user()->id)->exists();
     }
 
     public function render()

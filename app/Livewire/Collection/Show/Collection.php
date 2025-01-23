@@ -8,6 +8,7 @@ use App\Models\Album;
 use App\Models\ImageCategory;
 use App\Models\SharedResources;
 use App\Support\Shared\AccessLevel;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
