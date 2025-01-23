@@ -2,13 +2,12 @@
 
 namespace App\Component;
 
-use App\Models\Image;
-use Exception;
+use App\Models\SharedResources;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
-use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -23,9 +22,11 @@ abstract class CollectionView extends Component
     public $gridView = true;
     #[Url('i')]
     public $count = 0;
-    public $minRating = 0;
 
     public $singleImage;
+
+    #[Locked()]
+    public $collectionType;
 
     public bool $showBackButton = false;
 
@@ -122,6 +123,11 @@ abstract class CollectionView extends Component
             $this->previousPage();
         }
         $this->updateImages();
+    }
+
+    public function isImageShared($id)
+    {
+        return SharedResources::where('type', 'image')->where('resource_uuid', $id)->where('shared_with_user_id', Auth::user()->id)->exists();
     }
 
     public function render()

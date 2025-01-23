@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Image;
+use App\Models\SharedResources;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
@@ -30,7 +31,9 @@ class ImageShow extends Component
         }
 
         if(Auth::user()->id != $this->image->owner_id) {
-            abort(403, 'Forbidden');
+            if(SharedResources::where('resource_id', $this->image->id)->where('type', 'image')->where('shared_with_user_id', Auth::user()->id)->first() == null) {
+                abort(404, 'Image not found');
+            }
         }
     }
 

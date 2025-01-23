@@ -53,6 +53,11 @@ class Dashboard extends Component
     }
 
     #[Computed()]
+    public function memoryUsage(){
+        return number_format((float)memory_get_usage() / 1024 / 1024, 2);
+    }
+
+    #[Computed()]
     public function softDeletedImages(){
         return Image::onlyTrashed()->count();
     }

@@ -2,13 +2,16 @@
 
 namespace App\Livewire\Collection\Show;
 
-use App\Models\Album;
 use App\Models\Image;
 use App\Component\CollectionView;
+use App\Models\Album;
 use App\Models\ImageCategory;
+use App\Models\SharedResources;
+use App\Support\Shared\AccessLevel;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 
 #[Layout('layouts.collection')]
 class Collection extends CollectionView
@@ -16,32 +19,45 @@ class Collection extends CollectionView
     public $minRating = 0;
 
     public $showOptions = false;
-    public $collection;
 
-    public $collectionType;
+    #[Locked()]
+    public $collectionID;
+
+    #[Locked()]
+    public AccessLevel $accessLevel = AccessLevel::view;
 
     public function mount($collectionType, $collectionID = null)
     {
         $this->showBackButton = true;
 
         $this->collectionType = $collectionType;
-        switch($collectionType) {
-            case 'categories':
-                $this->collection = ImageCategory::find($collectionID);
-                break;
-            case 'albums':
-                $this->collection = Album::find($collectionID);
-                break;
-            default:
-                abort(404, 'Collection not found');
-        }
+        $this->collectionID = $collectionID;
 
-        if(!isset($this->collection)) {
+
+        if($collectionType != 'categories' && $collectionType != 'albums') {
             abort(404, 'Collection not found');
         }
 
-        if(Auth::user()->id != $this->collection->owner_id) {
-            abort(403, 'Forbidden');
+        if($collectionType == 'categories') {
+            if(ImageCategory::ownedOrShared()->find($collectionID) == null) {
+                abort(404, 'Category not found');
+            }
+
+            if(!ImageCategory::owned()->exists($collectionID)) {
+                $resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
+                $this->accessLevel = $resource->level;
+            }
+        }
+
+        if($collectionType == 'albums') {
+            if(Album::ownedOrShared()->find($collectionID) == null) {
+                abort(404, 'Category not found');
+            }
+
+            if(!Album::owned()->exists($collectionID)) {
+                $resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
+                $this->accessLevel = $resource->level;
+            }
         }
 
         $this->updateImages();
@@ -55,7 +71,16 @@ class Collection extends CollectionView
     #[Computed()]
     public function images()
     {
-        return $this->collection->images->where('rating', '>=', $this->minRating)->sortBy('rating', SORT_NUMERIC, true)->values()->paginate(20);
+        if($this->collectionType == 'categories') {
+            return Image::whereHas('category', function ($query) {
+                $query->where('category_id', $this->collectionID);
+            })->paginate(20);
+        }
+        else if($this->collectionType == 'albums') {
+            return Image::whereHas('albums', function ($query) {
+                $query->where('album_id', $this->collectionID);
+            })->paginate(20);
+        }
     }
 
 }

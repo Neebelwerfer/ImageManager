@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -50,11 +51,16 @@ class User extends Authenticatable
     public function lastLogin()
     {
 
-        $login = $this->loginActivity()->where('is_successful', true)->first();
+        $login = $this->loginActivity()->where('is_successful', true)->orderBy('time', 'desc')->first();
         if(isset($login)) {
             return $login->time->diffForHumans() ?? 'n/a';
         }
         return 'n/a';
+    }
+
+    public function shared_resources() : HasMany
+    {
+        return $this->hasMany(SharedResources::class, 'shared_with_user_id', 'id');
     }
 
     public function images() : HasMany

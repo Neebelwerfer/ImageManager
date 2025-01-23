@@ -19,7 +19,7 @@ class Albums extends Component
     {
         return view('livewire.collection.albums',
             [
-                'albums' => Album::where('owner_id', Auth::user()->id)->paginate(20),
+                'albums' => Album::ownedOrShared()->paginate(20),
             ]);
     }
 }

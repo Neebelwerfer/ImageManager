@@ -24,10 +24,11 @@
                         class="p-1 border rounded @if(!$gridView) bg-slate-400 dark:bg-gray-500 @else bg-slate-600 dark:bg-gray-700 @endif hover:bg-gray-400 hover:dark:bg-gray-500"
                         wire:click="setGridView(false)" @if(!$gridView) disabled @endif>Single</button>
                 </div>
+                @if($this->isImageShared($singleImage->uuid))
                 <div class="mt-2 mr-4 @if($gridView) hidden @endif">
-                    <!--<button x-on:click="$wire.showOptions = !$wire.showOptions" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>-->
-                    <button wire:click="$dispatch('openModal', {component: 'modal.image.details', arguments: {imageUuid: '{{ $singleImage->uuid }}'}})" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>
+                    <button wire:click="$dispatch('openModal', {component: 'modal.image.details', arguments: {imageUuid: '{{ $singleImage->uuid }}', source: '{{ $collectionType }}'}})" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>
                 </div>
+                @endif
                 {{ $this->images->links() }}
             </div>
 
@@ -47,7 +48,7 @@
                         </x-slot>
 
                         @foreach ($this->images as $key => $image)
-                            <x-grid.image-card-button :image="$image" x-on:click="$wire.show({{ $key }})" wire:key='grid-{{ $image->uuid }}'>
+                            <x-grid.image-card-button :image="$image" x-on:click="$wire.show({{ $key }})" owned="{{ $image->owner_id == Auth::user()->id }}" wire:key='grid-{{ $image->uuid }}'>
                             </x-grid.image-card-button>
                         @endforeach
                     </x-grid>

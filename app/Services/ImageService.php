@@ -5,12 +5,12 @@ namespace App\Services;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTag;
+use App\Models\ImageTraits;
+use App\Models\ImageUpload;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\LazyCollection;
 use Intervention\Image\ImageManager;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Illuminate\Support\Str;
 use SapientPro\ImageComparator\ImageComparator;
 
 class ImageService
@@ -65,22 +65,22 @@ class ImageService
      * @param array $data
      * @return void
      */
-    public function create(TemporaryUploadedFile $image, array $data)
+    public function create(ImageUpload $image, array $data, array $traits)
     {
         $user = Auth::user();
 
         $imageModel = new Image($data);
 
         try {
-            $imageInfo = ImageManager::imagick()->read($image);
-            $imageScaled = ImageManager::gd()->read($image);
+            $imageInfo = ImageManager::imagick()->read($image->fullPath());
+            $imageScaled = ImageManager::gd()->read($image->fullPath());
 
-            $imageModel->uuid = Str::uuid();
+            $imageModel->uuid = $image->uuid;
             $imageModel->owner_id = $user->id;
             $imageModel->width = $imageScaled->width();
             $imageModel->image_hash = $data['hash'];
             $imageModel->height = $imageScaled->height();
-            $imageModel->format = $image->extension();
+            $imageModel->format = $image->extension;
             $uuidSplit = substr($imageModel->uuid, 0, 1).'/'.substr($imageModel->uuid, 1, 1).'/'.substr($imageModel->uuid, 2, 1).'/'.substr($imageModel->uuid, 3, 1);
 
             $imageInfo->scaleDown(256, 256);
@@ -92,7 +92,7 @@ class ImageService
             }
             $imageInfo->save(storage_path('app') . '/' . $full_thumbnail_path);
 
-            $imagePath = $uuidSplit . '/' . $imageModel->uuid . '.' . $image->extension();
+            $imagePath = $uuidSplit . '/' . $imageModel->uuid . '.' . $image->extension;
 
             if(!Storage::disk('local')->exists('images/' . $uuidSplit)) {
                 Storage::disk('local')->makeDirectory('images/' . $uuidSplit);
@@ -107,9 +107,23 @@ class ImageService
             $imageModel->save();
             $tags = [];
             foreach ($data['tags'] as $tag) {
-                $tagResponse = ImageTag::where('owner_id', Auth::user()->id)->find($tag);
+                $tagResponse = ImageTag::find($tag);
                 if(isset($tagResponse)) {
                     $tags[$tag] = $tagResponse;
+                }
+            }
+
+            if(count($traits) > 0) {
+                foreach ($traits as $trait) {
+                    $t = new ImageTraits(
+                        [
+                            'image_uuid' => $imageModel->uuid,
+                            'trait_id' => $trait->getTrait()->id,
+                            'owner_id' => $user->id,
+                            'value' => $trait->getValue()
+                        ]
+                    );
+                    $t->save();
                 }
             }
 
@@ -124,11 +138,15 @@ class ImageService
                 Storage::disk('local')->delete('images/' . $imagePath);
             }
             $image->delete();
-            return redirect()->route('image.upload')->with(['status' => 'Something went wrong', 'error' => true, 'error_message' => $e->getMessage()]);
+
+            session()->flash('status', 'Something went wrong');
+            session()->flash('error', true);
+            session()->flash('error_message', $e->getMessage());
+            return;
         }
 
         $image->delete();
-        return redirect()->route('image.upload')->with('status', 'Image uploaded successfully!');
+        session()->flash('status', 'Image uploaded successfully!');
     }
 
     public function compareHashes($newHash, $threshold = 95) : array
@@ -147,9 +165,9 @@ class ImageService
         return $hits;
     }
 
-    public function getHashFromUploadedImage(TemporaryUploadedFile $image) : string
+    public function getHashFromUploadedImage(ImageUpload $image) : string
     {
-        $img = ImageManager::gd()->read($image);
+        $img = ImageManager::gd()->read($image->fullPath());
         return $this->createImageHash($img->core()->native());
     }
 

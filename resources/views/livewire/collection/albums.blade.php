@@ -22,9 +22,9 @@
         </div>
      @else
         @foreach ($albums as $album)
-            <x-grid.image-card :image="$this->getImageFromAlbum($album)" route="{{ route('collection.type.show', [ 'albums', $album->id]) }}">
+            <x-grid.image-card :image="$this->getImageFromAlbum($album)" owned="{{ $album->owner_id == Auth::user()->id }}" route="{{ route('collection.type.show', [ 'albums', $album->id]) }}">
                 <div class="absolute inset-0 flex items-end">
-                    <div class="flex justify-center w-full border-t border-gray-700 bg-slate-800/60">
+                    <div class="flex justify-center w-full border-t border-gray-700 bg-slate-800/80">
                     {{ $album->name }}
                     </div>
                 </div>

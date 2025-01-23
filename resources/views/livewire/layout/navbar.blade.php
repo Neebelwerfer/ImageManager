@@ -43,8 +43,8 @@ $logout = function (Logout $logout) {
                         </x-nav-link>
                         @endif
 
-                        @if (Route::has('image.upload'))
-                        <x-nav-link :href="route('image.upload')" :active="request()->routeIs('image.upload')" wire:navigate>
+                        @if (Route::has('upload'))
+                        <x-nav-link :href="route('upload')" :active="request()->routeIs('upload')" wire:navigate>
                             {{ __('Upload Image') }}
                         </x-nav-link>
                         @endif
@@ -161,8 +161,6 @@ $logout = function (Logout $logout) {
                     @endif
                 @endauth
             </div>
-
         </div>
     </div>
-
 </nav>

@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class Image extends Model
 {
@@ -20,39 +20,11 @@ class Image extends Model
 
     protected $fillable = [
         'category_id',
-        'rating',
     ];
 
     public $primaryKey = 'uuid';
     public $incrementing = false;
     protected $keyType = 'string';
-
-    public function category() : BelongsTo
-    {
-        return $this->belongsTo(ImageCategory::class);
-    }
-
-    public function tags() : BelongsToMany
-    {
-        return $this->belongsToMany(ImageTag::class);
-    }
-
-    public function user() : BelongsTo
-    {
-        return $this->belongsTo(User::class, 'owner_id');
-    }
-
-    /**
-     * @deprecated
-     *
-     * @return string
-     */
-    public function thumbnail_path() : string
-    {
-        $thumbnail_path = Image::splitUUID($this->uuid);
-        return 'thumbnails/' . $thumbnail_path . '/' . $this->uuid . '.webp';
-    }
-
 
     public function getThumbnailPath() : string
     {
@@ -66,9 +38,53 @@ class Image extends Model
         return 'images/' . $split . '/' . $this->uuid . '.' . $this->format;
     }
 
+    public function category() : BelongsTo
+    {
+        return $this->belongsTo(ImageCategory::class);
+    }
+
+    public function tags() : BelongsToMany
+    {
+        return $this->belongsToMany(ImageTag::class);
+    }
+
+    public function traits() : HasMany
+    {
+        return $this->hasMany(ImageTraits::class)->where('owner_id', Auth::user()->id);
+    }
+
+    public function user() : BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
     public function albums() : BelongsToMany
     {
         return $this->belongsToMany(Album::class, 'album_images', 'image_uuid', 'album_id');
+    }
+
+    public function shared_resources() : HasMany
+    {
+        return $this->hasMany(SharedResources::class, 'resource_uuid', 'uuid')->where('type', 'image');
+    }
+
+    public function scopeOwned($query)
+    {
+        $query->where('owner_id', Auth::user()->id);
+    }
+
+    public function scopeShared($query)
+    {
+        $query->whereHas('shared_resources', function ($query) {
+            $query->where('shared_with_user_id', Auth::user()->id)->select('resource_uuid');
+        });
+    }
+
+    public function scopeOwnedOrShared($query)
+    {
+        $query->where('owner_id', Auth::user()->id)->orwhereHas('shared_resources', function ($query) {
+            $query->where('shared_with_user_id', Auth::user()->id)->select('resource_uuid');
+        });
     }
 
     protected static function booted(): void
@@ -84,5 +100,4 @@ class Image extends Model
         $split = substr($uuid, 0, 1).'/'.substr($uuid, 1, 1).'/'.substr($uuid, 2, 1).'/'.substr($uuid, 3, 1);
         return $split;
     }
-
 }

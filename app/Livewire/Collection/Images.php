@@ -5,15 +5,13 @@ namespace App\Livewire\Collection;
 use App\Component\CollectionView;
 use App\Models\Image;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Url;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.collection')]
-class Images extends CollectionView
+class Images extends Component
 {
     use WithPagination;
 
@@ -22,10 +20,11 @@ class Images extends CollectionView
     public $showOptions = false;
     public $collection;
 
-    #[Computed()]
-    public function images()
+    public function render()
     {
-        $key = Auth::user()->id.'-images';
-        return Image::where('rating', '>=', $this->minRating)->where('owner_id', Auth::user()->id)->orderby('rating', 'desc')->paginate(20);
+        return view('livewire.collection.images',
+            [
+                'images' => Image::ownedOrShared()->paginate(20)
+            ]);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Image;
+use App\Models\ImageUpload;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -17,3 +18,7 @@ Schedule::call(function () {
 })->everyTenMinutes();
 
 Schedule::command('model:prune')->daily();
+
+Schedule::command('model:prune', [
+    '--model' => ImageUpload::class
+])->everyFifteenMinutes();

@@ -29,14 +29,33 @@ return new class extends Migration
             $table->uuid()->primary();
             $table->smallInteger('width', false, true);
             $table->smallInteger('height', false, true);
-            $table->tinyInteger('rating')->default(5)->unsigned();
             $table->foreignId('category_id')->nullable()->constrained('image_categories')->nullOnDelete();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->tinyText('image_hash');
             $table->tinyText('format');
-            $table->timestamp('date_created')->nullable();
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        Schema::create('traits', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->integer('min')->nullable();
+            $table->integer('max')->nullable();
+            $table->string('default');
+            $table->boolean('global')->default(false);
+            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->enum('type', ['integer', 'float', 'text', 'boolean', 'date']);
+        });
+
+        Schema::create('image_traits', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('image_uuid')->constrained('images', 'uuid')->onDelete('cascade');
+            $table->foreignId('trait_id')->constrained('traits')->onDelete('cascade');
+            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->unique(['image_uuid', 'trait_id', 'owner_id']);
+            $table->string('value');
+            $table->timestamps();
         });
 
         Schema::create('image_tags' , function (Blueprint $table) {
@@ -45,7 +64,6 @@ return new class extends Migration
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
-
 
         Schema::create('album_images', function (Blueprint $table) {
             $table->id();
@@ -68,9 +86,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('image_image_tag');
+        Schema::dropIfExists('tag_ownership');
+        Schema::dropIfExists('category_ownership');
         Schema::dropIfExists('album_images');
         Schema::dropIfExists('image_tags');
         Schema::dropIfExists('images');
+        Schema::dropIfExists('image_traits');
+        Schema::dropIfExists('traits');
         Schema::dropIfExists('image_categories');
         Schema::dropIfExists('albums');
     }
