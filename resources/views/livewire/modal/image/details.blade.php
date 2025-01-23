@@ -65,7 +65,7 @@
             <div>
             <x-button wire:click="closeModal">Close</x-button>
             <x-button wire:confirm='This will redirect you to the image' wire:click="show">Show Image</x-button>
-            <button class="p-1 mt-4 bg-teal-700 border rounded btn dark:bg-teal-700 hover:bg-teal-400 hover:dark:bg-teal-500" wire:click="">Share</button>
+            <button class="p-1 mt-4 bg-teal-700 border rounded btn dark:bg-teal-700 hover:bg-teal-400 hover:dark:bg-teal-500" wire:click="$dispatch('openModal', {component: 'modal.manage.share', arguments: {type: 'image', id: '{{ $image->uuid }}'} })">Share</button>
             </div>
             <button class="p-1 mt-4 bg-red-700 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:confirm="Are your sure you want to delete this image?" wire:click="deleteImage">Delete</button>
         </div>

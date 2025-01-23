@@ -76,7 +76,7 @@ class Collection extends CollectionView
             })->paginate(20);
         }
         else if($this->collectionType == 'albums') {
-            return Image::owned()->whereHas('albums', function ($query) {
+            return Image::whereHas('albums', function ($query) {
                 $query->where('album_id', $this->collectionID);
             })->paginate(20);
         }

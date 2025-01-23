@@ -65,12 +65,26 @@ class Image extends Model
 
     public function shared_resources() : HasMany
     {
-        return $this->hasMany(SharedResources::class, 'resource_uuid', 'id')->where('type', 'image');
+        return $this->hasMany(SharedResources::class, 'resource_uuid', 'uuid')->where('type', 'image');
     }
 
     public function scopeOwned($query)
     {
         $query->where('owner_id', Auth::user()->id);
+    }
+
+    public function scopeShared($query)
+    {
+        $query->whereHas('shared_resources', function ($query) {
+            $query->where('shared_with_user_id', Auth::user()->id)->select('resource_uuid');
+        });
+    }
+
+    public function scopeOwnedOrShared($query)
+    {
+        $query->where('owner_id', Auth::user()->id)->orwhereHas('shared_resources', function ($query) {
+            $query->where('shared_with_user_id', Auth::user()->id)->select('resource_uuid');
+        });
     }
 
     protected static function booted(): void
