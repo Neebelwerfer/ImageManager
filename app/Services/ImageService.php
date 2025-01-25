@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Models\Image;
 use App\Models\ImageCategory;
-use App\Models\ImageTag;
 use App\Models\ImageTraits;
 use App\Models\ImageUpload;
+use App\Models\Tags;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\LazyCollection;
@@ -42,9 +42,9 @@ class ImageService
         $image->delete();
     }
 
-    public function addTags(Image $image, array $tags)
+    public function addTag(Image $image, Tags $tag)
     {
-        $image->tags()->saveMany($tags);
+        $image->tags()->attach($tag, ['added_by' => Auth::user()->id]);
     }
 
     public function removeTags(Image $image, array $tags)
@@ -107,7 +107,7 @@ class ImageService
             $imageModel->save();
             $tags = [];
             foreach ($data['tags'] as $tag) {
-                $tagResponse = ImageTag::find($tag);
+                $tagResponse = Tags::find($tag);
                 if(isset($tagResponse)) {
                     $tags[$tag] = $tagResponse;
                 }
@@ -127,7 +127,11 @@ class ImageService
                 }
             }
 
-            $this->addTags($imageModel, $tags);
+
+            foreach($tags as $tag)
+            {
+                $this->addTag($imageModel, $tag);
+            }
 
         } catch (\Exception $e) {
             if(isset($imageModel)) {

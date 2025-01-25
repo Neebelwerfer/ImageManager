@@ -58,10 +58,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('image_tags' , function (Blueprint $table) {
+        Schema::create('tags' , function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
+            $table->string('name')->unique();
             $table->timestamps();
         });
 
@@ -72,10 +71,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('image_image_tag', function (Blueprint $table) {
+        Schema::create('image_tags', function (Blueprint $table) {
             $table->foreignUuid('image_uuid')->constrained('images', 'uuid')->onDelete('cascade');
-            $table->foreignId('image_tag_id')->constrained('image_tags')->onDelete('cascade');
-            $table->primary(['image_uuid', 'image_tag_id']);
+            $table->foreignId('tags_id')->constrained('tags')->onDelete('cascade');
+            $table->foreignId('added_by')->constrained('users')->cascadeOnDelete();
+            $table->primary(['image_uuid', 'tags_id']);
             $table->timestamps();
         });
     }
@@ -85,11 +85,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('image_image_tag');
-        Schema::dropIfExists('tag_ownership');
-        Schema::dropIfExists('category_ownership');
-        Schema::dropIfExists('album_images');
         Schema::dropIfExists('image_tags');
+        Schema::dropIfExists('album_images');
+        Schema::dropIfExists('tags');
         Schema::dropIfExists('images');
         Schema::dropIfExists('image_traits');
         Schema::dropIfExists('traits');

@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\ImageTag;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Tags;
 
 class TagService
 {
@@ -11,33 +10,24 @@ class TagService
         //
     }
 
-    public function find($id) : ?ImageTag
+    public function find($id) : ?Tags
     {
-        return ImageTag::find($id);
+        return Tags::find($id);
     }
 
-    public function create($name) : ImageTag
+    public function getOrCreate($name) : Tags
     {
-        $tag = ImageTag::where('name', $name)->first();
+        $tag = Tags::where('name', $name)->first();
 
         if(isset($tag)) {
             return $tag;
         }
 
-        $tag = ImageTag::create([
+        $tag = Tags::create([
             'name' => $name,
-            'owner_id' => Auth::user()->id
         ]);
 
         return $tag;
-    }
-
-    public function delete($id) : void
-    {
-        $cat = ImageTag::owned()->find($id);
-        if(isset($cat)) {
-            $cat->delete();
-        }
     }
 }
 

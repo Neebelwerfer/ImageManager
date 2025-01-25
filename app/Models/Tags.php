@@ -8,14 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[ScopedBy(OwnerOnly::class)]
-class ImageTag extends Model
+class Tags extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'owner_id',
     ];
 
     public function images() : BelongsToMany

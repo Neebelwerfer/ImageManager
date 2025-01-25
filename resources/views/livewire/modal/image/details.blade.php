@@ -30,7 +30,7 @@
                 <div class="w-1/2 overflow-scroll ">
                     <div class="flex flex-row border-b border-black">
                         <h1>Tags</h1>
-                        <button class="ml-2 border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: ['tag']})">Edit</button>
+                        <button class="ml-2 border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="$dispatch('openModal', {component: 'modal.image.add-tag'})">Edit</button>
                     </div>
                     <div>
                         @foreach ($image->tags as $tag)

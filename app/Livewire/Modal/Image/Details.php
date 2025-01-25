@@ -5,8 +5,9 @@ namespace App\Livewire\Modal\Image;
 use App\Models\Album;
 use App\Models\Image;
 use App\Models\ImageCategory;
-use App\Models\ImageTag;
+use App\Models\Tags;
 use App\Models\Traits;
+use App\Services\ImageService;
 use App\Support\Traits\DisplayTrait;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -39,13 +40,14 @@ class Details extends ModalComponent
             return;
         }
 
-        $res = ImageTag::find($tag);
+        $res = Tags::find($tag);
 
         if(isset($res)) {
             if($this->image->tags()->find($res->id) != null) {
                 return;
             }
-            $this->image->tags()->save($res);
+
+            app(ImageService::class)->addTag($this->image, $res);
         }
     }
 
@@ -71,7 +73,7 @@ class Details extends ModalComponent
         if(Auth::user()->id != $this->image->owner_id) {
             return;
         }
-        $tag = ImageTag::find($tagID);
+        $tag = Tags::find($tagID);
         $this->image->tags()->detach($tag);
     }
 

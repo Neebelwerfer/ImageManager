@@ -29,7 +29,7 @@ class ImageCategory extends Model
 
     public function tags() : HasManyThrough
     {
-        return $this->hasManyThrough(ImageTag::class, Image::class, 'category_id', 'image_id');
+        return $this->hasManyThrough(Tags::class, Image::class, 'category_id', 'image_id');
     }
 
     public function shared_resources() : HasMany

@@ -45,7 +45,7 @@ class Image extends Model
 
     public function tags() : BelongsToMany
     {
-        return $this->belongsToMany(ImageTag::class);
+        return $this->belongsToMany(Tags::class);
     }
 
     public function traits() : HasMany

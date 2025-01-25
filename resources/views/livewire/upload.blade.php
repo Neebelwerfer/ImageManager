@@ -78,7 +78,7 @@
                                     <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
                                 @enderror
                                 <button class="px-2 border rounded" type="button"
-                                    wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: ['tag']})">+</button>
+                                    wire:click="$dispatch('openModal', {component: 'modal.image.add-tag'})">+</button>
                             </div>
                         </div>
                         @if (count($tags) > 0)

@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\ImageCategory;
-use App\Models\ImageTag;
+use App\Models\Tags;
 use App\Models\ImageUpload;
 use App\Models\Traits;
 use App\Services\ImageService;
@@ -52,13 +52,13 @@ class Upload extends Component
     }
 
     #[On('tagSelected')]
-    public function tagSelected($tag)
+    public function tagSelected($tagId)
     {
-        if (isset($this->tags[$tag])) {
+        if (isset($this->tags[$tagId])) {
             return;
         }
 
-        $this->tags[$tag] = ImageTag::find($tag);
+        $this->tags[$tagId] = Tags::find($tagId);
     }
 
     public function removeTag($tagID)

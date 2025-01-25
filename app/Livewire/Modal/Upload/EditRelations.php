@@ -2,10 +2,8 @@
 
 namespace App\Livewire\Modal\Upload;
 
-use App\Livewire\ImageUpload;
 use App\Models\Album;
 use App\Models\ImageCategory;
-use App\Models\ImageTag;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -34,8 +32,6 @@ class EditRelations extends ModalComponent
         switch ($type) {
             case 'category':
                 return 'categorySelected';
-            case 'tag':
-                return 'tagSelected';
             case 'album':
                 return 'albumSelected';
         }
@@ -51,9 +47,6 @@ class EditRelations extends ModalComponent
     {
         if($this->type == 'category') {
             return ImageCategory::ownedOrShared()->paginate(20);
-        }
-        else if ($this->type == 'tag') {
-            return ImageTag::all()->paginate(20);
         }
         else if ($this->type == 'album') {
             return Album::where('owner_id', Auth::user()->id)->paginate(20);
