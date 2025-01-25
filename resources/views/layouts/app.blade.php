@@ -15,7 +15,6 @@
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @livewireScripts
     @livewireStyles
 </head>
 
@@ -44,6 +43,7 @@
             Image Manager v0.0.1
         </footer>
     </div>
+    @livewireScripts
     @livewire('wire-elements-modal')
 </body>
 
