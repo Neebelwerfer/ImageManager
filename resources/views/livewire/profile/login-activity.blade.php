@@ -25,7 +25,6 @@ new class extends Component
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
             {{ __('Login tries') }}
         </h2>
-
     </header>
 
     <div class="flex flex-col justify-center w-full">
@@ -60,5 +59,4 @@ new class extends Component
                 @endforeach
             </tbody>
         </table>
-
 </section>

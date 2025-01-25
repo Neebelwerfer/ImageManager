@@ -9,6 +9,8 @@ use App\Models\Traits;
 use App\Services\ImageService;
 use App\Support\Traits\AddedTrait;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
@@ -16,6 +18,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
 use Livewire\Attributes\Url;
 
 #[Layout('layouts.app')]
@@ -109,6 +112,7 @@ class Upload extends Component
         $this->imageUpload = $upload;
 
         $this->setupTraits();
+        unset($this->ImageMetadata);
     }
 
     public function setupTraits() {
@@ -117,6 +121,25 @@ class Upload extends Component
             $at = new AddedTrait($trait, $trait->default);
             $this->traits[$trait->id] = $at;
         }
+    }
+
+    #[Computed()]
+    public function ImageMetadata()
+    {
+        if($this->imageUpload == null) return null;
+        $cache = Cache::get('image-upload-'.$this->imageUpload->uuid);
+        if($cache === null)
+        {
+            $data = [];
+            $img = ImageManager::gd()->read(storage_path('app/') . $this->imageUpload->path());
+
+            $data['dimensions'] = ['height' => $img->size()->height(), 'width' => $img->size()->width()];
+            $data['extension'] = Str::upper($this->imageUpload->extension);
+            $data['size'] = number_format(Storage::disk('local')->size($this->imageUpload->path()) / 1024 / 1024, 2);
+            Cache::set('image-upload-'.$this->imageUpload->uuid, $data, now()->addHour());
+            return $data;
+        }
+        return $cache;
     }
 
     public function onUploadStarted()
@@ -132,6 +155,7 @@ class Upload extends Component
         }
         $this->uuid = '';
         $this->traits = [];
+        unset($this->ImageMetadata);
     }
 
     public function boot()
