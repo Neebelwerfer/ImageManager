@@ -58,16 +58,15 @@
 
                 </div>
 
-                <form class="relative w-full ml-2 space-y-4" wire:submit="save">
+                <form class="relative content-between w-full h-full ml-2 space-y-4" wire:submit="save">
                     @csrf
-                    <div>
+                    <div class="w-full border-b border-slate-500">
                         <ul>
                             <li>Image Dimensions: {{ $this->ImageMetadata['dimensions']['height'] }} / {{ $this->ImageMetadata['dimensions']['width'] }}</li>
                             <li>Image Size: {{ $this->ImageMetadata['size'] }} mb</li>
                             <li>Image Type: {{ $this->ImageMetadata['extension'] }}</li>
                         </ul>
                     </div>
-
 
                     <div class="flex flex-col">
                         <div class="inline-flex gap-4">
@@ -95,7 +94,7 @@
                         @endif
                     </div>
 
-                    <div class="flex flex-col">
+                    <div class="flex flex-col w-fit">
                         <div class="inline-flex gap-4">
                             <label for="tags">Traits:</label>
                             <div class="mb-3">
