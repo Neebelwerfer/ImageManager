@@ -68,13 +68,16 @@ class Collection extends CollectionView
         return redirect()->route('collection.show', $this->collectionType);
     }
 
+
     #[Computed()]
     public function images()
     {
         if($this->collectionType == 'categories') {
-            return Image::whereHas('category', function ($query) {
+            $query = Image::whereHas('category', function ($query) {
                 $query->where('category_id', $this->collectionID);
-            })->paginate(20);
+            });
+
+            return $this->sortTags($query)->paginate(20);
         }
         else if($this->collectionType == 'albums') {
             return Image::whereHas('albums', function ($query) {

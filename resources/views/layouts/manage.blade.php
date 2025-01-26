@@ -3,9 +3,7 @@
         <x-sidebar>
             <x-sidebar.link-button route="{{ route('manage.albums') }}">Albums</x-sidebar.link-button>
             <x-sidebar.link-button route="{{ route('manage.categories') }}">Categories</x-sidebar.link-button>
-            <x-sidebar.link-button route="{{ route('manage.tags') }}">Tags</x-sidebar.link-button>
             <x-sidebar.link-button route="{{ route('manage.traits') }}">Traits</x-sidebar.link-button>
-
         </x-sidebar>
 
         <div class="flex justify-center flex-grow">

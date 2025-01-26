@@ -3,7 +3,11 @@
 namespace App\Component;
 
 use App\Models\SharedResources;
+use App\Models\Tags;
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -18,10 +22,12 @@ abstract class CollectionView extends Component
 
     use WithPagination;
 
-    #[Url('g')]
+    #[Url('grid')]
     public $gridView = true;
     #[Url('i')]
     public $count = 0;
+    #[Url('tags', except:'')]
+    public $tags;
 
     public $singleImage;
 
@@ -123,6 +129,76 @@ abstract class CollectionView extends Component
             $this->previousPage();
         }
         $this->updateImages();
+    }
+
+    public function sortTags(Builder $query) : Builder
+    {
+        if(empty($this->tags)) return $query;
+
+        $tagList = explode(' ', $this->tags);
+
+        $negativeTags = [];
+        $positiveTags = [];
+
+        foreach ($tagList as $tag)
+        {
+            if(Tags::IsNegativeTag($tag))
+            {
+                $tag = str::after($tag, '-');
+                array_push($negativeTags, $tag);
+            }
+            else
+            {
+                array_push($positiveTags, $tag);
+            }
+        }
+
+        if(count($negativeTags) > 0)
+        {
+            $query->whereDoesntHave('tags', function (Builder $query) use($negativeTags)
+            {
+                $first = true;
+
+                foreach($negativeTags as $tag)
+                {
+                    if($first)
+                    {
+                        $query->where('name', 'like', '%'.$tag.'%');
+                        $first = false;
+                    }
+                    else
+                    {
+                        $query->orWhere('name', 'like', '%'.$tag.'%');
+                    }
+                }
+            });
+        }
+
+        if(count($positiveTags) > 0)
+        {
+            $query->WhereHas('tags', function (Builder $query) use ($positiveTags)
+            {
+                $first = true;
+
+                foreach ($positiveTags as $tag)
+                {
+                    if($first)
+                    {
+                        $query->where('name', 'like', '%'.$tag.'%');
+                        $first = false;
+                    }
+                    else
+                    {
+                        $query->orWhere('name', 'like', '%'.$tag.'%');
+                    }
+                }
+            });
+        }
+        else {
+            $query->orWhereDoesntHave('tags');
+        }
+
+        return $query;
     }
 
     public function isImageShared($id)

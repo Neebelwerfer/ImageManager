@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\OwnerOnly;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,6 +14,11 @@ class Tags extends Model
     protected $fillable = [
         'name',
     ];
+
+    public static function IsNegativeTag($tag)
+    {
+        return Str::contains($tag, '-');
+    }
 
     public function images() : BelongsToMany
     {
