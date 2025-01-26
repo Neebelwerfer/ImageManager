@@ -31,8 +31,6 @@ class CreateRelationClassification extends ModalComponent
 
         if($this->type == 'category') {
             app(CategoryService::class)->create($this->name);
-        } else if ($this->type == 'tag') {
-            app(TagService::class)->create($this->name);
         } else if ($this->type == 'album') {
             Album::create([
                 'name' => $this->name,
@@ -48,8 +46,6 @@ class CreateRelationClassification extends ModalComponent
     public function checkIfExists($name) {
         if($this->type == 'category') {
             return ImageCategory::where('name', $name)->exists();
-        } else if ($this->type == 'tag') {
-            return ImageTag::where('name', $name)->exists();
         } else if ($this->type == 'album') {
             return Album::where('name', $name)->where('owner_id', Auth::user()->id)->exists();
         } else {

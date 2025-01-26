@@ -18,7 +18,7 @@ class Images extends Component
     use WithPagination;
 
     #[Url('tags', except:'')]
-    public $tags;
+    public $tags = '';
     public $minRating = 0;
 
     public $showOptions = false;

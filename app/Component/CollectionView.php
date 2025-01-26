@@ -27,7 +27,7 @@ abstract class CollectionView extends Component
     #[Url('i')]
     public $count = 0;
     #[Url('tags', except:'')]
-    public $tags;
+    public $tags = '';
 
     public $singleImage;
 
