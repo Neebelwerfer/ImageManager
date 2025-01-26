@@ -201,11 +201,6 @@ abstract class CollectionView extends Component
         return $query;
     }
 
-    public function isImageShared($id)
-    {
-        return SharedResources::where('type', 'image')->where('resource_uuid', $id)->where('shared_with_user_id', Auth::user()->id)->exists();
-    }
-
     public function render()
     {
         if($this->images->count() > 0) {
