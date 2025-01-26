@@ -1,14 +1,16 @@
 <x-grid>
     <x-slot name="header">
-        <div class="flex flex-row justify-center gap-2">
-
-            <div class="flex flex-col">
-                <label for="rating" class="">Min Rating</label>
-                <input type="number" class="text-black form-control" wire:model="rating" placeholder="Rating..." min="0" max="10"/>
-            </div>
-            <button class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="search">Search</button>
+        <div>
+            <form class="flex flex-row justify-between mx-3" wire:submit.prevent="filter">
+                <div class="flex flex-col w-1/2">
+                    <label>Tags</label>
+                    <input class="text-black" type="text" wire:model='tags'>
+                </div>
+                <div class="flex self-end">
+                    <x-button class="h-fit" type="submit">Search</x-button>
+                </div>
+            </form>
         </div>
-
         <div>
             {{ $images->links() }}
         </div>

@@ -7,6 +7,7 @@ use App\Component\CollectionView;
 use App\Models\Album;
 use App\Models\ImageCategory;
 use App\Models\SharedResources;
+use App\Models\Tags;
 use App\Support\Shared\AccessLevel;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -77,12 +78,14 @@ class Collection extends CollectionView
                 $query->where('category_id', $this->collectionID);
             });
 
-            return $this->sortTags($query)->paginate(20);
+            return Tags::sortTags($query, $this->tags)->paginate(20);
         }
         else if($this->collectionType == 'albums') {
-            return Image::whereHas('albums', function ($query) {
+            $query = Image::whereHas('albums', function ($query) {
                 $query->where('album_id', $this->collectionID);
-            })->paginate(20);
+            });
+
+            return Tags::sortTags($query, $this->tags)->paginate(20);
         }
     }
 
