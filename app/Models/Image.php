@@ -45,7 +45,7 @@ class Image extends Model
 
     public function tags() : BelongsToMany
     {
-        return $this->belongsToMany(Tags::class);
+        return $this->belongsToMany(Tags::class)->withPivot('added_by', 'personal')->ownOrPublic();
     }
 
     public function traits() : HasMany

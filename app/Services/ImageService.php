@@ -42,9 +42,9 @@ class ImageService
         $image->delete();
     }
 
-    public function addTag(Image $image, Tags $tag)
+    public function addTag(Image $image, Tags $tag, bool $personal)
     {
-        $image->tags()->attach($tag, ['added_by' => Auth::user()->id]);
+        $image->tags()->attach($tag, ['added_by' => Auth::user()->id, 'personal' => $personal]);
     }
 
     public function removeTags(Image $image, array $tags)
@@ -105,13 +105,6 @@ class ImageService
             }
 
             $imageModel->save();
-            $tags = [];
-            foreach ($data['tags'] as $tag) {
-                $tagResponse = Tags::find($tag);
-                if(isset($tagResponse)) {
-                    $tags[$tag] = $tagResponse;
-                }
-            }
 
             if(count($traits) > 0) {
                 foreach ($traits as $trait) {
@@ -128,9 +121,9 @@ class ImageService
             }
 
 
-            foreach($tags as $tag)
+            foreach($data['tags'] as $tagData)
             {
-                $this->addTag($imageModel, $tag);
+                $this->addTag($imageModel, $tagData['tag'], $tagData['personal']);
             }
 
         } catch (\Exception $e) {

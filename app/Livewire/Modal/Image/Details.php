@@ -34,11 +34,9 @@ class Details extends ModalComponent
     }
 
     #[On('tagSelected')]
-    public function tagSelected($tag)
+    public function tagSelected($tagData)
     {
-        if(Auth::user()->id != $this->image->owner_id) {
-            return;
-        }
+        $tag = $tagData['id'];
 
         $res = Tags::find($tag);
 
@@ -47,7 +45,7 @@ class Details extends ModalComponent
                 return;
             }
 
-            app(ImageService::class)->addTag($this->image, $res);
+            app(ImageService::class)->addTag($this->image, $res, $tagData['personal']);
         }
     }
 
@@ -70,11 +68,12 @@ class Details extends ModalComponent
 
     public function removeTag($tagID)
     {
-        if(Auth::user()->id != $this->image->owner_id) {
-            return;
+        $tag = $this->image->tags()->find($tagID);
+
+        if($this->image->owner_id == Auth::user()->id || $tag->pivot->added_by === Auth::user()->id)
+        {
+            $this->image->tags()->detach($tag);
         }
-        $tag = Tags::find($tagID);
-        $this->image->tags()->detach($tag);
     }
 
     public function deleteImage()

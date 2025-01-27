@@ -83,11 +83,11 @@
                         </div>
                         @if (count($tags) > 0)
                         <div class="flex flex-col mx-5 mb-4">
-                            @foreach ($tags as $tag)
+                            @foreach ($tags as $tagData)
                                 <div class="inline-flex justify-between w-20 gap-2 border rounded">
-                                    <h1>{{ $tag->name }}</h1>
+                                    <h1>{{ $tagData['tag']->name }}</h1>
                                     <button class="w-5 border border-red-600 rounded hover:bg-red-400 bg-red-600/80 h-fit" type="button"
-                                            wire:click='removeTag({{ $tag->id }})'>X</button>
+                                            wire:click='removeTag({{ $tagData['tag']->id }})'>X</button>
                                 </div>
                             @endforeach
                         </div>

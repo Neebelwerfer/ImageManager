@@ -7,9 +7,13 @@ use App\Models\Album;
 use App\Models\Image;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Url;
 
 class Albums extends Component
 {
+
+    #[Url('name', except:"")]
+    public $name="";
 
     public function getImageFromAlbum(Album $album)
     {
@@ -28,7 +32,7 @@ class Albums extends Component
     {
         return view('livewire.collection.albums',
             [
-                'albums' => Album::ownedOrShared()->paginate(20),
+                'albums' => Album::ownedOrShared()->where('name', 'like', '%'.$this->name.'%')->paginate(20),
             ]);
     }
 }

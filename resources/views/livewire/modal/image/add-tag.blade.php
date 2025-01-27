@@ -8,6 +8,10 @@
             <label for="name" class="">Name</label>
             <input type="text" class="text-black form-control" wire:model="name" placeholder="Name..."/>
         </div>
+        <div>
+            <label for="personal" class="">Personal?</label>
+            <input type="checkbox" class="text-black form-control" wire:model="personal"/>
+        </div>
     </x-slot>
 
     <x-slot name="buttons">

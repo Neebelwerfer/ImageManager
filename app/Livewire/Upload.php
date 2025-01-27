@@ -52,13 +52,15 @@ class Upload extends Component
     }
 
     #[On('tagSelected')]
-    public function tagSelected($tagId)
+    public function tagSelected($tagData)
     {
-        if (isset($this->tags[$tagId])) {
+        $id = $tagData['id'];
+        $personal = $tagData['personal'];
+        if (isset($this->tags[$id])) {
             return;
         }
 
-        $this->tags[$tagId] = Tags::find($tagId);
+        $this->tags[$id] = ['tag' => Tags::find($id), 'personal' => $personal];
     }
 
     public function removeTag($tagID)
@@ -88,7 +90,7 @@ class Upload extends Component
     public function upload(ImageService $imageService) {
         $data = [
             'category' => $this->category->id ?? null,
-            'tags' => array_keys($this->tags),
+            'tags' => $this->tags,
             'hash' => $this->hash
         ];
 

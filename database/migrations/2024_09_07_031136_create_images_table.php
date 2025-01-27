@@ -75,8 +75,8 @@ return new class extends Migration
             $table->foreignUuid('image_uuid')->constrained('images', 'uuid')->onDelete('cascade');
             $table->foreignId('tags_id')->constrained('tags')->onDelete('cascade');
             $table->foreignId('added_by')->constrained('users')->cascadeOnDelete();
+            $table->boolean('personal')->default(true);
             $table->primary(['image_uuid', 'tags_id']);
-            $table->timestamps();
         });
     }
 

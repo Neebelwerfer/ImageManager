@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Auth;
 
 class Tags extends Model
 {
@@ -16,14 +17,18 @@ class Tags extends Model
         'name',
     ];
 
-    public static function IsNegativeTag($tag)
-    {
-        return Str::contains($tag, '-');
-    }
 
     public function images() : BelongsToMany
     {
         return $this->belongsToMany(Image::class);
+    }
+
+    public function scopeOwnOrPublic(Builder $query)
+    {
+        return $query->where(function($q) {
+            $q->where('added_by', Auth::user()->id);
+            $q->orWhere('personal', 'false');
+        });
     }
 
     public static function sortTags(Builder $query, ?string $tags) : Builder
@@ -37,7 +42,7 @@ class Tags extends Model
 
         foreach ($tagList as $tag)
         {
-            if(Tags::IsNegativeTag($tag))
+            if(Str::contains($tag, '-'))
             {
                 $tag = str::after($tag, '-');
                 array_push($negativeTags, $tag);
@@ -74,6 +79,11 @@ class Tags extends Model
             $query->WhereHas('tags', function (Builder $query) use ($positiveTags)
             {
                 $first = true;
+                $query->where(function($q)
+                {
+                    $q->where('added_by', Auth::user()->id);
+                    $q->orWhere('personal', 'false');
+                });
 
                 foreach ($positiveTags as $tag)
                 {
