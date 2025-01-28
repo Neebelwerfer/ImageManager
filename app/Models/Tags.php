@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Auth;
 
 class Tags extends Model
 {
-    use HasFactory;
+    use HasFactory, Prunable;
 
     protected $fillable = [
         'name',
@@ -58,7 +59,6 @@ class Tags extends Model
             $query->whereDoesntHave('tags', function (Builder $query) use($negativeTags)
             {
                 $first = true;
-
                 foreach($negativeTags as $tag)
                 {
                     if($first)
@@ -79,12 +79,6 @@ class Tags extends Model
             $query->WhereHas('tags', function (Builder $query) use ($positiveTags)
             {
                 $first = true;
-                $query->where(function($q)
-                {
-                    $q->where('added_by', Auth::user()->id);
-                    $q->orWhere('personal', 'false');
-                });
-
                 foreach ($positiveTags as $tag)
                 {
                     if($first)
@@ -104,5 +98,10 @@ class Tags extends Model
         }
 
         return $query;
+    }
+
+    public function prunable()
+    {
+        return $this->whereDoesntHave('images');
     }
 }
