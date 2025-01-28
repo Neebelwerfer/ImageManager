@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Modal\Image;
 
+use App\Events\ImageTagEdited;
 use App\Models\Album;
 use App\Models\Image;
 use App\Models\ImageCategory;
@@ -10,6 +11,7 @@ use App\Models\Traits;
 use App\Services\ImageService;
 use App\Support\Traits\DisplayTrait;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use LivewireUI\Modal\ModalComponent;
@@ -19,6 +21,13 @@ class Details extends ModalComponent
     public Image $image;
 
     public bool $owned = true;
+
+
+    #[On('echo:Image.{image.uuid},.tagEdited')]
+    public function tagEdited()
+    {
+        unset($this->tags);
+    }
 
     #[On('categorySelected')]
     public function categorySelected($category)
@@ -73,6 +82,7 @@ class Details extends ModalComponent
         if($this->image->owner_id == Auth::user()->id || $tag->pivot->added_by === Auth::user()->id)
         {
             $this->image->tags()->detach($tag);
+            Broadcast::on('Image.'.$this->image->uuid)->as('tagEdited')->sendNow();
         }
     }
 
@@ -114,6 +124,12 @@ class Details extends ModalComponent
         }
 
         return $res;
+    }
+
+    #[Computed()]
+    public function tags()
+    {
+        return $this->image->tags;
     }
 
     public function mount(string $imageUuid)

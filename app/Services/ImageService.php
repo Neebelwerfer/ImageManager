@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Events\ImageTagEdited;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTraits;
 use App\Models\ImageUpload;
 use App\Models\Tags;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\LazyCollection;
 use Intervention\Image\ImageManager;
@@ -45,6 +47,7 @@ class ImageService
     public function addTag(Image $image, Tags $tag, bool $personal)
     {
         $image->tags()->attach($tag, ['added_by' => Auth::user()->id, 'personal' => $personal]);
+        Broadcast::on('Image.'.$image->uuid)->as('tagEdited')->sendNow();
     }
 
     public function removeTags(Image $image, array $tags)

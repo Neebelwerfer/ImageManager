@@ -36,7 +36,7 @@
                         <button class="ml-2 border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="$dispatch('openModal', {component: 'modal.image.add-tag'})">Edit</button>
                     </div>
                     <div>
-                        @foreach ($image->tags as $tag)
+                        @foreach ($this->tags as $tag)
                             <div class="flex flex-row justify-between">
                                 <p>{{ $tag->name }}</p>
                                 <button class="border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="removeTag({{ $tag->id }})">X</button>
