@@ -5,6 +5,7 @@ namespace App\Livewire\Modal\Manage;
 use App\Models\Album;
 use App\Models\SharedResources;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use LivewireUI\Modal\ModalComponent;
 
 class EditAlbum extends ModalComponent
@@ -24,16 +25,6 @@ class EditAlbum extends ModalComponent
     {
         $this->album->delete();
         $this->closeModal();
-    }
-
-    public function removeShared($id) {
-        SharedResources::find($id)->delete();
-        $this->closeModal();
-    }
-
-    #[Computed()]
-    public function sharedWith() {
-        return SharedResources::where('resource_id', $this->album->id)->where('type', 'album')->get();
     }
 
     public function mount($album)

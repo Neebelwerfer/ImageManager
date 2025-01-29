@@ -57,22 +57,19 @@ class Share extends ModalComponent
             return $this->addError('email', 'User not found');
         }
 
-
-        if($this->type == 'category')
+        switch($this->type)
         {
-            $res = $this->categoryService->share($this->id, $sharedTo, $this->accessLevel);
-        }
-        else if($this->type == 'album')
-        {
-            $res = $this->albumService->share($this->id, $sharedTo, $this->accessLevel);
-        }
-        else if($this->type == 'image')
-        {
-            $res = $this->imageService->share($this->id, $sharedTo, $this->accessLevel);
-        }
-        else
-        {
-            throw new \Exception('Trying to share unknown type');
+            case 'category':
+                $res = $this->categoryService->share($this->id, $sharedTo, $this->accessLevel);
+                break;
+            case 'album':
+                $res = $this->albumService->share($this->id, $sharedTo, $this->accessLevel);
+                break;
+            case 'image':
+                $res = $this->imageService->share($this->id, $sharedTo, $this->accessLevel);
+                break;
+            default:
+                throw new \Exception('Trying to share unknown type');
         }
 
         if(!$res)
@@ -80,6 +77,8 @@ class Share extends ModalComponent
             $this->dispatch('openModal', 'modal.error.simple-error-message', ['message' => 'This '. $this->type  .'is already shared with user!']);
             return;
         }
+        $this->dispatch('updateShared');
+        $this->closeModal();
     }
 
     public function render()
