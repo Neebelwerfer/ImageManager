@@ -1,6 +1,6 @@
 <x-modal formAction="save">
     <x-slot name="title">
-        {{ $type }}
+        Create {{ $type }}
     </x-slot>
 
     <x-slot name="content">

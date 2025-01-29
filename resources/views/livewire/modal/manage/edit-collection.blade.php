@@ -1,6 +1,6 @@
 <x-modal>
     <x-slot name="title">
-        Edit Category
+        Edit {{ $collectionType }}
     </x-slot>
 
     <x-slot name="content">
@@ -11,7 +11,7 @@
             </div>
         </form>
 
-        <livewire:component.shared-with-list id="{{ $category->id }}" type="category" x-transition/>
+        <livewire:component.shared-with-list id="{{ $collectionID }}" type="{{ $collectionType }}" x-transition/>
     </x-slot>
 
     <x-slot name="buttons">
@@ -21,7 +21,7 @@
             <x-button wire:click="$dispatch('closeModal')">Cancel</x-button>
             <button class="p-1 mt-4 bg-red-700 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="delete">Delete</button>
             </span>
-            <button class="p-1 mt-4 bg-green-700 border rounded btn dark:bg-green-500 hover:bg-green-400 hover:dark:bg-gray-500" wire:click="$dispatch('openModal', {component: 'modal.manage.share', arguments: {type: 'category', id: '{{ $category->id }}'} })">Share</button>
+            <button class="p-1 mt-4 bg-green-700 border rounded btn dark:bg-green-500 hover:bg-green-400 hover:dark:bg-gray-500" wire:click="$dispatch('openModal', {component: 'modal.manage.share', arguments: {type: '{{ $collectionType }}', id: '{{ $collectionID }}'} })">Share</button>
         </div>
     </x-slot>
 </x-modal>

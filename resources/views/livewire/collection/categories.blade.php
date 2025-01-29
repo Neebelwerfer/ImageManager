@@ -1,7 +1,7 @@
 <div class="flex justify-center w-full h-full">
     <x-grid class="w-7/12">
         <x-slot name="header">
-            <div class="flex flex-row gap-2 ml-2">
+            <div class="flex flex-row justify-between gap-2 ml-2">
                 <div class="flex flex-col">
                     <div>
                         <label for="name" class="">Name</label>
@@ -10,6 +10,7 @@
                         <input type="text" class="text-black form-control" wire:model.live="name" placeholder="Name..."/>
                     </div>
                 </div>
+                <x-button class="self-end px-4 mr-4 h-fit" wire:click="$dispatch('openModal', {component: 'modal.image.create-relation-classification', arguments: {'type': 'category'} })">Create Category</x-button>
             </div>
 
             <div>

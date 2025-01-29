@@ -21,6 +21,10 @@ class Categories extends Component
         if($image === null)
         {
             $image = $category->images()->first();
+            if($image=== null)
+            {
+                return null;
+            }
             Cache::set($key, $image->uuid, 3600);
         }
         return $image;

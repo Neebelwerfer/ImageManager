@@ -18,7 +18,7 @@
                     <h1 class="text-xl font-semibold leading-tight text-center text-gray-800 dark:text-gray-200">Own</h1>
                     <div class="grid w-full grid-flow-row grid-cols-10 gap-2 mx-2">
                         @foreach ($categories as $category)
-                            <button class="flex flex-col justify-between p-2 border rounded bg-slate-800 w-fit hover:bg-gray-600" wire:click="$dispatch('openModal', {component: 'modal.manage.edit-category', arguments: ['{{ $category->id }}'] })">
+                            <button class="flex flex-col justify-between p-2 border rounded bg-slate-800 w-fit hover:bg-gray-600"  wire:click="$dispatch('openModal', {component: 'modal.manage.edit-collection', arguments: {'collectionType': 'category', 'collectionId': '{{ $category->id }}'}})">
                                 <div class="w-full">
                                     <h1>{{ $category->name }}</h1>
                                     <h1>Images: {{ $this->imageCount($category->id) }}</h1>

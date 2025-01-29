@@ -3,7 +3,6 @@
 namespace App\Livewire\Manage;
 
 use App\Models\Album;
-use App\Models\Image;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;

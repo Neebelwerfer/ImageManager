@@ -23,6 +23,10 @@ class Albums extends Component
         if($image === null)
         {
             $image = $album->images()->first();
+            if($image=== null)
+            {
+                return null;
+            }
             Cache::set($key, $image->uuid, 3600);
         }
         return $image;

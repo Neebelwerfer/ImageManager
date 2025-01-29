@@ -1,8 +1,8 @@
 <div class="relative w-full h-full overflow-hidden" x-data="{ showOptions: $wire.entangle('showOptions') }">
-    @if(isset($collection->name))
+    @if(isset($collectionName))
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-            {{ $collection->name }}
+            {{ $collectionName }}
         </h2>
     </x-slot>
     @endif
@@ -29,7 +29,7 @@
         </div>
 
         <div class="@if($gridView) flex  @else collapse @endif justify-center">
-            <div class="flex flex-col justify-center justify-items-center">
+            <div class="flex flex-col justify-center w-7/12 justify-items-center">
                 <x-grid>
                     <x-slot name="header">
                         <div>
@@ -38,8 +38,9 @@
                                     <label>Tags</label>
                                     <input class="text-black" type="text" wire:model='tags'>
                                 </div>
-                                <div class="flex self-end">
+                                <div class="flex self-end gap-2">
                                     <x-button class="h-fit" type="submit">Search</x-button>
+                                    <x-button class="px-2 h-fit" type="button" wire:click="$dispatch('openModal', {component: 'modal.manage.edit-collection', arguments: {'collectionId': '{{ $collectionID }}', 'collectionType': '{{ $collectionType }}'} })">Edit</x-button>
                                 </div>
                             </form>
                         </div>

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 
 #[Layout('layouts.collection')]
 class Collection extends CollectionView
@@ -23,6 +24,8 @@ class Collection extends CollectionView
 
     #[Locked()]
     public $collectionID;
+    #[Locked]
+    public $collectionName;
 
     #[Locked()]
     public AccessLevel $accessLevel = AccessLevel::view;
@@ -34,31 +37,34 @@ class Collection extends CollectionView
         $this->collectionType = $collectionType;
         $this->collectionID = $collectionID;
 
-
         if($collectionType != 'categories' && $collectionType != 'albums') {
             abort(404, 'Collection not found');
         }
 
         if($collectionType == 'categories') {
-            if(ImageCategory::ownedOrShared()->find($collectionID) == null) {
+            $res = ImageCategory::ownedOrShared()->find($collectionID);
+            if( $res === null) {
                 abort(404, 'Category not found');
             }
 
-            if(!ImageCategory::owned()->exists($collectionID)) {
+            if(!$res->owner_id === Auth::user()->id) {
                 $resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
                 $this->accessLevel = $resource->level;
             }
+            $this->collectionName = $res->name;
         }
 
         if($collectionType == 'albums') {
-            if(Album::ownedOrShared()->find($collectionID) == null) {
+            $res = Album::ownedOrShared()->find($collectionID);
+            if($res === null) {
                 abort(404, 'Category not found');
             }
 
-            if(!Album::owned()->exists($collectionID)) {
+            if(!$res->owner_id === Auth::user()->id) {
                 $resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
                 $this->accessLevel = $resource->level;
             }
+            $this->collectionName = $res->name;
         }
 
         $this->updateImages();
@@ -67,6 +73,19 @@ class Collection extends CollectionView
     public function goBack()
     {
         return redirect()->route('collection.show', $this->collectionType);
+    }
+
+    #[On('collectionEdited')]
+    public function collectionEdited($name)
+    {
+        $this->collectionName = $name;
+        $this->dispatch('reloadPage');
+    }
+
+    #[On('collectionDeleted')]
+    public function collectionDeleted()
+    {
+        return $this->goBack();
     }
 
 
