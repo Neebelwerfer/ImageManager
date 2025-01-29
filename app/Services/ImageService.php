@@ -47,7 +47,10 @@ class ImageService
     public function addTag(Image $image, Tags $tag, bool $personal)
     {
         $image->tags()->attach($tag, ['added_by' => Auth::user()->id, 'personal' => $personal]);
-        Broadcast::on('Image.'.$image->uuid)->as('tagEdited')->sendNow();
+        if(!$personal)
+        {
+            Broadcast(new ImageTagEdited(Auth::user(), $image->uuid))->toOthers();
+        }
     }
 
     public function removeTags(Image $image, array $tags)

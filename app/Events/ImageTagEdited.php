@@ -4,13 +4,15 @@ namespace App\Events;
 
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
+use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 class ImageTagEdited implements ShouldBroadcastNow
 {
-    use SerializesModels;
+    use SerializesModels, Dispatchable, InteractsWithSockets;
 
     /**
      * Create a new event instance.
@@ -30,6 +32,10 @@ class ImageTagEdited implements ShouldBroadcastNow
         return [];
     }
 
+    public function broadcastAs(): string
+    {
+        return 'tagEdited';
+    }
 
     /**
      * Get the channels the event should broadcast on.

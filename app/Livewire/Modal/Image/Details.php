@@ -82,7 +82,10 @@ class Details extends ModalComponent
         if($this->image->owner_id == Auth::user()->id || $tag->pivot->added_by === Auth::user()->id)
         {
             $this->image->tags()->detach($tag);
-            Broadcast::on('Image.'.$this->image->uuid)->as('tagEdited')->sendNow();
+            if(!$tag->pivot->personal)
+            {
+                Broadcast(new ImageTagEdited(Auth::user(), $this->image->uuid))->toOthers();
+            }
         }
     }
 
