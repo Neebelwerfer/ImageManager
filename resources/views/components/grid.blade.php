@@ -1,4 +1,4 @@
-<div class="flex flex-col flex-grow-0 max-h-fit ">
+<div {{ $attributes->merge(['class' => 'flex flex-col flex-grow-0 max-h-fit']) }}>
     @if(isset($header))
         <div class="flex flex-col justify-center p-2">
             {{ $header }}

@@ -6,7 +6,7 @@
     </x-sidebar>
 
     <div class="flex justify-center flex-grow">
-        <div class="flex flex-col flex-grow-0 flex-shrink">
+        <div class="flex flex-col flex-grow-0 w-full">
 
             @if(!empty($this->type))
             <h2 class="flex justify-center text-xl font-semibold leading-tight text-gray-800 underline uppercase dark:text-gray-200">
