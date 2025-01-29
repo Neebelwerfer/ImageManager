@@ -8,6 +8,7 @@ use App\Models\ImageCategory;
 use App\Models\ImageTraits;
 use App\Models\ImageUpload;
 use App\Models\Tags;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Storage;
@@ -178,6 +179,24 @@ class ImageService
     {
         $hash = $this->comparator->hashImage($image);
         return $this->comparator->convertHashToBinaryString($hash);
+    }
+
+    public function isShared($sharedTo, $id) : bool
+    {
+        return app(SharedResourceService::class)->isShared($sharedTo, 'image', $id);
+    }
+
+
+    public function share($id, User $sharedTo, $accessLevel) : bool
+    {
+        $image = Image::owned()->find($id);
+        if(isset($image)) {
+            if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && !$this->isShared($sharedTo, $id)) {
+                app(SharedResourceService::class)->Share($sharedTo, 'image', $id, $accessLevel);
+                return true;
+            }
+        }
+        return false;
     }
 
 }

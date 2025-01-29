@@ -7,6 +7,9 @@ use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\SharedResources;
 use App\Models\User;
+use App\Services\AlbumService;
+use App\Services\CategoryService;
+use App\Services\ImageService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -17,7 +20,7 @@ use LivewireUI\Modal\ModalComponent;
 class Share extends ModalComponent
 {
 
-    #[Validate('required', 'email')]
+    #[Validate('required|email')]
     public $email;
     #[Validate('required')]
     public $accessLevel = 'view';
@@ -27,72 +30,56 @@ class Share extends ModalComponent
     #[Locked()]
     public $id;
 
+    protected CategoryService $categoryService;
+    protected AlbumService $albumService;
+    protected ImageService $imageService;
+
     public function mount($type, $id)
     {
         $this->type = $type;
         $this->id = $id;
     }
 
+    public function boot()
+    {
+        $this->categoryService = app(CategoryService::class);
+        $this->albumService = app(AlbumService::class);
+        $this->imageService = app(ImageService::class);
+    }
+
     public function share()
     {
         $this->validate();
 
-        if($this->type == 'category') {
-            $category = ImageCategory::owned()->find($this->id);
-
-            if(isset($category)) {
-                $sharedTo = User::where('email', $this->email)->first();
-
-                if(isset($sharedTo) && $sharedTo->id != Auth::user()->id) {
-                    $shared_resource = new SharedResources();
-                    $shared_resource->resource_id = $category->id;
-                    $shared_resource->type = 'category';
-                    $shared_resource->shared_by_user_id = Auth::user()->id;
-                    $shared_resource->shared_with_user_id = $sharedTo->id;
-                    $shared_resource->level = $this->accessLevel;
-                    $shared_resource->save();
-                    return $this->closeModal();
-                }
-            }
-        }
-        else if($this->type == 'album') {
-            $album = Album::owned()->find($this->id);
-
-            if(isset($album)) {
-                $sharedTo = User::where('email', $this->email)->first();
-
-                if(isset($sharedTo) && $sharedTo->id != Auth::user()->id) {
-                    $shared_resource = new SharedResources();
-                    $shared_resource->resource_id = $album->id;
-                    $shared_resource->type = 'album';
-                    $shared_resource->shared_by_user_id = Auth::user()->id;
-                    $shared_resource->shared_with_user_id = $sharedTo->id;
-                    $shared_resource->level = $this->accessLevel;
-                    $shared_resource->save();
-                    return $this->closeModal();
-                }
-            }
-        }
-        else if($this->type == 'image') {
-            $image = Image::owned()->find($this->id);
-
-            if(isset($image)) {
-                $sharedTo = User::where('email', $this->email)->first();
-
-                if(isset($sharedTo) && $sharedTo->id != Auth::user()->id) {
-                    $shared_resource = new SharedResources();
-                    $shared_resource->resource_uuid = $image->uuid;
-                    $shared_resource->type = 'image';
-                    $shared_resource->shared_by_user_id = Auth::user()->id;
-                    $shared_resource->shared_with_user_id = $sharedTo->id;
-                    $shared_resource->level = $this->accessLevel;
-                    $shared_resource->save();
-                    return $this->closeModal();
-                }
-            }
+        $sharedTo = User::where('email', $this->email)->first();
+        if(!isset($sharedTo))
+        {
+            return $this->addError('email', 'User not found');
         }
 
-        return $this->addError('email', 'User not found');
+
+        if($this->type == 'category')
+        {
+            $res = $this->categoryService->share($this->id, $sharedTo, $this->accessLevel);
+        }
+        else if($this->type == 'album')
+        {
+            $res = $this->albumService->share($this->id, $sharedTo, $this->accessLevel);
+        }
+        else if($this->type == 'image')
+        {
+            $res = $this->imageService->share($this->id, $sharedTo, $this->accessLevel);
+        }
+        else
+        {
+            throw new \Exception('Trying to share unknown type');
+        }
+
+        if(!$res)
+        {
+            $this->dispatch('openModal', 'modal.error.simple-error-message', ['message' => 'This '. $this->type  .'is already shared with user!']);
+            return;
+        }
     }
 
     public function render()

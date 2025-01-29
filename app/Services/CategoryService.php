@@ -3,13 +3,14 @@
 namespace App\Services;
 
 use App\Models\ImageCategory;
+use App\Models\SharedResources;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class CategoryService
 {
     public function __construct() {
-        //
+
     }
 
     public function create($name) : ImageCategory
@@ -28,16 +29,22 @@ class CategoryService
         return $cat;
     }
 
-    public function share($id, $email) : void
+    public function isShared($sharedTo, $id) : bool
+    {
+        return app(SharedResourceService::class)->isShared($sharedTo, 'category', $id);
+    }
+
+
+    public function share($id, User $sharedTo, $accessLevel) : bool
     {
         $cat = ImageCategory::owned()->find($id);
         if(isset($cat)) {
-            $sharedTo = User::where('email', $email)->first();
-
-            if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && $sharedTo->sharedCategories()->find($cat->id) == null) {
-
+            if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && !$this->isShared($sharedTo, $id)) {
+                app(SharedResourceService::class)->Share($sharedTo, 'category', $id, $accessLevel);
+                return true;
             }
         }
+        return false;
     }
 
     public function delete($id) : void

@@ -8,6 +8,7 @@ use App\Repository\TagRepository;
 use App\Services\AlbumService;
 use App\Services\CategoryService;
 use App\Services\ImageService;
+use App\Services\SharedResourceService;
 use App\Services\TagService;
 
 class ImageProvider extends ServiceProvider
@@ -31,6 +32,10 @@ class ImageProvider extends ServiceProvider
 
         $this->app->singleton(ImageService::class, function ($app) {
             return new ImageService();
+        });
+
+        $this->app->singleton(SharedResourceService::class, function ($app) {
+            return new SharedResourceService();
         });
     }
 
