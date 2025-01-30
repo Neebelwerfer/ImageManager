@@ -13,6 +13,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
@@ -71,7 +73,8 @@ class ImageController extends Controller
             redirect()->back();
         }
 
-        return response()->file(storage_path('app/' . $image->getImagePath()));
+        $data = file_get_contents(storage_path('app/' . $image->getImagePath()));
+        return response()->make(Crypt::decryptString($data, false), 200, ['Content-Type' => 'image/' . $image->format .';base64']);
     }
 
     public function getThumbnail(string $uuid) {
@@ -85,12 +88,10 @@ class ImageController extends Controller
             redirect()->back();
         }
 
-        if(empty($image->getThumbnailPath ())) {
-            abort(404);
-        }
-
-
-        return response()->file(storage_path('app') . '/' . $image->getThumbnailPath());
+        $data = Cache::remember('thumbnail-'.$image->uuid, 3600, function() use($image) {
+            return Crypt::decryptString(file_get_contents(storage_path('app/' . $image->getThumbnailPath())));
+        });
+        return response()->make($data, 200, ['Content-Type' => 'image/webp;base64']);
     }
 
     public function getTempImage(string $uuid) {

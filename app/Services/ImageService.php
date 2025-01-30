@@ -11,9 +11,11 @@ use App\Models\Tags;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\LazyCollection;
 use Intervention\Image\ImageManager;
+use Intervention\Image\Interfaces\ImageInterface;
 use SapientPro\ImageComparator\ImageComparator;
 
 class ImageService
@@ -77,8 +79,8 @@ class ImageService
         $user = Auth::user();
 
         $imageModel = new Image($data);
-
         try {
+
             $imageInfo = ImageManager::imagick()->read($image->fullPath());
             $imageScaled = ImageManager::gd()->read($image->fullPath());
 
@@ -91,21 +93,10 @@ class ImageService
             $uuidSplit = substr($imageModel->uuid, 0, 1).'/'.substr($imageModel->uuid, 1, 1).'/'.substr($imageModel->uuid, 2, 1).'/'.substr($imageModel->uuid, 3, 1);
 
             $imageInfo->scaleDown(256, 256);
-            $thumbnail_path = 'thumbnails/' . $uuidSplit;
-            $fileName = $imageModel->uuid . '.webp';
-            $full_thumbnail_path = 'thumbnails/' . $uuidSplit . '/' . $fileName;
-            if(!Storage::disk('local')->exists($thumbnail_path)) {
-                Storage::disk('local')->makeDirectory($thumbnail_path);
-            }
-            $imageInfo->save(storage_path('app') . '/' . $full_thumbnail_path);
 
-            $imagePath = $uuidSplit . '/' . $imageModel->uuid . '.' . $image->extension;
-
-            if(!Storage::disk('local')->exists('images/' . $uuidSplit)) {
-                Storage::disk('local')->makeDirectory('images/' . $uuidSplit);
-            }
-
-            $imageScaled->save(storage_path('app') . '/' . 'images/' . $imagePath);
+            $path = $uuidSplit;
+            $name = $imageModel->uuid;
+            $this->storeImageAndThumbnail($imageScaled, $imageInfo, $path, $name);
 
             if(isset($data['category']) && $data['category'] >= 0) {
                 $imageModel->category_id = $data['category'];
@@ -138,10 +129,9 @@ class ImageService
                 $imageModel->delete();
             }
             else {
-                Storage::disk('local')->delete($full_thumbnail_path);
-                Storage::disk('local')->delete('images/' . $imagePath);
+                Storage::disk('local')->delete('thumbnails/' . $path . '/' . $name);
+                Storage::disk('local')->delete('images/' . $path . '/' . $name);
             }
-            $image->delete();
 
             session()->flash('status', 'Something went wrong');
             session()->flash('error', true);
@@ -151,6 +141,24 @@ class ImageService
 
         $image->delete();
         session()->flash('status', 'Image uploaded successfully!');
+    }
+
+    public function storeImageAndThumbnail(ImageInterface $image, ImageInterface $thumbnail, string $path, string $name)
+    {
+        $thumbnail_path = 'thumbnails/' . $path;
+        $image_path = 'images/' . $path;
+        if(!Storage::disk('local')->exists($thumbnail_path)) {
+            Storage::disk('local')->makeDirectory($thumbnail_path);
+        }
+        if(!Storage::disk('local')->exists($image_path)) {
+            Storage::disk('local')->makeDirectory($image_path);
+        }
+
+        $cryptThumb = Crypt::encrypt((string) $thumbnail->toWebp(), false);
+        $cryptImage = Crypt::encrypt((string) $image->encodeByMediaType(), false);
+
+        Storage::disk('local')->put($thumbnail_path . '/' . $name, $cryptThumb);
+        Storage::disk('local')->put($image_path . '/' . $name,$cryptImage);
     }
 
     public function compareHashes($newHash, $threshold = 95) : array
@@ -193,10 +201,15 @@ class ImageService
         if(isset($image)) {
             if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && !$this->isShared($sharedTo, $id)) {
                 app(SharedResourceService::class)->Share($sharedTo, 'image', $id, $accessLevel);
+                $image->is_shared = true;
                 return true;
             }
         }
         return false;
     }
 
+    public function stopSharing($sharedTo, $id)
+    {
+
+    }
 }
