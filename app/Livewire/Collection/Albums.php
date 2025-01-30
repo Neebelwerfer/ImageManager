@@ -5,10 +5,11 @@ namespace App\Livewire\Collection;
 use Livewire\Component;
 use App\Models\Album;
 use App\Models\Image;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 
+#[Layout('layouts.collection')]
 class Albums extends Component
 {
 
