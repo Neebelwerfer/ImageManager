@@ -60,7 +60,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('thumbnail/{thumbnail}', [ImageController::class, 'getThumbnail']);
     Route::get('temp/{imageUuid}', [ImageController::class, 'getTempImage']);
 
-
     Route::get('image/{imageUuid}', ImageShow::class)
         ->name('image.show');
 });

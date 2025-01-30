@@ -146,6 +146,18 @@
                     {{ session('error_message') }}
                 @endif
             </div>
+
+            @if(!session('error'))
+                <x-slot name="buttons">
+                    <x-button wire:click='goToImage()'>
+                        Go To image
+                    </x-button>
+
+                    <button x-on:click="showModal = false" class="px-4 py-2 text-white bg-red-500 rounded-md">
+                        Close
+                    </button>
+                </x-slot>
+            @endif
         </x-status-modal>
     @endif
 </div>

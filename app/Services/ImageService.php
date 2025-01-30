@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\DTO\ImageUploadDTO;
 use App\Events\ImageTagEdited;
+use App\Jobs\ProcessImage;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTraits;
@@ -11,6 +13,7 @@ use App\Models\Tags;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\LazyCollection;
@@ -74,73 +77,37 @@ class ImageService
      * @param array $data
      * @return void
      */
-    public function create(ImageUpload $image, array $data, array $traits)
+    public function create(ImageUpload $image, array $data, array $traits) : bool
     {
         $user = Auth::user();
 
         $imageModel = new Image($data);
         try {
 
-            $imageInfo = ImageManager::imagick()->read($image->fullPath());
-            $imageScaled = ImageManager::gd()->read($image->fullPath());
-
             $imageModel->uuid = $image->uuid;
             $imageModel->owner_id = $user->id;
-            $imageModel->width = $imageScaled->width();
+            $imageModel->width = $data['dimensions']['width'];
+            $imageModel->height = $data['dimensions']['height'];
             $imageModel->image_hash = $data['hash'];
-            $imageModel->height = $imageScaled->height();
             $imageModel->format = $image->extension;
-            $uuidSplit = substr($imageModel->uuid, 0, 1).'/'.substr($imageModel->uuid, 1, 1).'/'.substr($imageModel->uuid, 2, 1).'/'.substr($imageModel->uuid, 3, 1);
-
-            $imageInfo->scaleDown(256, 256);
-
-            $path = $uuidSplit;
-            $name = $imageModel->uuid;
-            $this->storeImageAndThumbnail($imageScaled, $imageInfo, $path, $name);
-
-            if(isset($data['category']) && $data['category'] >= 0) {
-                $imageModel->category_id = $data['category'];
-            }
-
             $imageModel->save();
 
-            if(count($traits) > 0) {
-                foreach ($traits as $trait) {
-                    $t = new ImageTraits(
-                        [
-                            'image_uuid' => $imageModel->uuid,
-                            'trait_id' => $trait->getTrait()->id,
-                            'owner_id' => $user->id,
-                            'value' => $trait->getValue()
-                        ]
-                    );
-                    $t->save();
-                }
-            }
-
-
-            foreach($data['tags'] as $tagData)
-            {
-                $this->addTag($imageModel, $tagData['tag'], $tagData['personal']);
-            }
+            $imageModel->processing = true;
+            ProcessImage::dispatch($imageModel, $image->fullPath(), $data, $traits);
 
         } catch (\Exception $e) {
-            if(isset($imageModel)) {
-                $imageModel->delete();
-            }
-            else {
-                Storage::disk('local')->delete('thumbnails/' . $path . '/' . $name);
-                Storage::disk('local')->delete('images/' . $path . '/' . $name);
-            }
+            $imageModel->delete();
 
             session()->flash('status', 'Something went wrong');
             session()->flash('error', true);
             session()->flash('error_message', $e->getMessage());
-            return;
+            return false;
         }
 
         $image->delete();
-        session()->flash('status', 'Image uploaded successfully!');
+        session()->flash('status', 'Image uploading!');
+        session()->put('uuid', $imageModel->uuid);
+        return true;
     }
 
     public function storeImageAndThumbnail(ImageInterface $image, ImageInterface $thumbnail, string $path, string $name)
@@ -163,14 +130,17 @@ class ImageService
 
     public function compareHashes($newHash, $threshold = 95) : array
     {
-        $sameSizeImages = $this->lazyIndex();
+        $images = Cache::remember('image-hashes.user-'. Auth::user()->id, 3600, function ()
+        {
+            return Image::owned()->select('image_hash', 'uuid')->get();
+        });
 
         $hits = [];
 
         $counter = 0;
-        foreach ($sameSizeImages as $sameSizeImage) {
-            if ($this->comparator->compareHashStrings($sameSizeImage->image_hash, $newHash) > $threshold) {
-                $hits[$counter] = $sameSizeImage->uuid;
+        foreach ($images as $image) {
+            if ($this->comparator->compareHashStrings($image->image_hash, $newHash) > $threshold) {
+                $hits[$counter] = $image->uuid;
                 $counter++;
             }
         }

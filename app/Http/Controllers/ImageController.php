@@ -84,7 +84,7 @@ class ImageController extends Controller
             return redirect(route('login'));
         }
 
-        if(Auth::user()->id != $image->owner_id) {
+        if(!isset($image) || Auth::user()->id != $image->owner_id) {
             redirect()->back();
         }
 

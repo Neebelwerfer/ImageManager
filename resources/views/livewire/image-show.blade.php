@@ -1,5 +1,5 @@
 <div class="relative flex flex-col flex-grow h-full">
-    <a class="absolute top-0 left-0 z-50 m-5" href="{{ url()->previous() }}">Back</a>
+    <a class="absolute top-0 left-0 z-50 m-5" href="{{ url(route('collection.show', 'images')) }}" wire:navigate>Back</a>
 
     <div class="flex flex-col justify-center w-full mt-5">
         <div class="flex flex-row justify-center gap-2">
