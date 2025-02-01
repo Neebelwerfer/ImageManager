@@ -13,6 +13,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 
@@ -44,7 +45,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
 
             $name = $this->image->uuid;
             $uuidSplit = substr($name, 0, 1).'/'.substr($name, 1, 1).'/'.substr($name, 2, 1).'/'.substr($name, 3, 1);
-            $path = $uuidSplit;
+            $path = $this->image->owner_id . '/' . $uuidSplit;
 
 
             if(isset($data['category']) && $data['category'] >= 0) {
@@ -57,7 +58,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
                         [
                             'image_uuid' => $this->image->uuid,
                             'trait_id' => $trait->getTrait()->id,
-                            'owner_id' => Auth::user()->id,
+                            'owner_id' => $this->image->owner_id,
                             'value' => $trait->getValue()
                         ]
                     );
@@ -82,9 +83,15 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
                 Storage::disk('local')->delete('thumbnails/' . $path . '/' . $name);
                 Storage::disk('local')->delete('images/' . $path . '/' . $name);
             }
+            return;
         }
+        finally
+        {
+            File::delete($this->tempPath);
+        }
+
         Broadcast::on('Image.'.$this->image->uuid)->as('imageProcessed')->sendNow();
-        Cache::forget('image-hashes.user-' . Auth::user()->id);
+        Cache::forget('image-hashes.user-' . $this->image->owner_id);
     }
 
     /**

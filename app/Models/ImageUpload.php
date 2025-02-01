@@ -39,11 +39,4 @@ class ImageUpload extends Model
     {
         Storage::disk('local')->delete($this->path());
     }
-
-    protected static function booted(): void
-    {
-        static::deleting(function (ImageUpload $image) {
-            Storage::disk('local')->delete($image->path());
-        });
-    }
 }

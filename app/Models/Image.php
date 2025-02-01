@@ -29,13 +29,13 @@ class Image extends Model
     public function getThumbnailPath() : string
     {
         $split = Image::splitUUID($this->uuid);
-        return 'thumbnails/' . $split . '/' . $this->uuid;
+        return 'thumbnails/' . $this->owner_id . '/' . $split . '/' . $this->uuid;
     }
 
     public function getImagePath() : string
     {
         $split = Image::splitUUID($this->uuid);
-        return 'images/' . $split . '/' . $this->uuid;
+        return 'images/' . $this->owner_id . '/' . $split . '/' . $this->uuid;
     }
 
     public function category() : BelongsTo
