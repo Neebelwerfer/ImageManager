@@ -12,7 +12,6 @@ class SharedResourceService
         //
     }
 
-
     public function Share(User $sharedTo, string $type, $id, $accessLevel)
     {
         $shared_resource = new SharedResources();
@@ -37,5 +36,10 @@ class SharedResourceService
             else
                 $query->where('resource_id', $id);
         })->exists();
+    }
+
+    public function stopSharing(User $sharedTo, string $type, $id)
+    {
+
     }
 }

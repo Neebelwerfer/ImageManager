@@ -24,9 +24,15 @@ class AlbumService
         if(isset($album)) {
             if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && !$this->isShared($sharedTo, $id)) {
                 app(SharedResourceService::class)->Share($sharedTo, 'album', $id, $accessLevel);
+                $album->is_shared = true;
                 return true;
             }
         }
         return false;
+    }
+
+    public function stopSharing($sharedTo, $id)
+    {
+
     }
 }

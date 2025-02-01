@@ -7,16 +7,17 @@ use App\Models\SharedResources;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 
 #[Layout('layouts.app')]
 class ImageShow extends Component
 {
-    public $image;
+    public Image $image;
 
     public function back()
     {
-        return $this->redirect(url()->previous(), true);
+        return $this->redirect(route('collection.show', 'images'), true);
     }
 
     public function mount($imageUuid)

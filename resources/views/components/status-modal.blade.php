@@ -8,10 +8,15 @@
                 {{ $slot }}
             </div>
 
-            <!-- Close Button -->
-            <button x-on:click="showModal = false" class="px-4 py-2 text-white bg-red-500 rounded-md">
-                Close
-            </button>
+            @isset($buttons)
+                {{ $buttons }}
+            @else
+                <!-- Close Button -->
+                <button x-on:click="showModal = false" class="px-4 py-2 text-white bg-red-500 rounded-md">
+                    Close
+                </button>
+            @endisset
+
         </div>
     </div>
 </div>

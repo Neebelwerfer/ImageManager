@@ -68,6 +68,14 @@ class Upload extends Component
         unset($this->tags[$tagID]);
     }
 
+    public function goToImage(){
+        $uuid = session('uuid', "");
+        if($uuid !== null)
+            $this->redirectRoute('image.show', ['imageUuid' => $uuid], true, true);
+        else
+            $this->redirectRoute('collection');
+    }
+
     public function save(ImageService $imageService)
     {
         $this->hash = $imageService->getHashFromUploadedImage($this->imageUpload);
@@ -91,10 +99,14 @@ class Upload extends Component
         $data = [
             'category' => $this->category->id ?? null,
             'tags' => $this->tags,
-            'hash' => $this->hash
+            'hash' => $this->hash,
+            'dimensions' => $this->ImageMetadata['dimensions']
         ];
 
-        return $imageService->create($this->imageUpload, $data, $this->traits);
+        if($imageService->create($this->imageUpload, $data, $this->traits))
+        {
+            $this->cancel();
+        }
     }
 
     public function onUploadFinished() {

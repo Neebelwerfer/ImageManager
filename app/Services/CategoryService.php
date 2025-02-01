@@ -41,10 +41,16 @@ class CategoryService
         if(isset($cat)) {
             if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && !$this->isShared($sharedTo, $id)) {
                 app(SharedResourceService::class)->Share($sharedTo, 'category', $id, $accessLevel);
+                $cat->is_shared = true;
                 return true;
             }
         }
         return false;
+    }
+
+    public function stopSharing($sharedTo, $id)
+    {
+
     }
 
     public function delete($id) : void

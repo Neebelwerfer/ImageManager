@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\DTO\ImageUploadDTO;
 use App\Events\ImageTagEdited;
+use App\Jobs\ProcessImage;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTraits;
@@ -11,9 +13,12 @@ use App\Models\Tags;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\LazyCollection;
 use Intervention\Image\ImageManager;
+use Intervention\Image\Interfaces\ImageInterface;
 use SapientPro\ImageComparator\ImageComparator;
 
 class ImageService
@@ -72,97 +77,70 @@ class ImageService
      * @param array $data
      * @return void
      */
-    public function create(ImageUpload $image, array $data, array $traits)
+    public function create(ImageUpload $image, array $data, array $traits) : bool
     {
         $user = Auth::user();
 
         $imageModel = new Image($data);
-
         try {
-            $imageInfo = ImageManager::imagick()->read($image->fullPath());
-            $imageScaled = ImageManager::gd()->read($image->fullPath());
 
             $imageModel->uuid = $image->uuid;
             $imageModel->owner_id = $user->id;
-            $imageModel->width = $imageScaled->width();
+            $imageModel->width = $data['dimensions']['width'];
+            $imageModel->height = $data['dimensions']['height'];
             $imageModel->image_hash = $data['hash'];
-            $imageModel->height = $imageScaled->height();
             $imageModel->format = $image->extension;
-            $uuidSplit = substr($imageModel->uuid, 0, 1).'/'.substr($imageModel->uuid, 1, 1).'/'.substr($imageModel->uuid, 2, 1).'/'.substr($imageModel->uuid, 3, 1);
-
-            $imageInfo->scaleDown(256, 256);
-            $thumbnail_path = 'thumbnails/' . $uuidSplit;
-            $fileName = $imageModel->uuid . '.webp';
-            $full_thumbnail_path = 'thumbnails/' . $uuidSplit . '/' . $fileName;
-            if(!Storage::disk('local')->exists($thumbnail_path)) {
-                Storage::disk('local')->makeDirectory($thumbnail_path);
-            }
-            $imageInfo->save(storage_path('app') . '/' . $full_thumbnail_path);
-
-            $imagePath = $uuidSplit . '/' . $imageModel->uuid . '.' . $image->extension;
-
-            if(!Storage::disk('local')->exists('images/' . $uuidSplit)) {
-                Storage::disk('local')->makeDirectory('images/' . $uuidSplit);
-            }
-
-            $imageScaled->save(storage_path('app') . '/' . 'images/' . $imagePath);
-
-            if(isset($data['category']) && $data['category'] >= 0) {
-                $imageModel->category_id = $data['category'];
-            }
-
             $imageModel->save();
 
-            if(count($traits) > 0) {
-                foreach ($traits as $trait) {
-                    $t = new ImageTraits(
-                        [
-                            'image_uuid' => $imageModel->uuid,
-                            'trait_id' => $trait->getTrait()->id,
-                            'owner_id' => $user->id,
-                            'value' => $trait->getValue()
-                        ]
-                    );
-                    $t->save();
-                }
-            }
-
-
-            foreach($data['tags'] as $tagData)
-            {
-                $this->addTag($imageModel, $tagData['tag'], $tagData['personal']);
-            }
+            $imageModel->processing = true;
+            ProcessImage::dispatch($imageModel, $image->fullPath(), $data, $traits);
 
         } catch (\Exception $e) {
-            if(isset($imageModel)) {
-                $imageModel->delete();
-            }
-            else {
-                Storage::disk('local')->delete($full_thumbnail_path);
-                Storage::disk('local')->delete('images/' . $imagePath);
-            }
-            $image->delete();
+            $imageModel->delete();
 
             session()->flash('status', 'Something went wrong');
             session()->flash('error', true);
             session()->flash('error_message', $e->getMessage());
-            return;
+            return false;
         }
 
         $image->delete();
-        session()->flash('status', 'Image uploaded successfully!');
+        session()->flash('status', 'Image uploading!');
+        session()->put('uuid', $imageModel->uuid);
+        return true;
+    }
+
+    public function storeImageAndThumbnail(ImageInterface $image, ImageInterface $thumbnail, string $path, string $name)
+    {
+        $thumbnail_path = 'thumbnails/' . $path;
+        $image_path = 'images/' . $path;
+        if(!Storage::disk('local')->exists($thumbnail_path)) {
+            Storage::disk('local')->makeDirectory($thumbnail_path);
+        }
+        if(!Storage::disk('local')->exists($image_path)) {
+            Storage::disk('local')->makeDirectory($image_path);
+        }
+
+        $cryptThumb = Crypt::encrypt((string) $thumbnail->toWebp(), false);
+        $cryptImage = Crypt::encrypt((string) $image->encodeByMediaType(), false);
+
+        Storage::disk('local')->put($thumbnail_path . '/' . $name, $cryptThumb);
+        Storage::disk('local')->put($image_path . '/' . $name,$cryptImage);
     }
 
     public function compareHashes($newHash, $threshold = 95) : array
     {
-        $sameSizeImages = $this->lazyIndex();
+        $images = Cache::remember('image-hashes.user-'. Auth::user()->id, 3600, function ()
+        {
+            return Image::owned()->select('image_hash', 'uuid')->get();
+        });
 
         $hits = [];
 
         $counter = 0;
-        foreach ($sameSizeImages as $sameSizeImage) {
-            if ($this->comparator->compareHashStrings($sameSizeImage->image_hash, $newHash) > $threshold) {
-                $hits[$counter] = $sameSizeImage->uuid;
+        foreach ($images as $image) {
+            if ($this->comparator->compareHashStrings($image->image_hash, $newHash) > $threshold) {
+                $hits[$counter] = $image->uuid;
                 $counter++;
             }
         }
@@ -193,10 +171,15 @@ class ImageService
         if(isset($image)) {
             if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && !$this->isShared($sharedTo, $id)) {
                 app(SharedResourceService::class)->Share($sharedTo, 'image', $id, $accessLevel);
+                $image->is_shared = true;
                 return true;
             }
         }
         return false;
     }
 
+    public function stopSharing($sharedTo, $id)
+    {
+
+    }
 }

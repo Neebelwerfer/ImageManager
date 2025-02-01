@@ -7,8 +7,10 @@ use App\Models\ImageCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+#[Layout('layouts.collection')]
 class Categories extends Component
 {
     public $name = '';
