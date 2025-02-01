@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\ImageProcessed;
 use App\Models\Image;
 use App\Models\ImageTraits;
 use App\Services\ImageService;
@@ -90,7 +91,8 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             File::delete($this->tempPath);
         }
 
-        Broadcast::on('Image.'.$this->image->uuid)->as('imageProcessed')->sendNow();
+        $this->image->processing = false;
+        broadcast(new ImageProcessed($this->image->uuid));
         Cache::forget('image-hashes.user-' . $this->image->owner_id);
     }
 
