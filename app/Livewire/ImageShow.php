@@ -20,6 +20,12 @@ class ImageShow extends Component
         return $this->redirect(route('collection.show', 'images'), true);
     }
 
+    #[On('echo:Image.{image.uuid},.imageProcessed')]
+    public function imageProcessed()
+    {
+        $this->dispatch('reloadPage');
+    }
+
     public function mount($imageUuid)
     {
         if(!isset($imageUuid) or empty($imageUuid)) {
