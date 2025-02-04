@@ -31,11 +31,15 @@ class Upload extends Component
     public $image;
 
     public function onUploadFinished() {
+        $img = ImageManager::gd()->read($this->image);
+
+
         $upload = new ImageUpload(
             [
                 'uuid' => str::uuid(),
                 'user_id' => Auth::user()->id,
-                'extension' => $this->image->extension()
+                'extension' => $this->image->extension(),
+                'hash' => app(ImageService::class)->createImageHash($img->core()->native())
             ]);
         $upload->save();
 

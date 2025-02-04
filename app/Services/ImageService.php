@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\DTO\ImageUploadDTO;
 use App\Events\ImageTagEdited;
-use App\Jobs\ProcessImage;
+use App\Jobs\Upload\ProcessImage;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTraits;
@@ -50,12 +50,12 @@ class ImageService
         $image->delete();
     }
 
-    public function addTag(Image $image, Tags $tag, bool $personal)
+    public function addTag(User $user, Image $image, Tags $tag, bool $personal)
     {
         $image->tags()->attach($tag, ['added_by' => Auth::user()->id, 'personal' => $personal]);
         if(!$personal)
         {
-            Broadcast(new ImageTagEdited(Auth::user(), $image->uuid))->toOthers();
+            Broadcast(new ImageTagEdited($user, $image->uuid))->toOthers();
         }
     }
 
@@ -68,46 +68,6 @@ class ImageService
     public function removeCategory(Image $image, ImageCategory $category) {
         $image->categories()->detach($category);
         $image->push();
-    }
-
-    /**
-     * Adds image to database and creates thumbnail
-     *
-     * @param TemporaryUploadedFile $image
-     * @param array $data
-     * @return void
-     */
-    public function create(ImageUpload $image, array $data, array $traits) : bool
-    {
-        $user = Auth::user();
-
-        $imageModel = new Image($data);
-        try {
-
-            $imageModel->uuid = $image->uuid;
-            $imageModel->owner_id = $user->id;
-            $imageModel->width = $data['dimensions']['width'];
-            $imageModel->height = $data['dimensions']['height'];
-            $imageModel->image_hash = $data['hash'];
-            $imageModel->format = $image->extension;
-            $imageModel->save();
-
-            $imageModel->processing = true;
-            ProcessImage::dispatch($imageModel, $image->fullPath(), $data, $traits);
-
-        } catch (\Exception $e) {
-            $imageModel->delete();
-
-            session()->flash('status', 'Something went wrong');
-            session()->flash('error', true);
-            session()->flash('error_message', $e->getMessage());
-            return false;
-        }
-
-        $image->delete();
-        session()->flash('status', 'Image uploading!');
-        session()->put('uuid', $imageModel->uuid);
-        return true;
     }
 
     public function storeImageAndThumbnail(ImageInterface $image, ImageInterface $thumbnail, string $path, string $name)
@@ -128,11 +88,11 @@ class ImageService
         Storage::disk('local')->put($image_path . '/' . $name,$cryptImage);
     }
 
-    public function compareHashes($newHash, $threshold = 95) : array
+    public function compareHashes(int $user_id, $newHash, $threshold = 95) : array
     {
-        $images = Cache::remember('image-hashes.user-'. Auth::user()->id, 3600, function ()
+        $images = Cache::remember('image-hashes.user-'. $user_id, 3600, function () use ($user_id)
         {
-            return Image::owned()->select('image_hash', 'uuid')->get();
+            return Image::where('owner_id', $user_id)->select('image_hash', 'uuid')->get();
         });
 
         $hits = [];
@@ -147,13 +107,13 @@ class ImageService
         return $hits;
     }
 
-    public function getHashFromUploadedImage(ImageUpload $image) : string
+    public function getHashFromUploadedImage(string $path) : string
     {
-        $img = ImageManager::gd()->read($image->fullPath());
+        $img = ImageManager::gd()->read($path);
         return $this->createImageHash($img->core()->native());
     }
 
-    private function createImageHash($image) : string
+    public function createImageHash($image) : string
     {
         $hash = $this->comparator->hashImage($image);
         return $this->comparator->convertHashToBinaryString($hash);

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\Modal\Upload;
+namespace App\Livewire\Upload;
 
-use LivewireUI\Modal\ModalComponent;
+use Livewire\Component;
 
-class DuplicateImages extends ModalComponent
+class DuplicateImages extends Component
 {
     public $duplicates;
     public $user_id;
@@ -47,20 +47,9 @@ class DuplicateImages extends ModalComponent
         return count($this->duplicates);
     }
 
-    public function close($accept) {
-
-        if($accept) {
-            $this->dispatch('accepted');
-        }
-        else{
-            $this->dispatch('cancelled');
-        }
-        $this->closeModal();
-    }
-
     public function render()
     {
 
-        return view('livewire.modal.upload.duplicate-images');
+        return view('livewire.upload.duplicate-images');
     }
 }

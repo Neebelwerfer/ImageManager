@@ -14,6 +14,7 @@ class ImageUpload extends Model
         'uuid',
         'extension',
         'user_id',
+        'hash'
     ];
 
     public $primaryKey = 'uuid';
@@ -39,4 +40,10 @@ class ImageUpload extends Model
     {
         Storage::disk('local')->delete($this->path());
     }
-}
+
+    protected static function booted(): void
+    {
+        static::deleting(function (ImageUpload $imageUpload) {
+            Storage::disk('local')->delete($imageUpload->path());
+        });
+    }}

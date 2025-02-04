@@ -2,11 +2,17 @@
 
 namespace App\Livewire\Upload;
 
+use App\Jobs\Upload\CheckForDuplicates;
+use App\Jobs\Upload\ProcessImage;
+use App\Jobs\Upload\ScanForDuplicates;
+use App\Livewire\Upload;
 use App\Models\ImageCategory;
 use App\Models\ImageUpload;
 use App\Models\Tags;
 use App\Models\Traits;
+use App\Models\User;
 use App\Services\ImageService;
+use App\Support\Enums\UploadState;
 use App\Support\Traits\AddedTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -23,10 +29,43 @@ class ProcessUpload extends Component
 {
     public ImageUpload $imageUpload;
 
+    public $state = "waiting";
+
     public $category;
     public $tags = [];
     public $traits = [];
     public $hash;
+
+
+    #[On('echo:upload.{imageUpload.uuid},.imageProcessed')]
+    public function imageProcessed()
+    {
+        $this->state = $this->imageUpload->state;
+    }
+
+    #[On('echo:upload.{imageUpload.uuid},.begunProcessing')]
+    public function begunProcessing()
+    {
+        $this->state = $this->imageUpload->state;
+    }
+
+    #[On('echo:upload.{imageUpload.uuid},.processingFailed')]
+    public function processingFailed()
+    {
+        $this->state = $this->imageUpload->state;
+    }
+
+    #[On('echo:upload.{imageUpload.uuid},.foundDuplicates')]
+    public function foundDuplicates()
+    {
+        $this->state = $this->imageUpload->state;
+        unset($this->duplicates);
+    }
+
+    public function process() {
+        $this->state = "processing";
+        ProcessImage::dispatchAfterResponse(Auth::user(), $this->imageUpload);
+    }
 
     #[On('categorySelected')]
     public function categorySelected($category)
@@ -50,17 +89,22 @@ class ProcessUpload extends Component
         $this->tags[$id] = ['tag' => Tags::find($id), 'personal' => $personal];
     }
 
-    public function save(ImageService $imageService)
+    public function submit()
     {
-        $this->hash = $imageService->getHashFromUploadedImage($this->imageUpload);
-        $duplicates = $imageService->compareHashes($this->hash);
-
-        if(count($duplicates) > 0) {
-            $this->dispatch('openModal', 'modal.upload.duplicate-images', ['duplicates' => $duplicates]);
+        if($this->imageUpload->state !== "waiting")
             return;
-        }
 
-        return $this->upload($imageService);
+        $data = [
+            'category' => $this->category->id ?? null,
+            'tags' => $this->tags,
+            'traits' => $this->traits,
+            'dimensions' => $this->ImageMetadata['dimensions']
+        ];
+
+        $this->imageUpload->data = json_encode($data);
+        $this->imageUpload->save();
+        $this->state = "scanning";
+        ScanForDuplicates::dispatchAfterResponse(Auth::user(), $this->imageUpload);
     }
 
     public function removeTag($tagID)
@@ -73,20 +117,6 @@ class ProcessUpload extends Component
         $this->traits[$id]->setValue($value);
     }
 
-    #[On('accepted')]
-    public function upload(ImageService $imageService) {
-        $data = [
-            'category' => $this->category->id ?? null,
-            'tags' => $this->tags,
-            'hash' => $this->hash,
-            'dimensions' => $this->ImageMetadata['dimensions']
-        ];
-
-        if($imageService->create($this->imageUpload, $data, $this->traits))
-        {
-            $this->cancel();
-        }
-    }
 
     public function setupTraits() {
         $traits = Traits::personalOrGlobal()->get();
@@ -96,10 +126,24 @@ class ProcessUpload extends Component
         }
     }
 
-    #[On('cancelled')]
     public function cancel() {
         $this->imageUpload->delete();
         return $this->redirectRoute('upload', navigate: true);
+    }
+
+    public function navigate($toImage = false)
+    {
+        if($toImage)
+        {
+            return $this->redirectRoute('image.show', ['imageUuid' => $this->imageUpload->uuid]);
+        }
+        return $this->redirectRoute('upload', navigate:true);
+    }
+
+    #[Computed()]
+    public function duplicates()
+    {
+        return json_decode($this->imageUpload->duplicates);
     }
 
     #[Computed()]
@@ -121,6 +165,20 @@ class ProcessUpload extends Component
         return $cache;
     }
 
+    public function SetupData()
+    {
+        $data = json_decode($this->imageUpload->data, true);
+        if(isset($data) && !empty($data))
+        {
+
+        }
+    }
+
+    public function boot()
+    {
+
+    }
+
     public function mount($uuid)
     {
         $res = ImageUpload::find($uuid);
@@ -131,7 +189,12 @@ class ProcessUpload extends Component
         }
 
         $this->imageUpload = $res;
-        $this->setupTraits();
+        $this->state = $res->state;
+
+       if($this->state === "waiting")
+            $this->SetupData();
+        else if($this->state === "foundDuplicates")
+            $this->foundDuplicates();
     }
 
     public function render()
