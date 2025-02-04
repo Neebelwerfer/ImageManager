@@ -63,6 +63,9 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             $image->height = $data['dimensions']['height'];
             $image->image_hash = $this->imageUpload->hash;
             $image->format = $this->imageUpload->extension;
+            if($data['category'] !== null) {
+                $image->category_id = $data['category'];
+            }
             $image->save();
 
             $traits = Traits::where('owner_id', $this->user->id)->get();
@@ -71,9 +74,6 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             $imageScaled = ImageManager::gd()->read($this->imageUpload->fullPath());
 
 
-            if(isset($data['category']) && $data['category'] >= 0) {
-                $image->category_id = $data['category'];
-            }
 
             if(isset($data['traits']) && count($data['traits']) > 0) {
                 foreach ($data['traits'] as $trait_id) {
