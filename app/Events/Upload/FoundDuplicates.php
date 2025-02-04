@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Events;
+namespace App\Events\Upload;
 
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ImageProcessed implements ShouldBroadcast
+class FoundDuplicates implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -17,8 +19,10 @@ class ImageProcessed implements ShouldBroadcast
      * Create a new event instance.
      */
     public function __construct(
-        public string $imageUUID,
-    ) {}
+        public User $user,
+        public string $image_uuid,
+    )
+    {}
 
     /**
      * Get the data to broadcast.
@@ -27,15 +31,13 @@ class ImageProcessed implements ShouldBroadcast
      */
     public function broadcastWith(): array
     {
-        return [];
+        return ['user_id' => $this->user->id];
     }
-
 
     public function broadcastAs(): string
     {
-        return 'imageProcessed';
+        return 'foundDuplicates';
     }
-
 
     /**
      * Get the channels the event should broadcast on.
@@ -45,7 +47,7 @@ class ImageProcessed implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('upload.'.$this->imageUUID)
+            new Channel('upload.'. $this->image_uuid),
         ];
     }
 }

@@ -13,11 +13,15 @@ use App\Livewire\Manage\Categories;
 use App\Livewire\Manage\Tags;
 use App\Livewire\Manage\Traits;
 use App\Livewire\Upload;
+use App\Livewire\Upload\ProcessUpload;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('upload', Upload::class)
         ->name('upload');
+
+    Route::get('upload/{uuid}', ProcessUpload::class)
+        ->name('upload.process');
 
     Route::get('manage', Manage::class)
         ->name('manage');

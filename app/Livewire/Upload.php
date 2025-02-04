@@ -30,91 +30,16 @@ class Upload extends Component
     #[Validate('image')]
     public $image;
 
-    #[Url('uuid', except: '')]
-    public string $uuid = '';
-
-    public ?ImageUpload $imageUpload;
-
-    public $category;
-
-    public $tags = [];
-    public $traits = [];
-    public $hash;
-
-    #[On('categorySelected')]
-    public function categorySelected($category)
-    {
-        if($category == -1) {
-            $this->category = null;
-            return;
-        }
-        $this->category = ImageCategory::find($category);
-    }
-
-    #[On('tagSelected')]
-    public function tagSelected($tagData)
-    {
-        $id = $tagData['id'];
-        $personal = $tagData['personal'];
-        if (isset($this->tags[$id])) {
-            return;
-        }
-
-        $this->tags[$id] = ['tag' => Tags::find($id), 'personal' => $personal];
-    }
-
-    public function removeTag($tagID)
-    {
-        unset($this->tags[$tagID]);
-    }
-
-    public function goToImage(){
-        $uuid = session('uuid', "");
-        if($uuid !== null)
-            $this->redirectRoute('image.show', ['imageUuid' => $uuid], true, true);
-        else
-            $this->redirectRoute('collection');
-    }
-
-    public function save(ImageService $imageService)
-    {
-        $this->hash = $imageService->getHashFromUploadedImage($this->imageUpload);
-        $duplicates = $imageService->compareHashes($this->hash);
-
-        if(count($duplicates) > 0) {
-            $this->dispatch('openModal', 'modal.upload.duplicate-images', ['duplicates' => $duplicates]);
-            return;
-        }
-
-        return $this->upload($imageService);
-    }
-
-    #[On('traitUpdated')]
-    public function traitUpdated($id, $value) {
-        $this->traits[$id]->setValue($value);
-    }
-
-    #[On('accepted')]
-    public function upload(ImageService $imageService) {
-        $data = [
-            'category' => $this->category->id ?? null,
-            'tags' => $this->tags,
-            'hash' => $this->hash,
-            'dimensions' => $this->ImageMetadata['dimensions']
-        ];
-
-        if($imageService->create($this->imageUpload, $data, $this->traits))
-        {
-            $this->cancel();
-        }
-    }
-
     public function onUploadFinished() {
+        $img = ImageManager::gd()->read($this->image);
+
+
         $upload = new ImageUpload(
             [
                 'uuid' => str::uuid(),
                 'user_id' => Auth::user()->id,
-                'extension' => $this->image->extension()
+                'extension' => $this->image->extension(),
+                'hash' => app(ImageService::class)->createImageHash($img->core()->native())
             ]);
         $upload->save();
 
@@ -122,78 +47,7 @@ class Upload extends Component
         $this->image->delete();
         $this->image = null;
 
-        $this->uuid = $upload->uuid;
-        $this->imageUpload = $upload;
-
-        $this->setupTraits();
-        unset($this->ImageMetadata);
-    }
-
-    public function setupTraits() {
-        $traits = Traits::personalOrGlobal()->get();
-        foreach($traits as $trait) {
-            $at = new AddedTrait($trait, $trait->default);
-            $this->traits[$trait->id] = $at;
-        }
-    }
-
-    #[Computed()]
-    public function ImageMetadata()
-    {
-        if($this->imageUpload == null) return null;
-        $cache = Cache::get('image-upload-'.$this->imageUpload->uuid);
-        if($cache === null)
-        {
-            $data = [];
-            $img = ImageManager::gd()->read(storage_path('app/') . $this->imageUpload->path());
-
-            $data['dimensions'] = ['height' => $img->size()->height(), 'width' => $img->size()->width()];
-            $data['extension'] = Str::upper($this->imageUpload->extension);
-            $data['size'] = number_format(Storage::disk('local')->size($this->imageUpload->path()) / 1024 / 1024, 2);
-            Cache::set('image-upload-'.$this->imageUpload->uuid, $data, now()->addHour());
-            return $data;
-        }
-        return $cache;
-    }
-
-    public function onUploadStarted()
-    {
-        $this->cancel();
-    }
-
-    public function cancel() {
-        if(isset($this->imageUpload))
-        {
-            $this->imageUpload->delete();
-            $this->imageUpload = null;
-        }
-        $this->uuid = '';
-        $this->traits = [];
-        unset($this->ImageMetadata);
-    }
-
-    public function boot()
-    {
-        if(!empty($this->uuid) && !isset($this->imageUpload))
-        {
-            $res = ImageUpload::where('user_id', Auth::user()->id)->where('uuid', $this->uuid)->first();
-            if(isset($res)) {
-                $this->imageUpload = $res;
-                if($this->traits == []) {
-                    $this->setupTraits();
-                }
-            }
-            else
-            {
-                $this->cancel();
-            }
-        }
-    }
-
-
-    #[On('cancelled')]
-    public function cancelled() {
-        $this->cancel();
+        return $this->redirectRoute('upload.process', ['uuid' => $upload->uuid], navigate: true);
     }
 
     public function render()

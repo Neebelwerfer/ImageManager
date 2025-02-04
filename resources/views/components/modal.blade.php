@@ -16,10 +16,11 @@
                     {{ $content }}
                 </div>
             </div>
-
-            <div class="px-4 pb-5 bg-slate-600 sm:px-4 sm:flex">
-                {{ $buttons }}
-            </div>
+            @isset($buttons)
+                <div class="px-4 pb-5 bg-slate-600 sm:px-4 sm:flex">
+                    {{ $buttons }}
+                </div>
+            @endisset
     @if($formAction)
         </form>
     @endif
