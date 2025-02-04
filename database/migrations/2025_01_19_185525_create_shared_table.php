@@ -30,17 +30,17 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('images', function (Blueprint $table) {
-            $table->boolean('is_shared')->default(false);
-        });
+        // Schema::table('images', function (Blueprint $table) {
+        //     $table->boolean('is_shared')->default(false);
+        // });
 
-        Schema::table('albums', function (Blueprint $table) {
-            $table->boolean('is_shared')->default(false);
-        });
+        // Schema::table('albums', function (Blueprint $table) {
+        //     $table->boolean('is_shared')->default(false);
+        // });
 
-        Schema::table('image_categories', function (Blueprint $table) {
-            $table->boolean('is_shared')->default(false);
-        });
+        // Schema::table('image_categories', function (Blueprint $table) {
+        //     $table->boolean('is_shared')->default(false);
+        // });
     }
 
     /**

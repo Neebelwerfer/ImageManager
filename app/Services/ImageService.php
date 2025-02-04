@@ -115,7 +115,7 @@ class ImageService
 
     public function createImageHash($image) : string
     {
-        $hash = $this->comparator->hashImage($image);
+        $hash = $this->comparator->hashImage($image, size:16);
         return $this->comparator->convertHashToBinaryString($hash);
     }
 

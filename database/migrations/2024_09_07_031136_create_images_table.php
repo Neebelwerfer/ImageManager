@@ -31,7 +31,7 @@ return new class extends Migration
             $table->smallInteger('height', false, true);
             $table->foreignId('category_id')->nullable()->constrained('image_categories')->nullOnDelete();
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
-            $table->tinyText('image_hash');
+            $table->text('image_hash');
             $table->tinyText('format');
             $table->timestamps();
             $table->softDeletes();
