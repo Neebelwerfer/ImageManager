@@ -94,9 +94,16 @@ class ProcessUpload extends Component
         if($this->imageUpload->state !== "waiting")
             return;
 
+        $tags = [];
+
+        foreach ($this->tags as $id => $data)
+        {
+            $tags[$data['tag']->name] = $data['personal'];
+        }
+
         $data = [
             'category' => $this->category->id ?? null,
-            'tags' => $this->tags,
+            'tags' => $tags,
             'traits' => $this->traits,
             'dimensions' => $this->ImageMetadata['dimensions']
         ];

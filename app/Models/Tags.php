@@ -24,13 +24,6 @@ class Tags extends Model
         return $this->belongsToMany(Image::class);
     }
 
-    public function scopeOwnOrPublic(Builder $query)
-    {
-        return $query->where(function($q) {
-            $q->where('added_by', Auth::user()->id);
-            $q->orWhere('personal', 'false');
-        });
-    }
 
     public static function sortTags(Builder $query, ?string $tags) : Builder
     {

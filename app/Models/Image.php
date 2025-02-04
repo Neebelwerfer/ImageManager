@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class Image extends Model
@@ -46,7 +47,7 @@ class Image extends Model
 
     public function tags() : BelongsToMany
     {
-        return $this->belongsToMany(Tags::class)->withPivot('added_by', 'personal')->ownOrPublic();
+        return $this->belongsToMany(Tags::class)->withPivot('added_by', 'personal');
     }
 
     public function traits() : HasMany
@@ -93,6 +94,7 @@ class Image extends Model
         static::deleting(function (Image $image) {
             Storage::disk('local')->delete($image->getImagePath());
             Storage::disk('local')->delete($image->getThumbnailPath());
+            Cache::forget('image-hashes.user-'. $image->owner_id);
         });
     }
 

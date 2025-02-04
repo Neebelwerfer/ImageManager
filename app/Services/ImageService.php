@@ -52,7 +52,7 @@ class ImageService
 
     public function addTag(User $user, Image $image, Tags $tag, bool $personal)
     {
-        $image->tags()->attach($tag, ['added_by' => Auth::user()->id, 'personal' => $personal]);
+        $image->tags()->attach($tag, ['added_by' => $user->id, 'personal' => $personal]);
         if(!$personal)
         {
             Broadcast(new ImageTagEdited($user, $image->uuid))->toOthers();

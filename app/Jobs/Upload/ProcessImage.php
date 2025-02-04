@@ -3,15 +3,15 @@
 namespace App\Jobs\Upload;
 
 use App\Events\ImageProcessed;
-use App\Events\Upload\CheckForDuplicatesDone;
-use App\Events\Upload\FoundDuplicates;
 use App\Models\Image;
 use App\Models\ImageTraits;
 use App\Models\ImageUpload;
+use App\Models\Tags;
 use App\Models\Traits;
 use App\Models\Upload\UploadErrors;
 use App\Models\User;
 use App\Services\ImageService;
+use App\Services\TagService;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -41,6 +41,9 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
      */
     public function handle(): void
     {
+        $imageService = app(ImageService::class);
+        $tagService = app(TagService::class);
+
         $this->imageUpload->state = "processing";
         $this->imageUpload->save();
 
@@ -61,8 +64,6 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             $image->image_hash = $this->imageUpload->hash;
             $image->format = $this->imageUpload->extension;
             $image->save();
-
-            $imageService = app(ImageService::class);
 
             $traits = Traits::where('owner_id', $this->user->id)->get();
 
@@ -90,9 +91,11 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
                 }
             }
 
-            foreach($data['tags'] as $tagData)
+            foreach($data['tags'] as $tagName => $personal)
             {
-                $imageService->addTag($this->user, $image, $tagData['tag'], $tagData['personal']);
+                $tag = $tagService->getOrCreate($tagName);
+                if(isset($tag))
+                    $imageService->addTag($this->user, $image, $tag, $personal);
             }
 
             $imageInfo->scaleDown(256, 256);
