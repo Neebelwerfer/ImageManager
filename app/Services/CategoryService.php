@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\ImageCategory;
-use App\Models\SharedResources;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,9 +12,9 @@ class CategoryService
 
     }
 
-    public function create($name) : ImageCategory
+    public function create(User $user, $name) : ImageCategory
     {
-        $cat = ImageCategory::owned()->where('name', $name)->first();
+        $cat = ImageCategory::owned($user->id)->where('name', $name)->first();
 
         if(isset($cat)) {
             return $cat;
@@ -31,16 +30,18 @@ class CategoryService
 
     public function isShared($sharedTo, $id) : bool
     {
-        return app(SharedResourceService::class)->isShared($sharedTo, 'category', $id);
+        return app(SharedResourceService::class)->isCollectionShared($sharedTo, 'category', $id);
     }
 
 
-    public function share($id, User $sharedTo, $accessLevel) : bool
+    public function share(User $sharedBy, $id, User $sharedTo, $accessLevel) : bool
     {
-        $cat = ImageCategory::owned()->find($id);
+        if($sharedTo->id === $sharedBy->id) return true;
+
+        $cat = ImageCategory::owned($sharedBy->id)->find($id);
         if(isset($cat)) {
-            if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && !$this->isShared($sharedTo, $id)) {
-                app(SharedResourceService::class)->Share($sharedTo, 'category', $id, $accessLevel);
+            if(isset($sharedTo) && !$this->isShared($sharedTo, $id)) {
+                app(SharedResourceService::class)->ShareCollection($sharedBy, $sharedTo, 'category', $id, $accessLevel);
                 $cat->is_shared = true;
                 return true;
             }
@@ -53,21 +54,21 @@ class CategoryService
 
     }
 
-    public function delete($id) : void
+    public function delete(User $user, $id) : void
     {
-        $cat = ImageCategory::owned()->find($id);
+        $cat = ImageCategory::owned($user)->find($id);
         if(isset($cat)) {
             $cat->delete();
         }
     }
 
-    public function find($id) : ?ImageCategory
+    public function find(User $user, $id) : ?ImageCategory
     {
-        return ImageCategory::owned()->find($id);
+        return ImageCategory::owned($user)->find($id);
     }
 
-    public function findWhereOwnedAndShared($id) : ?ImageCategory
+    public function findWhereOwnedAndShared(User $user, $id) : ?ImageCategory
     {
-        return ImageCategory::ownedOrShared()->find($id);
+        return ImageCategory::ownedOrShared($user)->find($id);
     }
 }

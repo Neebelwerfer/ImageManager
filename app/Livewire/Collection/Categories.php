@@ -36,7 +36,7 @@ class Categories extends Component
     {
         return view('livewire.collection.categories',
             [
-                'categories' => ImageCategory::ownedOrShared()->where('name', 'like', '%' . $this->name . '%')->paginate(20)
+                'categories' => ImageCategory::ownedOrShared(Auth::user()->id)->where('name', 'like', '%' . $this->name . '%')->paginate(20)
             ]);
     }
 }

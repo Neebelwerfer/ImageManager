@@ -7,26 +7,17 @@ use App\Support\Shared\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class SharedResources extends Model
+class SharedCollections extends Model
 {
-    public $table = 'shared_resources';
+    public $table = 'shared_collections';
 
     protected $fillable = [
         'resource_id',
-        'resource_uuid',
         'shared_by_user_id',
         'shared_with_user_id',
         'level',
         'type',
     ];
-
-    public function casts()
-    {
-        return [
-            'level' => AccessLevel::class,
-            'type' => Type::class,
-        ];
-    }
 
     public function shared_with() : BelongsTo
     {

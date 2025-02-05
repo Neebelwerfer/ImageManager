@@ -54,7 +54,7 @@ class Details extends ModalComponent
                 return;
             }
 
-            app(ImageService::class)->addTag($this->image, $res, $tagData['personal']);
+            app(ImageService::class)->addTag(Auth::user(), $this->image, $res, $tagData['personal']);
         }
     }
 

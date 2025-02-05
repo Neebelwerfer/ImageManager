@@ -46,7 +46,7 @@ class EditRelations extends ModalComponent
     public function entries()
     {
         if($this->type == 'category') {
-            return ImageCategory::ownedOrShared()->paginate(20);
+            return ImageCategory::ownedOrShared(Auth::user()->id)->paginate(20);
         }
         else if ($this->type == 'album') {
             return Album::where('owner_id', Auth::user()->id)->paginate(20);

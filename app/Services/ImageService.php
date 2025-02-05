@@ -9,6 +9,7 @@ use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTraits;
 use App\Models\ImageUpload;
+use App\Models\SharedImages;
 use App\Models\Tags;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -119,18 +120,20 @@ class ImageService
         return $this->comparator->convertHashToBinaryString($hash);
     }
 
-    public function isShared($sharedTo, $id) : bool
+    public function isShared(User $sharedTo, $uuid) : bool
     {
-        return app(SharedResourceService::class)->isShared($sharedTo, 'image', $id);
+        return SharedImages::where('image_uuid', $uuid)->where('shared_with_user_id', $sharedTo->id);
     }
 
 
-    public function share($id, User $sharedTo, $accessLevel) : bool
+    public function share(User $sharedBy, $image_id, User $sharedTo, $accessLevel) : bool
     {
-        $image = Image::owned()->find($id);
-        if(isset($image)) {
-            if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && !$this->isShared($sharedTo, $id)) {
-                app(SharedResourceService::class)->Share($sharedTo, 'image', $id, $accessLevel);
+        if($sharedTo->id == $sharedBy->id) return true;
+        $image = Image::owned()->find($image_id);
+        if(isset($image))
+        {
+            if(isset($sharedTo) && !$this->isShared($sharedTo, $image_id)) {
+                app(SharedResourceService::class)->ShareImage($sharedBy, $sharedTo, 'image', $image_id, $accessLevel);
                 $image->is_shared = true;
                 return true;
             }

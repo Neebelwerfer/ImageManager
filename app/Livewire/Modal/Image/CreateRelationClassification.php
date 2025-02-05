@@ -30,7 +30,7 @@ class CreateRelationClassification extends ModalComponent
         }
 
         if($this->type == 'category') {
-            app(CategoryService::class)->create($this->name);
+            app(CategoryService::class)->create(Auth::user(), $this->name);
         } else if ($this->type == 'album') {
             Album::create([
                 'name' => $this->name,

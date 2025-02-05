@@ -40,12 +40,11 @@ return new class extends Migration
         Schema::create('traits', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->enum('type', ['integer', 'float', 'text', 'boolean', 'date']);
             $table->integer('min')->nullable();
             $table->integer('max')->nullable();
             $table->string('default');
-            $table->boolean('global')->default(false);
             $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
-            $table->enum('type', ['integer', 'float', 'text', 'boolean', 'date']);
         });
 
         Schema::create('image_traits', function (Blueprint $table) {
@@ -68,6 +67,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('album_id')->constrained('albums')->onDelete('cascade');
             $table->foreignUuid('image_uuid')->constrained('images', 'uuid')->onDelete('cascade');
+            $table->foreignId('added_by')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
 

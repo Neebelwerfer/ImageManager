@@ -42,27 +42,27 @@ class Collection extends CollectionView
         }
 
         if($collectionType == 'categories') {
-            $res = ImageCategory::ownedOrShared()->find($collectionID);
+            $res = ImageCategory::ownedOrShared(Auth::user()->id)->find($collectionID);
             if( $res === null) {
                 abort(404, 'Category not found');
             }
 
-            if(!$res->owner_id === Auth::user()->id) {
-                $resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
-                $this->accessLevel = $resource->level;
+            if(!$res->owner_id !== Auth::user()->id) {
+                //$resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
+                //$this->accessLevel = $resource->level;
             }
             $this->collectionName = $res->name;
         }
 
         if($collectionType == 'albums') {
-            $res = Album::ownedOrShared()->find($collectionID);
+            $res = Album::ownedOrShared(Auth::user()->id)->find($collectionID);
             if($res === null) {
                 abort(404, 'Category not found');
             }
 
-            if(!$res->owner_id === Auth::user()->id) {
-                $resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
-                $this->accessLevel = $resource->level;
+            if($res->owner_id !== Auth::user()->id) {
+                //$resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
+                //$this->accessLevel = $resource->level;
             }
             $this->collectionName = $res->name;
         }

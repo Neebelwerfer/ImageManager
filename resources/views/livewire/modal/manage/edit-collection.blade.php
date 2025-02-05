@@ -11,7 +11,7 @@
             </div>
         </form>
 
-        <livewire:component.shared-with-list id="{{ $collectionID }}" type="{{ $collectionType }}" x-transition/>
+        {{-- <livewire:component.shared-with-list id="{{ $collectionID }}" type="{{ $collectionType }}" x-transition/> --}}
     </x-slot>
 
     <x-slot name="buttons">
