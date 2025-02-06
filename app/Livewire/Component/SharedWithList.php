@@ -2,7 +2,11 @@
 
 namespace App\Livewire\Component;
 
+use App\Jobs\StopSharingCategory;
+use App\Models\SharedCollections;
+use App\Models\SharedImages;
 use App\Models\SharedResources;
+use App\Models\User;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -23,12 +27,23 @@ class SharedWithList extends Component
     }
 
     public function removeShared($id) {
-        SharedResources::find($id)->delete();
+        // SharedResources::find($id)->delete();
+        if($this->type === 'category')
+        {
+            $shared = $this->sharedWith->find($id);
+
+            StopSharingCategory::dispatch(User::find($shared->shared_by_user_id), User::find($shared->shared_with_user_id), $shared);
+        }
+        $this->updateShared();
     }
 
     #[Computed()]
     public function sharedWith() {
-        return SharedResources::where('resource_id', $this->id)->where('type', $this->type)->get();
+        if($this->type === 'image')
+        {
+            return SharedImages::where('image_uuid', $this->id)->get();
+        }
+        return SharedCollections::where('resource_id', $this->id)->where('type', $this->type)->get();
     }
 
     public function render()

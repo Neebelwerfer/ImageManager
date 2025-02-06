@@ -12,11 +12,22 @@ use App\Models\SharedResources;
 use App\Models\SharedSource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class SharedResourceService
 {
     public function __construct() {
         //
+    }
+
+    public function isCollectionShared(User $sharedTo, $collectionType, $collectionId)
+    {
+        return SharedCollections::where('type', $collectionType)->where('resource_id', $collectionId)->where('shared_with_user_id', $sharedTo->id)->exists();
+    }
+
+    public function isImageShared(User $sharedTo, $imageUuid)
+    {
+        return SharedImages::where('image_uuid', $imageUuid)->where('shared_with_user_id', $sharedTo->id);
     }
 
     public function ShareCategory(User $sharedBy, User $sharedTo, $id, $accessLevel)
@@ -76,24 +87,13 @@ class SharedResourceService
 
     public function RemoveSourceFromSharedImage(User $sharedBy, SharedImages $sharedImage, $source)
     {
-        $res = $sharedImage->where('shared_by_user_id', $sharedBy->id)->where('source', $source)->first();
+        $res = SharedSource::where('shared_image', $sharedImage->id)->where('source', $source)->where('shared_by_user_id', $sharedBy->id)->first();
         if(isset($res))
         {
-            $res->delete;
+            $res->delete();
         }
-        if($sharedImage->sharedSources()->count() == 0)
-        {
-            $sharedImage->delete();
+        else {
+            Log::debug('Could not find source of shared image');
         }
-    }
-
-    public function isCollectionShared(User $sharedTo, $collectionType, $collectionId)
-    {
-        return SharedCollections::where('type', $collectionType)->where('resource_id', $collectionId)->where('shared_with_user_id', $sharedTo->id)->exists();
-    }
-
-    public function isImageShared(User $sharedTo, $imageUuid)
-    {
-        return SharedImages::where('image_uuid', $imageUuid)->where('shared_with_user_id', $sharedTo->id);
     }
 }

@@ -14,6 +14,7 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ShareCategoryImages implements ShouldQueue, ShouldBeEncrypted, ShouldBeUnique
 {
@@ -54,7 +55,6 @@ class ShareCategoryImages implements ShouldQueue, ShouldBeEncrypted, ShouldBeUni
 
             foreach ($catImages as $image)
             {
-
                 $shared_image = SharedImages::with('SharedSource')->where('image_uuid', $image->uuid)->where('shared_by_user_id', $this->sharedBy->id)->where('shared_with_user_id', $this->sharedTo->id)->firstOrCreate([
                     'image_uuid' => $image->uuid,
                     'shared_by_user_id' => $this->sharedBy->id,
@@ -65,6 +65,9 @@ class ShareCategoryImages implements ShouldQueue, ShouldBeEncrypted, ShouldBeUni
                 if(!$shared_image->sharedSources()->where('source', 'category')->exists())
                 {
                     app(SharedResourceService::class)->AddSourceToSharedImage($this->sharedBy, $shared_image, 'category');
+                }
+                else {
+                    Log::warning('Shared image in category already have category as source', ['image_uuid' => $image->uuid, 'category' => $this->imageCategory->id]);
                 }
             }
             DB::commit();

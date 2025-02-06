@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Image;
 use App\Models\SharedCollections;
 use App\Models\SharedImages;
+use App\Models\SharedSource;
 use App\Models\User;
 use App\Services\SharedResourceService;
 use Exception;
@@ -27,7 +28,6 @@ class StopSharingCategory implements ShouldQueue, ShouldBeEncrypted, ShouldBeUni
         public readonly User $sharedBy,
         public readonly User $sharedTo,
         public readonly SharedCollections $sharedCategory,
-        public readonly int $categoryId,
     )
     {
         //
@@ -40,24 +40,36 @@ class StopSharingCategory implements ShouldQueue, ShouldBeEncrypted, ShouldBeUni
     {
         try {
             DB::beginTransaction();
-            $catImages = Image::where('category_id', $this->categoryId)->select('uuid')->get();
+            $catImages = Image::where('category_id', $this->sharedCategory->resource_id)->get();
 
             foreach ($catImages as $image)
             {
-                $shared_image = SharedImages::where('image_uuid', $image->uuid)->where('shared_by_user_id', $this->sharedBy->id)->where('shared_with_user_id', $this->sharedTo->id)->first;
+                $shared_image = SharedImages::where('image_uuid', $image->uuid)->where('shared_by_user_id', $this->sharedBy->id)->where('shared_with_user_id', $this->sharedTo->id)->first();
                 if(!isset($shared_image))
                 {
-                    Log::warning('Found image not shared in shared category', ['image_uuid' => $image->uuid, 'category_id' => $this->categoryId]);
+                    Log::debug('Found image not shared in shared category', ['image_uuid' => $image->uuid, 'category_id' => $this->sharedCategory->resource_id]);
                     continue;
                 }
 
                 app(SharedResourceService::class)->RemoveSourceFromSharedImage($this->sharedBy, $shared_image, 'category');
+
+                if($shared_image->sharedSources()->count() == 0)
+                {
+                    $tags = $image->tags()->wherePivot('added_by', $this->sharedTo->id)->get();
+                    foreach($tags as $tag)
+                    {
+                        $image->tags()->detach($tag);
+                    }
+                    $image->push();
+                    $shared_image->delete();
+                }
             }
 
             $this->sharedCategory->delete();
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
+            Log::debug($e->getMessage());
             $this->fail($e);
         }
     }

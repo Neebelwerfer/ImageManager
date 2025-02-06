@@ -7,6 +7,8 @@ use App\Support\Shared\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SharedImages extends Model
 {
@@ -34,6 +36,8 @@ class SharedImages extends Model
         return $this->hasMany(SharedSource::class, 'id', 'shared_image');
     }
 
-
-
+    public function image() : HasOne
+    {
+        return $this->hasOne(Image::class, 'image_uuid', 'uuid');
+    }
 }

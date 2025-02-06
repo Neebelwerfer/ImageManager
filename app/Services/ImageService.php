@@ -60,12 +60,6 @@ class ImageService
         }
     }
 
-    public function removeTags(Image $image, array $tags)
-    {
-        $image->tags()->detach($tags);
-        $image->push();
-    }
-
     public function removeCategory(Image $image, ImageCategory $category) {
         $image->categories()->detach($category);
         $image->push();
@@ -144,5 +138,25 @@ class ImageService
     public function stopSharing($sharedTo, $id)
     {
 
+    }
+
+    public function removeTags(Image $image, array $tags)
+    {
+        $image->tags()->detach($tags);
+        $image->push();
+    }
+
+    public function removeTag(User $user, Image $image, $tagID)
+    {
+        $tag = $image->tags()->find($tagID);
+
+        if($image->owner_id == $user->id || $tag->pivot->added_by === $user->id)
+        {
+            $image->tags()->detach($tag);
+            if(!$tag->pivot->personal)
+            {
+                Broadcast(new ImageTagEdited($user, $image->uuid))->toOthers();
+            }
+        }
     }
 }
