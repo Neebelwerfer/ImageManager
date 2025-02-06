@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Jobs\ShareCategoryImages;
+use App\Models\Album;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\SharedCollections;
@@ -17,8 +19,26 @@ class SharedResourceService
         //
     }
 
-    public function ShareCollection(User $sharedBy, User $sharedTo, string $type, $id, $accessLevel)
+    public function ShareCategory(User $sharedBy, User $sharedTo, $id, $accessLevel)
     {
+        $category = ImageCategory::find($id);
+        if(!isset($category))
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Could Not find Model');
+
+
+        ShareCategoryImages::dispatch($sharedBy, $sharedTo, $category, $accessLevel);
+    }
+
+    public function ShareAlbum(User $sharedBy, User $sharedTo, $id, $accessLevel)
+    {
+        $type = 'album';
+        $album = Album::find($id);
+        if(!isset($album))
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Could Not find Model');
+
+        $album->is_shared = true;
+        $album->save();
+
         $shared_collection = new SharedCollections();
         $shared_collection->resource_id = $id;
         $shared_collection->type = $type;
@@ -26,16 +46,8 @@ class SharedResourceService
         $shared_collection->shared_with_user_id = $sharedTo->id;
         $shared_collection->level = $accessLevel;
         $shared_collection->save();
-
-        if($type === 'category')
-        {
-            $catImages = Image::where('category_id', $id)->select('uuid')->get();
-            foreach ($catImages as $image)
-            {
-                $this->ShareImage($sharedBy, $sharedTo, $image->uuid, $accessLevel, $type);
-            }
-        }
     }
+
 
     public function ShareImage(User $sharedBy, User $sharedTo, $uuid, $accessLevel, $source)
     {
@@ -60,6 +72,19 @@ class SharedResourceService
             'shared_by_user_id' => $sharedBy->id,
             'source' => $source
         ]);
+    }
+
+    public function RemoveSourceFromSharedImage(User $sharedBy, SharedImages $sharedImage, $source)
+    {
+        $res = $sharedImage->where('shared_by_user_id', $sharedBy->id)->where('source', $source)->first();
+        if(isset($res))
+        {
+            $res->delete;
+        }
+        if($sharedImage->sharedSources()->count() == 0)
+        {
+            $sharedImage->delete();
+        }
     }
 
     public function isCollectionShared(User $sharedTo, $collectionType, $collectionId)

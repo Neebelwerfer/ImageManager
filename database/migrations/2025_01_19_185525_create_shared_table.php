@@ -37,6 +37,18 @@ return new class extends Migration
             $table->enum('source', ['image', 'category']);
             $table->unique(['shared_image', 'shared_by_user_id', 'source']);
         });
+
+        Schema::table('images', function (Blueprint $table) {
+            $table->boolean('is_shared')->default(false);
+        });
+
+        Schema::table('albums', function (Blueprint $table) {
+            $table->boolean('is_shared')->default(false);
+        });
+
+        Schema::table('image_categories', function (Blueprint $table) {
+            $table->boolean('is_shared')->default(false);
+        });
     }
 
     /**
@@ -47,5 +59,14 @@ return new class extends Migration
         Schema::dropIfExists('shared_source');
         Schema::dropIfExists('shared_collections');
         Schema::dropIfExists('shared_images');
+        Schema::table('images', function (Blueprint $table) {
+            $table->dropColumn('is_shared');
+        });
+        Schema::table('albums', function (Blueprint $table) {
+            $table->dropColumn('is_shared');
+        });
+        Schema::table('image_categories', function (Blueprint $table) {
+            $table->dropColumn('is_shared');
+        });
     }
 };

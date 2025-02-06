@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Jobs\StopSharingCategory;
 use App\Models\ImageCategory;
+use App\Models\SharedCollections;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -34,24 +36,30 @@ class CategoryService
     }
 
 
-    public function share(User $sharedBy, $id, User $sharedTo, $accessLevel) : bool
+    public function share(User $sharedBy, $category_id, User $sharedTo, $accessLevel) : bool
     {
-        if($sharedTo->id === $sharedBy->id) return true;
+        if($sharedTo->id === $sharedBy->id) return false;
 
-        $cat = ImageCategory::owned($sharedBy->id)->find($id);
+        $cat = ImageCategory::owned($sharedBy->id)->find($category_id);
         if(isset($cat)) {
-            if(isset($sharedTo) && !$this->isShared($sharedTo, $id)) {
-                app(SharedResourceService::class)->ShareCollection($sharedBy, $sharedTo, 'category', $id, $accessLevel);
-                $cat->is_shared = true;
+            if(isset($sharedTo) && !$this->isShared($sharedTo, $category_id)) {
+                app(SharedResourceService::class)->ShareCategory($sharedBy, $sharedTo, $category_id, $accessLevel);
                 return true;
             }
         }
         return false;
     }
 
-    public function stopSharing($sharedTo, $id)
+    public function stopSharing(User $sharedBy, User $sharedTo, $category_id)
     {
-
+        $cat = ImageCategory::owned($sharedBy->id)->find($category_id);
+        if(isset($cat))
+        {
+            if(!$cat->is_shared) return;
+            $sharedCategory = SharedCollections::where('type', 'category')->where('shared_by_user_id', $sharedBy)->where('shared_with_user_id', $sharedTo)->first();
+            if(!isset($sharedCategory)) throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Could not find shared category');
+            StopSharingCategory::dispatch();
+        }
     }
 
     public function delete(User $user, $id) : void

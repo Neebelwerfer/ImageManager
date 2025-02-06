@@ -20,14 +20,13 @@ class AlbumService
 
     public function share(User $sharedBy, $id, User $sharedTo, $accessLevel) : bool
     {
-        if($sharedTo->id === $sharedBy->id) return true;
+        if($sharedTo->id === $sharedBy->id) return false;
 
 
         $album = Album::owned($sharedBy)->find($id);
         if(isset($album)) {
             if(isset($sharedTo) && !$this->isShared($sharedTo, $id)) {
-                app(SharedResourceService::class)->ShareCollection($sharedBy, $sharedTo, 'album', $id, $accessLevel);
-                $album->is_shared = true;
+                app(SharedResourceService::class)->ShareAlbum($sharedBy, $sharedTo, $id, $accessLevel);
                 return true;
             }
         }

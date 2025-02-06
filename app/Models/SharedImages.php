@@ -6,6 +6,7 @@ use App\Support\Shared\AccessLevel;
 use App\Support\Shared\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SharedImages extends Model
 {
@@ -27,5 +28,12 @@ class SharedImages extends Model
     {
         return $this->belongsTo(User::class, 'shared_by_user_id');
     }
+
+    public function sharedSources() : HasMany
+    {
+        return $this->hasMany(SharedSource::class, 'id', 'shared_image');
+    }
+
+
 
 }
