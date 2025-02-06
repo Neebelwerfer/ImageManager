@@ -8,6 +8,7 @@ use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\Tags;
 use App\Models\Traits;
+use App\Services\CategoryService;
 use App\Services\ImageService;
 use App\Support\Traits\DisplayTrait;
 use Illuminate\Support\Facades\Auth;
@@ -32,13 +33,13 @@ class Details extends ModalComponent
     #[On('categorySelected')]
     public function categorySelected($category)
     {
-        $category = ImageCategory::ownedOrShared()->find($category);
+        $category = ImageCategory::ownedOrShared(Auth::user()->id)->find($category);
 
         if(isset($category)) {
-            $this->image->update(['category_id' => $category->id]);
+            app(CategoryService::class)->addImageToCategory(Auth::user(), $this->image, $category);
         }
         else {
-            $this->image->update(['category_id' => null]);
+            app(CategoryService::class)->removeImageFromCategory(Auth::user(), $this->image);
         }
     }
 

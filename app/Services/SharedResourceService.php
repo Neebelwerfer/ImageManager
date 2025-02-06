@@ -76,6 +76,19 @@ class SharedResourceService
         $this->AddSourceToSharedImage($sharedBy, $shared_image, $source);
     }
 
+    public function StopSharingImage(User $sharedBy, User $sharedTo, $image_uuid, $source)
+    {
+        $sharedImages = SharedImages::where('image_uuid', $image_uuid)->where('shared_with_user_id', $sharedTo->id)->get();
+        foreach ($sharedImages as $sharedImage)
+        {
+            $this->RemoveSourceFromSharedImage($sharedBy, $sharedImage, $source);
+            if($sharedImage->sharedSources()->count() == 0)
+            {
+                $sharedImage->delete();
+            }
+        }
+    }
+
     public function AddSourceToSharedImage(User $sharedBy, SharedImages $sharedImages, $source)
     {
         SharedSource::create([

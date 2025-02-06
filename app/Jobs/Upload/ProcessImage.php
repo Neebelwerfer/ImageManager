@@ -4,12 +4,14 @@ namespace App\Jobs\Upload;
 
 use App\Events\ImageProcessed;
 use App\Models\Image;
+use App\Models\ImageCategory;
 use App\Models\ImageTraits;
 use App\Models\ImageUpload;
 use App\Models\Tags;
 use App\Models\Traits;
 use App\Models\Upload\UploadErrors;
 use App\Models\User;
+use App\Services\CategoryService;
 use App\Services\ImageService;
 use App\Services\TagService;
 use Exception;
@@ -43,6 +45,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
     {
         $imageService = app(ImageService::class);
         $tagService = app(TagService::class);
+        $categoryService = app(CategoryService::class);
 
         $this->imageUpload->state = "processing";
         $this->imageUpload->save();
@@ -63,9 +66,6 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             $image->height = $data['dimensions']['height'];
             $image->image_hash = $this->imageUpload->hash;
             $image->format = $this->imageUpload->extension;
-            if($data['category'] !== null) {
-                $image->category_id = $data['category'];
-            }
             $image->save();
 
             $traits = Traits::where('owner_id', $this->user->id)->get();
@@ -73,7 +73,10 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             $imageInfo = ImageManager::imagick()->read($this->imageUpload->fullPath());
             $imageScaled = ImageManager::gd()->read($this->imageUpload->fullPath());
 
-
+            if($data['category'] !== null) {
+                $category = ImageCategory::find($data['category']);
+                $categoryService->addImageToCategory($this->user, $image, $category);
+            }
 
             if(isset($data['traits']) && count($data['traits']) > 0) {
                 foreach ($data['traits'] as $trait_id) {
