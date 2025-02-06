@@ -66,7 +66,7 @@ class Share extends ModalComponent
                 $res = $this->albumService->share(Auth::user(), $this->id, $sharedTo, $this->accessLevel);
                 break;
             case 'image':
-                $res = $this->imageService->share(Auth::user(), $this->id, $sharedTo, $this->accessLevel);
+                $res = $this->imageService->share(Auth::user(), $sharedTo, $this->id, $this->accessLevel);
                 break;
             default:
                 throw new \Exception('Trying to share unknown type');

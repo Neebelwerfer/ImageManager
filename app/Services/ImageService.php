@@ -116,18 +116,18 @@ class ImageService
 
     public function isShared(User $sharedTo, $uuid) : bool
     {
-        return SharedImages::where('image_uuid', $uuid)->where('shared_with_user_id', $sharedTo->id);
+        return SharedImages::where('image_uuid', $uuid)->where('shared_with_user_id', $sharedTo->id)->exists();
     }
 
 
-    public function share(User $sharedBy, $image_id, User $sharedTo, $accessLevel) : bool
+    public function share(User $sharedBy, User $sharedTo, string $image_uuid, $accessLevel) : bool
     {
         if($sharedTo->id == $sharedBy->id) return true;
-        $image = Image::owned()->find($image_id);
+        $image = Image::owned(Auth::user()->id)->find($image_uuid);
         if(isset($image))
         {
-            if(isset($sharedTo) && !$this->isShared($sharedTo, $image_id)) {
-                app(SharedResourceService::class)->ShareImage($sharedBy, $sharedTo, 'image', $image_id, $accessLevel);
+            if(isset($sharedTo) && !$this->isShared($sharedTo, $image_uuid)) {
+                app(SharedResourceService::class)->ShareImage($sharedBy, $sharedTo, $image_uuid, $accessLevel, 'image');
                 $image->is_shared = true;
                 return true;
             }

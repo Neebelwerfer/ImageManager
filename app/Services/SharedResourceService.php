@@ -82,7 +82,8 @@ class SharedResourceService
         foreach ($sharedImages as $sharedImage)
         {
             $this->RemoveSourceFromSharedImage($sharedBy, $sharedImage, $source);
-            if($sharedImage->sharedSources()->count() == 0)
+
+            if(SharedSource::where('shared_image', $sharedImage->id)->where('shared_by_user_id', $sharedBy->id)->count() == 0)
             {
                 $sharedImage->delete();
             }
