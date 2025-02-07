@@ -116,7 +116,7 @@ class ImageService
 
     public function isShared(User $sharedTo, $uuid) : bool
     {
-        return SharedImages::where('image_uuid', $uuid)->where('shared_with_user_id', $sharedTo->id)->exists();
+        return app(SharedResourceService::class)->isImageShared($sharedTo, $uuid, 'image');
     }
 
 

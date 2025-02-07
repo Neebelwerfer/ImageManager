@@ -7,6 +7,7 @@ use App\Models\SharedCollections;
 use App\Models\SharedImages;
 use App\Models\SharedResources;
 use App\Models\User;
+use App\Services\ImageService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -27,12 +28,16 @@ class SharedWithList extends Component
     }
 
     public function removeShared($id) {
-        // SharedResources::find($id)->delete();
         if($this->type === 'category')
         {
             $shared = $this->sharedWith->find($id);
 
             StopSharingCategory::dispatch(User::find($shared->shared_by_user_id), User::find($shared->shared_with_user_id), $shared);
+        }
+        else if ($this->type === 'image')
+        {
+            // $shared = $this->sharedWith->find($id);
+            // app(ImageService::class)->stopSharing()
         }
         $this->updateShared();
     }

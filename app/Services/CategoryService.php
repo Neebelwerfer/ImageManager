@@ -95,11 +95,11 @@ class CategoryService
                     if($sharedCollection->shared_with_user_id != $user->id && !isset($users[$sharedCollection->shared_with_user_id]))
                     {
                         $users[$sharedCollection->shared_with_user_id] = $sharedCollection;
-                        app(SharedResourceService::class)->StopSharingImage($user, User::find($sharedCollection->shared_with_user_id), $image->uuid, $sharedCollection->level, 'category');
+                        app(SharedResourceService::class)->StopSharingImage($user, User::find($sharedCollection->shared_with_user_id), $image->uuid, 'category');
                     }
                     if($imageCategory->owner_id != $user->id)
                     {
-                        app(SharedResourceService::class)->StopSharingImage($user, User::find($imageCategory->owner_id), $image->uuid, $sharedCollection->level, 'category');
+                        app(SharedResourceService::class)->StopSharingImage($user, User::find($imageCategory->owner_id), $image->uuid, 'category');
                     }
                 }
             }

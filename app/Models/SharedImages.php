@@ -33,7 +33,7 @@ class SharedImages extends Model
 
     public function sharedSources() : HasMany
     {
-        return $this->hasMany(SharedSource::class, 'id', 'shared_image');
+        return $this->hasMany(SharedSource::class, 'shared_image');
     }
 
     public function image() : HasOne

@@ -11,6 +11,7 @@ use App\Models\SharedImages;
 use App\Models\SharedResources;
 use App\Models\SharedSource;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -25,9 +26,12 @@ class SharedResourceService
         return SharedCollections::where('type', $collectionType)->where('resource_id', $collectionId)->where('shared_with_user_id', $sharedTo->id)->exists();
     }
 
-    public function isImageShared(User $sharedTo, $imageUuid)
+    public function isImageShared(User $sharedTo, $imageUuid, $source)
     {
-        return SharedImages::where('image_uuid', $imageUuid)->where('shared_with_user_id', $sharedTo->id);
+        return SharedImages::where('image_uuid', $imageUuid)->where('shared_with_user_id', $sharedTo->id)->whereHas('sharedSources', function(Builder $query) use ($source)
+        {
+            $query->where('source', $source);
+        })->exists();
     }
 
     public function ShareCategory(User $sharedBy, User $sharedTo, $id, $accessLevel)
@@ -107,7 +111,7 @@ class SharedResourceService
             $res->delete();
         }
         else {
-            Log::debug('Could not find source of shared image');
+            Log::debug('Could not find source of shared image', ['sharedImages' => $sharedImage->id, 'source' => $source]);
         }
     }
 }
