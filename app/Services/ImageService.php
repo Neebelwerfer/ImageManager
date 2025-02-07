@@ -135,9 +135,9 @@ class ImageService
         return false;
     }
 
-    public function stopSharing($sharedTo, $id)
+    public function stopSharing(User $sharedBy, User $sharedTo, $uuid)
     {
-
+        app(SharedResourceService::class)->StopSharingImage($sharedBy, $sharedTo, $uuid, 'image');
     }
 
     public function removeTags(Image $image, array $tags)

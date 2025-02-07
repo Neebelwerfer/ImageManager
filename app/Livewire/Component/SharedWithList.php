@@ -36,8 +36,8 @@ class SharedWithList extends Component
         }
         else if ($this->type === 'image')
         {
-            // $shared = $this->sharedWith->find($id);
-            // app(ImageService::class)->stopSharing()
+            $shared = $this->sharedWith->find($id);
+            app(ImageService::class)->stopSharing(User::find($shared->shared_by_user_id), User::find($shared->shared_with_user_id), $this->id);
         }
         $this->updateShared();
     }

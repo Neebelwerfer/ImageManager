@@ -78,7 +78,7 @@ class Share extends ModalComponent
             return;
         }
         $this->dispatch('updateShared');
-        $this->closeModal();
+        $this->email = "";
     }
 
     public function render()
