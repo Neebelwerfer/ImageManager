@@ -55,12 +55,6 @@ class StopSharingCategory implements ShouldQueue, ShouldBeEncrypted, ShouldBeUni
 
                 if($shared_image->sharedSources()->count() == 0)
                 {
-                    $tags = $image->tags()->wherePivot('added_by', $this->sharedTo->id)->get();
-                    foreach($tags as $tag)
-                    {
-                        $image->tags()->detach($tag);
-                    }
-                    $image->push();
                     $shared_image->delete();
                 }
             }

@@ -47,12 +47,12 @@ class Image extends Model
 
     public function tags() : BelongsToMany
     {
-        return $this->belongsToMany(Tags::class)->withPivot('added_by', 'personal');
+        return $this->belongsToMany(Tags::class)->withPivot('added_by', 'personal', 'shared_image');
     }
 
     public function traits() : HasMany
     {
-        return $this->hasMany(ImageTraits::class)->where('owner_id', Auth::user()->id);
+        return $this->hasMany(ImageTraits::class)->withPivot('added_by', 'shared_image');
     }
 
     public function user() : BelongsTo
@@ -62,7 +62,7 @@ class Image extends Model
 
     public function albums() : BelongsToMany
     {
-        return $this->belongsToMany(Album::class, 'album_images', 'image_uuid', 'album_id');
+        return $this->belongsToMany(Album::class, 'album_images', 'image_uuid', 'album_id')->withPivot('added_by', 'shared_image');
     }
 
     public function sharedImages() : HasMany

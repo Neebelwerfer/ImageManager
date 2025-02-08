@@ -49,6 +49,18 @@ return new class extends Migration
         Schema::table('image_categories', function (Blueprint $table) {
             $table->boolean('is_shared')->default(false);
         });
+
+        Schema::table('image_tags', function (Blueprint $table) {
+            $table->foreignId('shared_image')->nullable()->constrained('shared_images')->cascadeOnDelete();
+        });
+
+        Schema::table('album_images', function (Blueprint $table) {
+            $table->foreignId('shared_image')->nullable()->constrained('shared_images')->cascadeOnDelete();
+        });
+
+        Schema::table('image_traits', function (Blueprint $table) {
+            $table->foreignId('shared_image')->nullable()->constrained('shared_images')->cascadeOnDelete();
+        });
     }
 
     /**
@@ -67,6 +79,17 @@ return new class extends Migration
         });
         Schema::table('image_categories', function (Blueprint $table) {
             $table->dropColumn('is_shared');
+        });
+        Schema::table('image_tags', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('shared_image');
+        });
+
+        Schema::table('album_images', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('shared_image');
+        });
+
+        Schema::table('image_traits', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('shared_image');
         });
     }
 };

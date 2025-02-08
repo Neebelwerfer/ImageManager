@@ -135,7 +135,7 @@ class CategoryService
             if(!$cat->is_shared) return;
             $sharedCategory = SharedCollections::where('type', 'category')->where('shared_by_user_id', $sharedBy)->where('shared_with_user_id', $sharedTo)->first();
             if(!isset($sharedCategory)) throw new \Illuminate\Database\Eloquent\ModelNotFoundException('Could not find shared category');
-            StopSharingCategory::dispatch();
+            StopSharingCategory::dispatch($sharedBy, $sharedTo, $sharedCategory);
         }
     }
 
