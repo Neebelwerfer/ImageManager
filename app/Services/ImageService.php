@@ -50,7 +50,7 @@ class ImageService
             }
         }
 
-        $image->tags()->attach($tag, ['added_by' => $user->id, 'personal' => $personal, 'shared_image' => $sharedImage->id]);
+        $image->tags()->attach($tag, ['added_by' => $user->id, 'personal' => $personal, 'shared_image' => $sharedImage == null ? null : $sharedImage->id]);
         if(!$personal)
         {
             Broadcast(new ImageTagEdited($user, $image->uuid))->toOthers();
