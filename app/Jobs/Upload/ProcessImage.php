@@ -11,6 +11,7 @@ use App\Models\Tags;
 use App\Models\Traits;
 use App\Models\Upload\UploadErrors;
 use App\Models\User;
+use App\Services\AlbumService;
 use App\Services\CategoryService;
 use App\Services\ImageService;
 use App\Services\TagService;
@@ -46,6 +47,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
         $imageService = app(ImageService::class);
         $tagService = app(TagService::class);
         $categoryService = app(CategoryService::class);
+        $albumService = app(AlbumService::class);
 
         $this->imageUpload->state = "processing";
         $this->imageUpload->save();
@@ -75,7 +77,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
 
             if($data['category'] !== null) {
                 $category = ImageCategory::find($data['category']);
-                $categoryService->addImageToCategory($this->user, $image, $category);
+                $categoryService->addImage($this->user, $image, $category);
             }
 
             if(isset($data['traits']) && count($data['traits']) > 0) {

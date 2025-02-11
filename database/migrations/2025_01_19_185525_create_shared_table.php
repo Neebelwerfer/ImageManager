@@ -34,7 +34,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('shared_image')->constrained('shared_images')->cascadeOnDelete();
             $table->foreignId('shared_by_user_id')->constrained('users')->cascadeOnDelete();
-            $table->enum('source', ['image', 'category']);
+            $table->enum('source', ['image', 'category', 'album']);
             $table->unique(['shared_image', 'shared_by_user_id', 'source']);
         });
 

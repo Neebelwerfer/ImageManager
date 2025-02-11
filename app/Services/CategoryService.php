@@ -40,7 +40,7 @@ class CategoryService
         return app(SharedResourceService::class)->isCollectionShared($sharedTo, 'category', $id);
     }
 
-    public function addImageToCategory(User $user, Image $image, ImageCategory $imageCategory)
+    public function addImage(User $user, Image $image, ImageCategory $imageCategory)
     {
         DB::beginTransaction();
         try
@@ -56,10 +56,10 @@ class CategoryService
                         $users[$sharedCollection->shared_with_user_id] = $sharedCollection;
                         app(SharedResourceService::class)->ShareImage($user, User::find($sharedCollection->shared_with_user_id), $image->uuid, $sharedCollection->level, 'category');
                     }
-                    if($imageCategory->owner_id != $user->id)
-                    {
-                        app(SharedResourceService::class)->ShareImage($user, User::find($imageCategory->owner_id), $image->uuid, $sharedCollection->level, 'category');
-                    }
+                }
+                if($imageCategory->owner_id != $user->id)
+                {
+                    app(SharedResourceService::class)->ShareImage($user, User::find($imageCategory->owner_id), $image->uuid, $sharedCollection->level, 'category');
                 }
             }
         }
@@ -72,7 +72,7 @@ class CategoryService
         DB::commit();
     }
 
-    public function removeImageFromCategory(User $user, Image $image, ImageCategory $imageCategory = null)
+    public function removeImage(User $user, Image $image, ImageCategory $imageCategory = null)
     {
         if($imageCategory === null)
         {
@@ -97,10 +97,10 @@ class CategoryService
                         $users[$sharedCollection->shared_with_user_id] = $sharedCollection;
                         app(SharedResourceService::class)->StopSharingImage($user, User::find($sharedCollection->shared_with_user_id), $image->uuid, 'category');
                     }
-                    if($imageCategory->owner_id != $user->id)
-                    {
-                        app(SharedResourceService::class)->StopSharingImage($user, User::find($imageCategory->owner_id), $image->uuid, 'category');
-                    }
+                }
+                if($imageCategory->owner_id != $user->id)
+                {
+                    app(SharedResourceService::class)->StopSharingImage($user, User::find($imageCategory->owner_id), $image->uuid, 'category');
                 }
             }
         }

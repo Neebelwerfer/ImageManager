@@ -7,6 +7,7 @@ use App\Models\SharedCollections;
 use App\Models\SharedImages;
 use App\Models\SharedResources;
 use App\Models\User;
+use App\Services\AlbumService;
 use App\Services\ImageService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -34,6 +35,11 @@ class SharedWithList extends Component
 
             StopSharingCategory::dispatch(User::find($shared->shared_by_user_id), User::find($shared->shared_with_user_id), $shared);
         }
+        else if ($this->type === 'album')
+        {
+            $shared = $this->sharedWith->find($id);
+            app(AlbumService::class)->stopSharing(User::find($shared->shared_by_user_id), User::find($shared->shared_with_user_id), $this->id);
+        }
         else if ($this->type === 'image')
         {
             $shared = $this->sharedWith->find($id);
@@ -54,7 +60,7 @@ class SharedWithList extends Component
     public function render()
     {
         return <<<'HTML'
-        <div class="flex flex-col" x-data="{ open: false } ">
+        <div class="flex flex-col" x-data="{ open: true } ">
             <div class="flex flex-row border-b border-slate-800" x-on:click="open = !open">
                 <p>Shared With</p>
                 <x-arrow class="self-center"/>

@@ -8,6 +8,7 @@ use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\Tags;
 use App\Models\Traits;
+use App\Services\AlbumService;
 use App\Services\CategoryService;
 use App\Services\ImageService;
 use App\Support\Traits\DisplayTrait;
@@ -36,10 +37,10 @@ class Details extends ModalComponent
         $category = ImageCategory::ownedOrShared(Auth::user()->id)->find($category);
 
         if(isset($category)) {
-            app(CategoryService::class)->addImageToCategory(Auth::user(), $this->image, $category);
+            app(CategoryService::class)->addImage(Auth::user(), $this->image, $category);
         }
         else {
-            app(CategoryService::class)->removeImageFromCategory(Auth::user(), $this->image);
+            app(CategoryService::class)->removeImage(Auth::user(), $this->image);
         }
     }
 
@@ -65,7 +66,8 @@ class Details extends ModalComponent
         if(Auth::user()->id != $this->image->owner_id) {
             return;
         }
-        $res = Album::where('owner_id', Auth::user()->id)->find($album);
+
+        $res = Album::ownedOrShared(Auth::user()->id)->find($album);
 
         if(!isset($res)) return;
 
@@ -73,7 +75,7 @@ class Details extends ModalComponent
             return;
         }
 
-        $this->image->albums()->attach($res->id);
+        app(AlbumService::class)->addImage(Auth::user(), $this->image, $res);
     }
 
     public function removeTag($tagID)
@@ -93,7 +95,7 @@ class Details extends ModalComponent
 
     public function getAlbums()
     {
-        return $this->image->albums()->where('owner_id', Auth::user()->id)->get();
+        return $this->image->albums()->owned(Auth::user()->id)->get();
     }
 
     public function show()
