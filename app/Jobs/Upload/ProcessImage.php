@@ -103,6 +103,11 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
                     $imageService->addTag($this->user, $image, $tag, $personal);
             }
 
+            foreach($data['albums'] as $albumID)
+            {
+                $albumService->addImage($this->user, $image, $albumID);
+            }
+
             $imageInfo->scaleDown(256, 256);
             $imageService->storeImageAndThumbnail($imageScaled, $imageInfo, $path, $name);
         }

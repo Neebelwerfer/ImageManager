@@ -6,6 +6,7 @@ use App\Jobs\Upload\CheckForDuplicates;
 use App\Jobs\Upload\ProcessImage;
 use App\Jobs\Upload\ScanForDuplicates;
 use App\Livewire\Upload;
+use App\Models\Album;
 use App\Models\ImageCategory;
 use App\Models\ImageUpload;
 use App\Models\Tags;
@@ -34,6 +35,7 @@ class ProcessUpload extends Component
     public $category;
     public $tags = [];
     public $traits = [];
+    public $albums = [];
     public $hash;
 
 
@@ -77,6 +79,13 @@ class ProcessUpload extends Component
         $this->category = ImageCategory::find($category);
     }
 
+
+    #[On('albumSelected')]
+    public function albumSelected($albumId)
+    {
+        $this->albums[$albumId] = Album::ownedOrShared(Auth::user()->id)->find($albumId);
+    }
+
     #[On('tagSelected')]
     public function tagSelected($tagData)
     {
@@ -105,7 +114,8 @@ class ProcessUpload extends Component
             'category' => $this->category->id ?? null,
             'tags' => $tags,
             'traits' => $this->traits,
-            'dimensions' => $this->ImageMetadata['dimensions']
+            'dimensions' => $this->ImageMetadata['dimensions'],
+            'albums' => array_keys($this->albums)
         ];
 
         $this->imageUpload->data = json_encode($data);

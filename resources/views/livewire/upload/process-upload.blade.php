@@ -66,6 +66,32 @@
                             @endif
                         </div>
 
+                        <div class="flex flex-col">
+                            <div class="inline-flex gap-4">
+                                <label for="tags">Albums:</label>
+                                <div class="mb-3">
+                                    <input type="hidden" class="text-black form-control" wire:model="albums"></textarea>
+
+                                    @error('albums')
+                                        <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
+                                    @enderror
+                                    <button class="px-2 border rounded" type="button"
+                                        wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type: 'album'}})">+</button>
+                                </div>
+                            </div>
+                            @if (count($albums) > 0)
+                            <div class="flex flex-col mx-5 mb-4">
+                                @foreach ($albums as $album)
+                                    <div class="inline-flex justify-between w-20 gap-2 border rounded">
+                                        <h1>{{ $album->name }}</h1>
+                                        <button class="w-5 border border-red-600 rounded hover:bg-red-400 bg-red-600/80 h-fit" type="button"
+                                                wire:click='removeAlbum({{ $album->id }})'>X</button>
+                                    </div>
+                                @endforeach
+                            </div>
+                            @endif
+                        </div>
+
                         <div class="flex flex-col w-fit">
                             <div class="inline-flex gap-4">
                                 <label for="tags">Traits:</label>
@@ -128,7 +154,7 @@
 
                     <h1 class="@if($state == "processing") font-extrabold underline @endif text-black-400 text-xl">Processing image</h1>
                     @if($state === "done")
-                        <h1 class="text-black 700">Done!</h1>
+                        <h1 class="text-xl font-extrabold underline text-black-400">Done!</h1>
 
                         <div class="absolute bottom-0 flex flex-row w-full gap-2">
                             <div class="mb-3">

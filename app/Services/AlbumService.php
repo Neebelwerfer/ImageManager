@@ -55,8 +55,17 @@ class AlbumService
         }
     }
 
-    public function addImage(User $user, Image $image, Album $album)
+    public function addImage(User $user, Image $image, Album|int $album)
     {
+        if(gettype($album) == "integer")
+        {
+            $album = Album::ownedOrShared($user->id)->find($album);
+            if($album === null)
+            {
+                throw new Exception('Could not find the album to add image to');
+            }
+        }
+
         DB::beginTransaction();
         try
         {
@@ -98,8 +107,17 @@ class AlbumService
         DB::commit();
     }
 
-    public function removeImage(User $user, Image $image, Album $album)
+    public function removeImage(User $user, Image $image, Album|int $album)
     {
+        if(gettype($album) == "integer")
+        {
+            $album = Album::ownedOrShared($user->id)->find($album);
+            if($album === null)
+            {
+                throw new Exception('Could not find the album to remove image from');
+            }
+        }
+
         DB::beginTransaction();
         try
         {

@@ -47,7 +47,7 @@ class Album extends Model
 
     public function scopeOwnedOrShared($query, $user_id)
     {
-        $query->where('owner_id', Auth::user()->id)->orwhereHas('sharedCollections', function ($query) use($user_id) {
+        $query->where('owner_id', $user_id)->orwhereHas('sharedCollections', function ($query) use($user_id) {
             $query->where('shared_with_user_id', $user_id);
         });
     }
