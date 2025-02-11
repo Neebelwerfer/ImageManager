@@ -6,7 +6,7 @@ use App\Models\Image;
 use App\Component\CollectionView;
 use App\Models\Album;
 use App\Models\ImageCategory;
-use App\Models\SharedResources;
+use App\Models\SharedCollections;
 use App\Models\Tags;
 use App\Support\Shared\AccessLevel;
 use Illuminate\Support\Facades\Auth;
@@ -47,9 +47,9 @@ class Collection extends CollectionView
                 abort(404, 'Category not found');
             }
 
-            if(!$res->owner_id !== Auth::user()->id) {
-                //$resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
-                //$this->accessLevel = $resource->level;
+            if($res->owner_id !== Auth::user()->id) {
+                $resource = SharedCollections::where('resource_id', $collectionID)->where('type', 'category')->first();
+                $this->accessLevel = $resource->level;
             }
             $this->collectionName = $res->name;
         }
@@ -57,12 +57,12 @@ class Collection extends CollectionView
         if($collectionType == 'albums') {
             $res = Album::ownedOrShared(Auth::user()->id)->find($collectionID);
             if($res === null) {
-                abort(404, 'Category not found');
+                abort(404, 'album not found');
             }
 
             if($res->owner_id !== Auth::user()->id) {
-                //$resource = SharedResources::where('resource_id', $collectionID)->where('type', 'category')->first();
-                //$this->accessLevel = $resource->level;
+                $resource = SharedCollections::where('resource_id', $collectionID)->where('type', 'album')->first();
+                $this->accessLevel = $resource->level;
             }
             $this->collectionName = $res->name;
         }

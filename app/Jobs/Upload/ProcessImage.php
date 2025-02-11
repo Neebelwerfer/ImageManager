@@ -57,7 +57,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
 
         $name = $this->imageUpload->uuid;
         $uuidSplit = substr($name, 0, 1).'/'.substr($name, 1, 1).'/'.substr($name, 2, 1).'/'.substr($name, 3, 1);
-        $path = $this->user->id . '/' . $uuidSplit;
+        $path = '/' . $uuidSplit;
 
         $image = new Image();
         try

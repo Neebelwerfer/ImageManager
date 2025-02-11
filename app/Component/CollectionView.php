@@ -130,7 +130,7 @@ abstract class CollectionView extends Component
         $this->updateImages();
     }
 
-    public function boot()
+    public function render()
     {
         if($this->images->count() > 0) {
             if($this->count > $this->images->count() - 1)
@@ -142,10 +142,6 @@ abstract class CollectionView extends Component
                 $this->singleImage = $this->images()[$this->count];
             }
         }
-    }
-
-    public function render()
-    {
         return view('livewire.collection.show.grid-and-single');
     }
 }

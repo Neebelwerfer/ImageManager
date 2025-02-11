@@ -1,4 +1,4 @@
-<div class="relative w-full h-full overflow-hidden" x-data="{ showOptions: $wire.entangle('showOptions') }">
+<div class="relative w-full h-full overflow-hidden">
     @if(isset($collectionName))
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
