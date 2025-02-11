@@ -33,7 +33,7 @@ class Images extends Component
     {
         return view('livewire.collection.images',
             [
-                'images' => Tags::sortTags(Image::ownedOrShared(), $this->tags)->paginate(20)
+                'images' => Tags::sortTags(Image::ownedOrShared(Auth::user()->id), $this->tags)->paginate(20)
             ]);
     }
 }

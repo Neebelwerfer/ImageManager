@@ -17,6 +17,8 @@
                 </select>
             </div>
         </form>
+
+        <livewire:component.shared-with-list id="{{ $id }}" type="{{ $type }}" x-transition/>
     </x-slot>
 
     <x-slot name="buttons">

@@ -32,27 +32,27 @@ class ImageCategory extends Model
         return $this->hasManyThrough(Tags::class, Image::class, 'category_id', 'image_id');
     }
 
-    public function shared_resources() : HasMany
+    public function sharedCollections() : HasMany
     {
-        return $this->hasMany(SharedResources::class, 'resource_id', 'id')->where('type', 'category');
+        return $this->hasMany(SharedCollections::class, 'resource_id', 'id')->where('type', '=', 'category');
     }
 
-    public function scopeOwned($query)
+    public function scopeOwned($query, $user_id)
     {
-        $query->where('owner_id', Auth::user()->id);
+        $query->where('owner_id', $user_id);
     }
 
-    public function scopeShared($query)
+    public function scopeShared($query, $user_id)
     {
-        $query->whereHas('shared_resources', function ($query) {
-            $query->where('shared_with_user_id', Auth::user()->id)->where('type', 'category')->select('resource_id');
+        $query->whereHas('sharedCollections', function ($query) use($user_id) {
+            $query->where('shared_with_user_id', $user_id)->select('resource_id');
         });
     }
 
-    public function scopeOwnedOrShared($query)
+    public function scopeOwnedOrShared($query, $user_id)
     {
-        $query->where('owner_id', Auth::user()->id)->orwhereHas('shared_resources', function ($query) {
-            $query->where('type', 'category')->where('shared_with_user_id', Auth::user()->id);
+        $query->where('owner_id', $user_id)->orwhereHas('sharedCollections', function ($query) use($user_id) {
+            $query->where('shared_with_user_id', $user_id);
         });
     }
 }

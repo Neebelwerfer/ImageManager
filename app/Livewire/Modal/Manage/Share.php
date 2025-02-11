@@ -60,13 +60,13 @@ class Share extends ModalComponent
         switch($this->type)
         {
             case 'category':
-                $res = $this->categoryService->share($this->id, $sharedTo, $this->accessLevel);
+                $res = $this->categoryService->share(Auth::user(), $this->id, $sharedTo, $this->accessLevel);
                 break;
             case 'album':
-                $res = $this->albumService->share($this->id, $sharedTo, $this->accessLevel);
+                $res = $this->albumService->share(Auth::user(), $this->id, $sharedTo, $this->accessLevel);
                 break;
             case 'image':
-                $res = $this->imageService->share($this->id, $sharedTo, $this->accessLevel);
+                $res = $this->imageService->share(Auth::user(), $sharedTo, $this->id, $this->accessLevel);
                 break;
             default:
                 throw new \Exception('Trying to share unknown type');
@@ -78,7 +78,7 @@ class Share extends ModalComponent
             return;
         }
         $this->dispatch('updateShared');
-        $this->closeModal();
+        $this->email = "";
     }
 
     public function render()

@@ -47,12 +47,12 @@ class Image extends Model
 
     public function tags() : BelongsToMany
     {
-        return $this->belongsToMany(Tags::class)->withPivot('added_by', 'personal');
+        return $this->belongsToMany(Tags::class)->withPivot('added_by', 'personal', 'shared_image');
     }
 
     public function traits() : HasMany
     {
-        return $this->hasMany(ImageTraits::class)->where('owner_id', Auth::user()->id);
+        return $this->hasMany(ImageTraits::class)->withPivot('added_by', 'shared_image');
     }
 
     public function user() : BelongsTo
@@ -62,30 +62,30 @@ class Image extends Model
 
     public function albums() : BelongsToMany
     {
-        return $this->belongsToMany(Album::class, 'album_images', 'image_uuid', 'album_id');
+        return $this->belongsToMany(Album::class, 'album_images', 'image_uuid', 'album_id')->withPivot('added_by', 'shared_image');
     }
 
-    public function shared_resources() : HasMany
+    public function sharedImages() : HasMany
     {
-        return $this->hasMany(SharedResources::class, 'resource_uuid', 'uuid')->where('type', 'image');
+        return $this->hasMany(SharedImages::class, 'image_uuid', 'uuid');
     }
 
-    public function scopeOwned($query)
+    public function scopeOwned($query, $user_id)
     {
-        $query->where('owner_id', Auth::user()->id);
+        $query->where('owner_id', $user_id);
     }
 
-    public function scopeShared($query)
+    public function scopeShared($query, $user_id)
     {
-        $query->whereHas('shared_resources', function ($query) {
-            $query->where('shared_with_user_id', Auth::user()->id)->select('resource_uuid');
+        $query->whereHas('sharedImages', function ($query) use ($user_id) {
+            $query->where('shared_with_user_id', $user_id);
         });
     }
 
-    public function scopeOwnedOrShared($query)
+    public function scopeOwnedOrShared($query, $user_id)
     {
-        $query->where('owner_id', Auth::user()->id)->orwhereHas('shared_resources', function ($query) {
-            $query->where('shared_with_user_id', Auth::user()->id)->select('resource_uuid');
+        $query->where('owner_id', $user_id)->orwhereHas('sharedImages', function ($query) use($user_id) {
+            $query->where('shared_with_user_id', $user_id)->select('image_uuid');
         });
     }
 

@@ -8,6 +8,8 @@ use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\Tags;
 use App\Models\Traits;
+use App\Services\AlbumService;
+use App\Services\CategoryService;
 use App\Services\ImageService;
 use App\Support\Traits\DisplayTrait;
 use Illuminate\Support\Facades\Auth;
@@ -32,13 +34,13 @@ class Details extends ModalComponent
     #[On('categorySelected')]
     public function categorySelected($category)
     {
-        $category = ImageCategory::ownedOrShared()->find($category);
+        $category = ImageCategory::ownedOrShared(Auth::user()->id)->find($category);
 
         if(isset($category)) {
-            $this->image->update(['category_id' => $category->id]);
+            app(CategoryService::class)->addImage(Auth::user(), $this->image, $category);
         }
         else {
-            $this->image->update(['category_id' => null]);
+            app(CategoryService::class)->removeImage(Auth::user(), $this->image);
         }
     }
 
@@ -54,7 +56,7 @@ class Details extends ModalComponent
                 return;
             }
 
-            app(ImageService::class)->addTag($this->image, $res, $tagData['personal']);
+            app(ImageService::class)->addTag(Auth::user(), $this->image, $res, $tagData['personal']);
         }
     }
 
@@ -64,7 +66,8 @@ class Details extends ModalComponent
         if(Auth::user()->id != $this->image->owner_id) {
             return;
         }
-        $res = Album::where('owner_id', Auth::user()->id)->find($album);
+
+        $res = Album::ownedOrShared(Auth::user()->id)->find($album);
 
         if(!isset($res)) return;
 
@@ -72,21 +75,12 @@ class Details extends ModalComponent
             return;
         }
 
-        $this->image->albums()->attach($res->id);
+        app(AlbumService::class)->addImage(Auth::user(), $this->image, $res);
     }
 
     public function removeTag($tagID)
     {
-        $tag = $this->image->tags()->find($tagID);
-
-        if($this->image->owner_id == Auth::user()->id || $tag->pivot->added_by === Auth::user()->id)
-        {
-            $this->image->tags()->detach($tag);
-            if(!$tag->pivot->personal)
-            {
-                Broadcast(new ImageTagEdited(Auth::user(), $this->image->uuid))->toOthers();
-            }
-        }
+        app(ImageService::class)->removeTag(Auth::user(), $this->image, $tagID);
     }
 
     public function deleteImage()
@@ -101,7 +95,7 @@ class Details extends ModalComponent
 
     public function getAlbums()
     {
-        return $this->image->albums()->where('owner_id', Auth::user()->id)->get();
+        return $this->image->albums()->owned(Auth::user()->id)->get();
     }
 
     public function show()
@@ -113,18 +107,18 @@ class Details extends ModalComponent
     public function traits()
     {
         $res = [];
-        $traits = Traits::personalOrGlobal()->get();
-        $imageTrait = $this->image->traits();
+        // $traits = Traits::personalOrGlobal()->get();
+        // $imageTrait = $this->image->traits();
 
-        foreach($traits as $trait) {
-            $dT = new DisplayTrait($trait->id, $trait->name, $trait->type, $trait->default);
-            foreach($imageTrait as $imageTrait) {
-                if($imageTrait->id == $trait->id) {
-                    $dT->setValue($imageTrait->value);
-                }
-            }
-            $res[$trait->id] = $dT;
-        }
+        // foreach($traits as $trait) {
+        //     $dT = new DisplayTrait($trait->id, $trait->name, $trait->type, $trait->default);
+        //     foreach($imageTrait as $imageTrait) {
+        //         if($imageTrait->id == $trait->id) {
+        //             $dT->setValue($imageTrait->value);
+        //         }
+        //     }
+        //     $res[$trait->id] = $dT;
+        // }
 
         return $res;
     }
@@ -137,7 +131,7 @@ class Details extends ModalComponent
 
     public function mount(string $imageUuid)
     {
-        $this->image = Image::ownedOrShared()->where('uuid', $imageUuid)->first();
+        $this->image = Image::ownedOrShared(Auth::user()->id)->where('uuid', $imageUuid)->first();
 
         $this->owned = Auth::user()->id == $this->image->owner_id;
 

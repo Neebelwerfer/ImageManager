@@ -9,12 +9,15 @@ use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\ImageTraits;
 use App\Models\ImageUpload;
+use App\Models\SharedImages;
 use App\Models\Tags;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\LazyCollection;
 use Intervention\Image\ImageManager;
@@ -30,39 +33,28 @@ class ImageService
         $this->comparator = new ImageComparator();
     }
 
-    public function index()
-    {
-        return Image::where('owner_id', Auth::user()->id)->all();
-    }
-
-    public function pagedIndex($pageSize = 20)
-    {
-        return $this->index()->paginate($pageSize);
-    }
-
-    public function lazyIndex() : LazyCollection
-    {
-        return Image::where('owner_id', Auth::user()->id)->lazy();
-    }
-
     public function deleteImage(Image $image)
     {
         $image->delete();
     }
 
-    public function addTag(User $user, Image $image, Tags $tag, bool $personal)
+    public function addTag(User $user, Image $image, Tags $tag, bool $personal, SharedImages $sharedImage = null)
     {
-        $image->tags()->attach($tag, ['added_by' => $user->id, 'personal' => $personal]);
+        if($sharedImage === null && $image->owner_id != $user->id)
+        {
+            $sharedImage = SharedImages::where('image_uuid', $image->uuid)->where('shared_with_user_id', $user->id)->first();
+            if($sharedImage == null)
+            {
+                Log::error('Could not find the shared image data entry', ['image' => $image->uuid, 'user' => $user->id]);
+                throw new ModelNotFoundException('Could not find the shared image data entry');
+            }
+        }
+
+        $image->tags()->attach($tag, ['added_by' => $user->id, 'personal' => $personal, 'shared_image' => $sharedImage == null ? null : $sharedImage->id]);
         if(!$personal)
         {
             Broadcast(new ImageTagEdited($user, $image->uuid))->toOthers();
         }
-    }
-
-    public function removeTags(Image $image, array $tags)
-    {
-        $image->tags()->detach($tags);
-        $image->push();
     }
 
     public function removeCategory(Image $image, ImageCategory $category) {
@@ -115,22 +107,24 @@ class ImageService
 
     public function createImageHash($image) : string
     {
-        $hash = $this->comparator->hashImage($image);
+        $hash = $this->comparator->hashImage($image, size:16);
         return $this->comparator->convertHashToBinaryString($hash);
     }
 
-    public function isShared($sharedTo, $id) : bool
+    public function isShared(User $sharedTo, $uuid) : bool
     {
-        return app(SharedResourceService::class)->isShared($sharedTo, 'image', $id);
+        return app(SharedResourceService::class)->isImageShared($sharedTo, $uuid, 'image');
     }
 
 
-    public function share($id, User $sharedTo, $accessLevel) : bool
+    public function share(User $sharedBy, User $sharedTo, string $image_uuid, $accessLevel) : bool
     {
-        $image = Image::owned()->find($id);
-        if(isset($image)) {
-            if(isset($sharedTo) && $sharedTo->id != Auth::user()->id && !$this->isShared($sharedTo, $id)) {
-                app(SharedResourceService::class)->Share($sharedTo, 'image', $id, $accessLevel);
+        if($sharedTo->id == $sharedBy->id) return true;
+        $image = Image::owned(Auth::user()->id)->find($image_uuid);
+        if(isset($image))
+        {
+            if(isset($sharedTo) && !$this->isShared($sharedTo, $image_uuid)) {
+                app(SharedResourceService::class)->ShareImage($sharedBy, $sharedTo, $image_uuid, $accessLevel, 'image');
                 $image->is_shared = true;
                 return true;
             }
@@ -138,8 +132,22 @@ class ImageService
         return false;
     }
 
-    public function stopSharing($sharedTo, $id)
+    public function stopSharing(User $sharedBy, User $sharedTo, $uuid)
     {
+        app(SharedResourceService::class)->StopSharingImage($sharedBy, $sharedTo, $uuid, 'image');
+    }
 
+    public function removeTag(User $user, Image $image, $tagID)
+    {
+        $tag = $image->tags()->find($tagID);
+
+        if($image->owner_id == $user->id || $tag->pivot->added_by === $user->id)
+        {
+            $image->tags()->detach($tag);
+            if(!$tag->pivot->personal)
+            {
+                Broadcast(new ImageTagEdited($user, $image->uuid))->toOthers();
+            }
+        }
     }
 }

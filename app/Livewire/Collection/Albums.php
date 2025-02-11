@@ -5,6 +5,7 @@ namespace App\Livewire\Collection;
 use Livewire\Component;
 use App\Models\Album;
 use App\Models\Image;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -21,6 +22,7 @@ class Albums extends Component
         $key = "album-thumbnail-".$album->id;
         $imageUuid = Cache::get($key);
         $image = Image::find($imageUuid);
+
         if($image === null)
         {
             $image = $album->images()->first();
@@ -37,7 +39,7 @@ class Albums extends Component
     {
         return view('livewire.collection.albums',
             [
-                'albums' => Album::ownedOrShared()->where('name', 'like', '%'.$this->name.'%')->paginate(20),
+                'albums' => Album::ownedOrShared(Auth::user()->id)->where('name', 'like', '%'.$this->name.'%')->paginate(20),
             ]);
     }
 }

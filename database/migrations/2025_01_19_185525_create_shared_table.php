@@ -11,23 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('shared_resources', function (Blueprint $table) {
+        Schema::create('shared_collections', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['image', 'album', 'category']);
-            $table->integer('resource_id')->nullable();
-            $table->uuid('resource_uuid')->nullable();
+            $table->enum('type', ['album', 'category']);
+            $table->integer('resource_id');
             $table->foreignId('shared_by_user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('shared_with_user_id')->constrained('users')->onDelete('cascade');
             $table->enum('level', ['view', 'edit']);
             $table->timestamps();
         });
 
-        Schema::create('shared_audit_log', function (Blueprint $table) {
+        Schema::create('shared_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('resource_id')->constrained('shared_resources')->onDelete('cascade');
-            $table->string('action');
+            $table->foreignUuid('image_uuid')->constrained('images', 'uuid')->cascadeOnDelete();
+            $table->foreignId('shared_by_user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('shared_with_user_id')->constrained('users')->onDelete('cascade');
+            $table->enum('level', ['view', 'edit']);
             $table->timestamps();
+        });
+
+        Schema::create('shared_source', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('shared_image')->constrained('shared_images')->cascadeOnDelete();
+            $table->foreignId('shared_by_user_id')->constrained('users')->cascadeOnDelete();
+            $table->enum('source', ['image', 'category', 'album']);
+            $table->unique(['shared_image', 'shared_by_user_id', 'source']);
         });
 
         Schema::table('images', function (Blueprint $table) {
@@ -40,6 +48,18 @@ return new class extends Migration
 
         Schema::table('image_categories', function (Blueprint $table) {
             $table->boolean('is_shared')->default(false);
+        });
+
+        Schema::table('image_tags', function (Blueprint $table) {
+            $table->foreignId('shared_image')->nullable()->constrained('shared_images')->cascadeOnDelete();
+        });
+
+        Schema::table('album_images', function (Blueprint $table) {
+            $table->foreignId('shared_image')->nullable()->constrained('shared_images')->cascadeOnDelete();
+        });
+
+        Schema::table('image_traits', function (Blueprint $table) {
+            $table->foreignId('shared_image')->nullable()->constrained('shared_images')->cascadeOnDelete();
         });
     }
 
@@ -48,8 +68,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('shared_audit_log');
-        Schema::dropIfExists('shared_resources');
+        Schema::dropIfExists('shared_source');
+        Schema::dropIfExists('shared_collections');
+        Schema::dropIfExists('shared_images');
         Schema::table('images', function (Blueprint $table) {
             $table->dropColumn('is_shared');
         });
@@ -58,6 +79,17 @@ return new class extends Migration
         });
         Schema::table('image_categories', function (Blueprint $table) {
             $table->dropColumn('is_shared');
+        });
+        Schema::table('image_tags', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('shared_image');
+        });
+
+        Schema::table('album_images', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('shared_image');
+        });
+
+        Schema::table('image_traits', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('shared_image');
         });
     }
 };
