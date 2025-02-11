@@ -19,7 +19,6 @@ use Livewire\WithPagination;
 #[Layout('layouts.collection')]
 abstract class CollectionView extends Component
 {
-
     use WithPagination;
 
     #[Url('grid')]

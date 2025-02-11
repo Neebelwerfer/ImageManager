@@ -72,7 +72,7 @@ class Collection extends CollectionView
 
     public function goBack()
     {
-        return redirect()->route('collection.show', $this->collectionType);
+        return redirect()->route('collection');
     }
 
     #[On('collectionEdited')]
@@ -87,7 +87,6 @@ class Collection extends CollectionView
     {
         return $this->goBack();
     }
-
 
     #[Computed()]
     public function images()
@@ -107,5 +106,4 @@ class Collection extends CollectionView
             return Tags::sortTags($query, $this->tags)->paginate(20);
         }
     }
-
 }

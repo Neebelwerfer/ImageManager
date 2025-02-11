@@ -1,4 +1,4 @@
-<div class="relative w-full h-full overflow-hidden">
+<div class="relative w-full h-full overflow-hidden" x-data="{ gridView: $wire.entangle('gridView')} ">
     @if(isset($collectionName))
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -13,12 +13,12 @@
                 @if($this->showBackButton)
                     <button class="p-1 mr-5 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="goBack()">Back</button>
                 @endif
-                <button
-                    class="p-1 border rounded  @if($gridView) bg-slate-400 dark:bg-gray-500 @else bg-slate-600 dark:bg-gray-700 @endif hover:bg-gray-400 hover:dark:bg-gray-500"
-                    wire:click="setGridView(true)" @if($gridView) disabled @endif>Grid</button>
-                <button
-                    class="p-1 border rounded @if(!$gridView) bg-slate-400 dark:bg-gray-500 @else bg-slate-600 dark:bg-gray-700 @endif hover:bg-gray-400 hover:dark:bg-gray-500"
-                    wire:click="setGridView(false)" @if(!$gridView) disabled @endif>Single</button>
+                <button id="Grid"
+                    class="p-1 border rounded hover:bg-gray-400 hover:dark:bg-gray-500"
+                    x-on:click="gridView = true" :class="gridView ? 'bg-slate-400 dark:bg-gray-500' : ' bg-slate-600 dark:bg-gray-700'" >Grid</button>
+                <button id="Single"
+                    class="p-1 border rounded hover:bg-gray-400 hover:dark:bg-gray-500"
+                    x-on:click="gridView = false" :class="!gridView ? 'bg-slate-400 dark:bg-gray-500' : ' bg-slate-600 dark:bg-gray-700'">Single</button>
             </div>
             @if($singleImage !== null)
             <div class="mt-2 mr-4 @if($gridView) hidden @endif">
@@ -28,7 +28,7 @@
             {{ $this->images->links() }}
         </div>
 
-        <div class="@if($gridView) flex  @else collapse @endif justify-center">
+        <div x-show="gridView" class="flex justify-center">
             <div class="flex flex-col justify-center w-7/12 justify-items-center">
                 <x-grid>
                     <x-slot name="header">
@@ -55,8 +55,8 @@
         </div>
 
 
-        @if (!$gridView && isset($singleImage))
-            <div class="h-full">
+        @if (isset($singleImage))
+            <div x-show="!gridView" class="h-full">
                 <button wire:click="previousImage" class="absolute z-30 left-0 w-20 h-full @if(!$this->gotPrevious()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-l border-y"><</button>
                 <button wire:click="nextImage" class="absolute z-30 right-0 w-20 h-full @if(!$this->gotNext()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-r border-y">></button>
 
@@ -71,3 +71,12 @@
         @endif
     </div>
 </div>
+
+@script
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const imagesCount = typeof($wire.images);
+
+    console.log(imagesCount);
+</script>
+@endscript
