@@ -72,7 +72,8 @@ class Collection extends CollectionView
 
     public function goBack()
     {
-        return redirect()->route('collection');
+        $route = $this->collectionType == 'albums' ? 'album' : 'category';
+        return redirect()->route('collection.' . $route, );
     }
 
     #[On('collectionEdited')]

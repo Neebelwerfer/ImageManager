@@ -56,7 +56,7 @@
 
 
         @if (isset($singleImage))
-            <div x-show="!gridView" class="h-full">
+            <div :class="!gridView ? '' : 'collapse'" class="h-full">
                 <button wire:click="previousImage" class="absolute z-30 left-0 w-20 h-full @if(!$this->gotPrevious()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-l border-y"><</button>
                 <button wire:click="nextImage" class="absolute z-30 right-0 w-20 h-full @if(!$this->gotNext()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-r border-y">></button>
 
