@@ -92,6 +92,7 @@
                             @endif
                         </div>
 
+                        @if(count($traits) > 0)
                         <div class="flex flex-col w-fit">
                             <div class="inline-flex gap-4">
                                 <label for="tags">Traits:</label>
@@ -103,14 +104,13 @@
                                     @enderror
                                 </div>
                             </div>
-                            @if (count($traits) > 0)
                             <div class="flex flex-col mx-5 mb-4 overflow-scroll">
                                 @foreach ($traits as $id => $trait)
                                     <livewire:trait.show :trait="$trait" wire:key='trait-{{ $id }}' />
                                 @endforeach
                             </div>
-                            @endif
                         </div>
+                        @endif
 
                         <div class="absolute bottom-0 flex flex-row justify-between w-full gap-2">
                             <div class="mb-3">
