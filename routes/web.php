@@ -26,7 +26,3 @@ Route::middleware(['auth', EnsureUserIsAdmin::class])->group(function () {
 
 require __DIR__.'/images.php';
 require __DIR__.'/auth.php';
-
-Route::fallback(function () {
-    return view('404');
-});
