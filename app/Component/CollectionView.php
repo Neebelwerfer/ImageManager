@@ -28,8 +28,6 @@ abstract class CollectionView extends Component
     #[Url('tags', except:'')]
     public $tags = '';
 
-    public $singleImage;
-
     #[Locked()]
     public $collectionType;
 
@@ -135,10 +133,6 @@ abstract class CollectionView extends Component
             if($this->count > $this->images->count() - 1)
             {
                 $this->count = $this->images->count() - 1;
-            }
-
-            if($this->singleImage == null || $this->singleImage != $this->images()[$this->count]) {
-                $this->singleImage = $this->images()[$this->count];
             }
         }
         return view('livewire.collection.show.grid-and-single');

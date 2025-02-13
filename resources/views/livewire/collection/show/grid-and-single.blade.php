@@ -1,4 +1,4 @@
-<div class="relative w-full h-full overflow-hidden" x-data="{ gridView: $wire.entangle('gridView')} ">
+<div class="relative w-full h-full overflow-hidden" x-data="collectionShow($wire.entangle('count'))">
     @if(isset($collectionName))
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -20,11 +20,10 @@
                     class="p-1 border rounded hover:bg-gray-400 hover:dark:bg-gray-500"
                     x-on:click="gridView = false" :class="!gridView ? 'bg-slate-400 dark:bg-gray-500' : ' bg-slate-600 dark:bg-gray-700'">Single</button>
             </div>
-            @if($singleImage !== null)
+
             <div class="mt-2 mr-4 @if($gridView) hidden @endif">
-                <button wire:click="$dispatch('openModal', {component: 'modal.image.details', arguments: {imageUuid: '{{ $singleImage->uuid }}', source: '{{ $collectionType }}'}})" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>
+                <button wire:click="$dispatch('openModal', {component: 'modal.image.details', arguments: {imageUuid: '{{ $this->images[$count]->uuid }}', source: '{{ $collectionType }}'}})" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>
             </div>
-            @endif
             {{ $this->images->links() }}
         </div>
 
@@ -47,36 +46,24 @@
                     </x-slot>
 
                     @foreach ($this->images as $key => $image)
-                        <x-grid.image-card-button :image="$image" x-on:click="$wire.show({{ $key }})" owned="{{ $image->owner_id == Auth::user()->id }}" wire:key='grid-{{ $image->uuid }}'>
+                        <x-grid.image-card-button :image="$image" x-on:click="show({{ $key }})" owned="{{ $image->owner_id == Auth::user()->id }}" wire:key='grid-{{ $image->uuid }}'>
                         </x-grid.image-card-button>
                     @endforeach
                 </x-grid>
             </div>
         </div>
 
+        <div :class="!gridView ? '' : 'collapse'" class="h-full">
+            <button wire:click="previousImage" class="absolute z-30 left-0 w-20 h-full @if(!$this->gotPrevious()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-l border-y"><</button>
+            <button wire:click="nextImage" class="absolute z-30 right-0 w-20 h-full @if(!$this->gotNext()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-r border-y">></button>
 
-        @if (isset($singleImage))
-            <div :class="!gridView ? '' : 'collapse'" class="h-full">
-                <button wire:click="previousImage" class="absolute z-30 left-0 w-20 h-full @if(!$this->gotPrevious()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-l border-y"><</button>
-                <button wire:click="nextImage" class="absolute z-30 right-0 w-20 h-full @if(!$this->gotNext()) bg-gray-600 @else bg-gray-900 hover:bg-gray-700 @endif border-r border-y">></button>
-
-                <div class="flex flex-col justify-center w-full h-full border-y"  x-on:keyup.left.window="$wire.previousImage()" x-on:keyup.right.window="$wire.nextImage()">
-                    <div class="flex flex-row justify-center h-full">
-                        <div class="flex justify-center flex-grow-0">
-                            <livewire:image classes="flex justify-center h-full" vWidth="w-10/12" hWidth="w-3/4" :image="$singleImage"/>
-                        </div>
+            <div class="flex flex-col justify-center w-full h-full border-y"  x-on:keyup.left.window="$wire.previousImage()" x-on:keyup.right.window="$wire.nextImage()">
+                <div class="flex flex-row justify-center h-full">
+                    <div class="flex justify-center flex-grow-0">
+                        <livewire:image classes="flex justify-center h-full" vWidth="w-10/12" hWidth="w-3/4" :image="$this->images[$count]"/>
                     </div>
                 </div>
             </div>
-        @endif
+        </div>
     </div>
 </div>
-
-@script
-<script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const imagesCount = typeof($wire.images);
-
-    console.log(imagesCount);
-</script>
-@endscript
