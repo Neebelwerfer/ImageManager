@@ -12,6 +12,7 @@ class ImageTraits extends Model
         'trait_id',
         'owner_id',
         'value',
+        'shared_image'
     ];
 
     public function image() : BelongsTo

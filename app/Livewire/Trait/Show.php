@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Trait;
 
-use App\Support\Traits\AddedTrait;
+use App\DTO\ImageTraitDTO;
 use Livewire\Component;
 
 class Show extends Component
 {
-    public AddedTrait $trait;
+    public ImageTraitDTO $trait;
 
     public $value = '';
 

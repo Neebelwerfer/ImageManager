@@ -10,6 +10,7 @@ use App\Services\CategoryService;
 use App\Services\ImageService;
 use App\Services\SharedResourceService;
 use App\Services\TagService;
+use App\Services\TraitService;
 
 class ImageProvider extends ServiceProvider
 {
@@ -32,6 +33,10 @@ class ImageProvider extends ServiceProvider
 
         $this->app->singleton(ImageService::class, function ($app) {
             return new ImageService();
+        });
+
+        $this->app->singleton(TraitService::class, function ($app) {
+            return new TraitService();
         });
 
         $this->app->singleton(SharedResourceService::class, function ($app) {

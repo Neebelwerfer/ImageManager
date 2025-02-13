@@ -21,14 +21,6 @@ class Traits extends Component
     {
         $trait = TraitsModel::find($id);
         if(isset($trait)) {
-            if($trait->global && !Auth::user()->is_admin) {
-                return;
-            }
-
-            if(!$trait->global && $trait->owner_id != Auth::user()->id) {
-                return;
-            }
-
             $trait->delete();
         }
     }
@@ -37,8 +29,7 @@ class Traits extends Component
     {
         return view('livewire.manage.traits',
             [
-                'globalTraits' => TraitsModel::global()->paginate(20),
-                'traits' => TraitsModel::personal()->paginate(20),
+                'traits' => TraitsModel::owned(Auth::user()->id)->paginate(20),
             ]);
     }
 }

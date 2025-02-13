@@ -10,10 +10,12 @@ use App\Models\SharedCollections;
 use App\Models\SharedImages;
 use App\Models\SharedResources;
 use App\Models\SharedSource;
+use App\Models\Traits;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 
 class SharedResourceService
 {
@@ -66,16 +68,31 @@ class SharedResourceService
 
     public function ShareImage(User $sharedBy, User $sharedTo, $uuid, $accessLevel, $source)
     {
-        if($source === null) return;
+        if($source === null)
+        {
+            throw new InvalidArgumentException('Tried to share image without valid source');
+        }
 
-        $shared_image = new SharedImages();
-        $shared_image->image_uuid = $uuid;
-        $shared_image->shared_by_user_id = $sharedBy->id;
-        $shared_image->shared_with_user_id = $sharedTo->id;
-        $shared_image->level = $accessLevel;
-        $shared_image->save();
+        $shared_image = SharedImages::where('shared_by_user_id', $sharedBy->id)->where('shared_with_user_id', $sharedTo->id)->where('image_uuid', $uuid)->first();
 
-        $shared_image->refresh();
+        if($shared_image === null)
+        {
+            $shared_image = new SharedImages();
+            $shared_image->image_uuid = $uuid;
+            $shared_image->shared_by_user_id = $sharedBy->id;
+            $shared_image->shared_with_user_id = $sharedTo->id;
+            $shared_image->level = $accessLevel;
+            $shared_image->save();
+
+            $shared_image->refresh();
+
+            $traits = Traits::owned($sharedTo->id)->get();
+            foreach($traits as $trait)
+            {
+                app(ImageService::class)->addTrait($uuid, $trait->id, $sharedTo->id, $trait->default, $shared_image->id);
+            }
+        }
+
 
         $this->AddSourceToSharedImage($sharedBy, $shared_image, $source);
     }

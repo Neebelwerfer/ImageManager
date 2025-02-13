@@ -66,14 +66,6 @@
                     @error('default')
                         <span class="text-red-500">{{ $message }}</span>
                     @enderror
-
-                    @if (Auth::user()->is_admin)
-                        <div class="flex flex-row justify-between border-t">
-                            <label class="block text-lg font-medium text-gray-700 dark:text-gray-300">Global</label>
-                            <input class="px-2 py-1 ml-1 text-black border rounded" type="checkbox" wire:model="global">
-                        </div>
-                    @endif
-
                 </div>
             </form>
         </div>

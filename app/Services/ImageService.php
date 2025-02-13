@@ -57,6 +57,19 @@ class ImageService
         }
     }
 
+    public function addTrait($uuid, $trait_id, $owner_id, $value, $shared_image_id = null)
+    {
+        ImageTraits::create(
+            [
+                'image_uuid' => $uuid,
+                'trait_id' => $trait_id,
+                'owner_id' => $owner_id,
+                'value' => $value,
+                'shared_image' => $shared_image_id
+            ]
+        );
+    }
+
     public function removeCategory(Image $image, ImageCategory $category) {
         $image->categories()->detach($category);
         $image->push();
@@ -120,12 +133,11 @@ class ImageService
     public function share(User $sharedBy, User $sharedTo, string $image_uuid, $accessLevel) : bool
     {
         if($sharedTo->id == $sharedBy->id) return true;
-        $image = Image::owned(Auth::user()->id)->find($image_uuid);
+        $image = Image::owned($sharedBy->id)->find($image_uuid);
         if(isset($image))
         {
             if(isset($sharedTo) && !$this->isShared($sharedTo, $image_uuid)) {
                 app(SharedResourceService::class)->ShareImage($sharedBy, $sharedTo, $image_uuid, $accessLevel, 'image');
-                $image->is_shared = true;
                 return true;
             }
         }

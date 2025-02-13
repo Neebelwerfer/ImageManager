@@ -2,11 +2,13 @@
 
 namespace App\Jobs;
 
+use App\Livewire\Modal\Manage\Share;
 use App\Models\Image;
 use App\Models\ImageCategory;
 use App\Models\SharedCollections;
 use App\Models\SharedImages;
 use App\Models\User;
+use App\Services\ImageService;
 use App\Services\SharedResourceService;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;

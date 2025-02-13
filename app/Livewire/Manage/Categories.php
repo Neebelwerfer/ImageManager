@@ -27,26 +27,27 @@ class Categories extends Component
 
     public function isOwned($id) : bool
     {
-        $category = ImageCategory::owned()->find($id);
+        $category = ImageCategory::owned(Auth::user()->id)->find($id);
         return isset($category);
     }
 
     public function imageCount($id) : int
     {
-        return Image::owned()->where('category_id', $id)->count();
+        return Image::owned(Auth::user()->id)->where('category_id', $id)->count();
     }
 
     public function create()
     {
+        $user = Auth::user();
         $this->validate();
 
-        $cat = ImageCategory::owned()->where('name', $this->name)->first();
+        $cat = ImageCategory::owned($user->id)->where('name', $this->name)->first();
 
         if(isset($cat)) {
            return $this->addError('name', 'Category already exists');
         }
         else {
-            $cat = app(CategoryService::class)->create($this->name);
+            $cat = app(CategoryService::class)->create($user, $this->name);
         }
     }
 
@@ -54,8 +55,8 @@ class Categories extends Component
     {
         return view('livewire.manage.categories',
             [
-                'categories' => ImageCategory::owned()->where('name', 'like', '%' . $this->name . '%')->paginate(50),
-                'shared' => ImageCategory::shared()->where('name', 'like', '%' . $this->name . '%')->paginate(20)
+                'categories' => ImageCategory::owned(Auth::user()->id)->where('name', 'like', '%' . $this->name . '%')->paginate(50),
+                'shared' => ImageCategory::shared(Auth::user()->id)->where('name', 'like', '%' . $this->name . '%')->paginate(20)
             ]);
     }
 }

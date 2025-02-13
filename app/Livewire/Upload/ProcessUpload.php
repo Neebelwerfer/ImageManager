@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Upload;
 
+use App\DTO\ImageTraitDTO;
 use App\Jobs\Upload\CheckForDuplicates;
 use App\Jobs\Upload\ProcessImage;
 use App\Jobs\Upload\ScanForDuplicates;
@@ -136,9 +137,9 @@ class ProcessUpload extends Component
 
 
     public function setupTraits() {
-        $traits = Traits::personalOrGlobal()->get();
+        $traits = Traits::owned(Auth::user()->id)->get();
         foreach($traits as $trait) {
-            $at = new AddedTrait($trait, $trait->default);
+            $at = new ImageTraitDTO($trait, Auth::user()->id, $trait->default);
             $this->traits[$trait->id] = $at;
         }
     }
@@ -184,6 +185,8 @@ class ProcessUpload extends Component
 
     public function SetupData()
     {
+        $this->setupTraits();
+
         $data = json_decode($this->imageUpload->data, true);
         if(isset($data) && !empty($data))
         {

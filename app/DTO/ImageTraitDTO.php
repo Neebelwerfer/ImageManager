@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Support\Traits;
+namespace App\DTO;
 
 use App\Models\Traits;
 use Livewire\Wireable;
 
-class AddedTrait implements Wireable
+class ImageTraitDTO implements Wireable
 {
-    protected Traits $trait;
+    protected readonly Traits $trait;
+    protected readonly int $owner_id;
     protected string $value;
 
-    public function __construct(Traits $trait, string $value) {
+    public function __construct(Traits $trait, int $owner_id, string $value) {
         $this->trait = $trait;
+        $this->owner_id = $owner_id;
         $this->value = $value;
     }
 
@@ -54,15 +56,17 @@ class AddedTrait implements Wireable
     {
         return [
             'trait_id' => $this->trait->id,
+            'owner_id' => $this->owner_id,
             'value' => $this->value,
         ];
     }
 
     public static function fromLivewire($value)
     {
-        $trait = Traits::personalOrGlobal()->find($value['trait_id']) ?? null;
+        $trait = Traits::owned($value['owner_id'])->find($value['trait_id']) ?? null;
+        $owner_id = $value['owner_id'];
         $value = $value['value'];
 
-        return new static($trait, $value);
+        return new static($trait, $owner_id, $value);
     }
 }

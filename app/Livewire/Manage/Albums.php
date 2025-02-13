@@ -46,8 +46,8 @@ class Albums extends Component
     {
         return view('livewire.manage.albums',
             [
-                'albums' => Album::where('owner_id', Auth::user()->id)->paginate(50),
-                'shared' => Album::shared()->where('name', 'like', '%' . $this->name . '%')->paginate(20)
+                'albums' => Album::owned(Auth::user()->id)->paginate(50),
+                'shared' => Album::shared(Auth::user()->id)->where('name', 'like', '%' . $this->name . '%')->paginate(20)
             ]);
     }
 }

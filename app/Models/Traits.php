@@ -12,25 +12,14 @@ class Traits extends Model
         'type',
         'min',
         'max',
-        'global',
         'owner_id',
         'default'
     ];
 
     public $timestamps = false;
 
-    public function scopePersonal($query)
+    public function scopeOwned($query, $owner_id)
     {
-        return $query->where('global', false)->where('owner_id', Auth::user()->id);
-    }
-
-    public function scopeGlobal($query)
-    {
-        return $query->where('global', true);
-    }
-
-    public function scopePersonalOrGlobal($query)
-    {
-        return $query->where('global', true)->orWhere('owner_id', Auth::user()->id);
+        return $query->where('owner_id', $owner_id);
     }
 }
