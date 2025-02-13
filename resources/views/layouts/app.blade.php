@@ -42,7 +42,7 @@
             Image Manager v0.0.1
         </footer>
     </div>
-    @livewireScriptConfig
     @livewire('wire-elements-modal')
+    @livewireScriptConfig
 </body>
 </html>

@@ -31,8 +31,6 @@ abstract class CollectionView extends Component
     #[Locked()]
     public $collectionType;
 
-    public bool $showBackButton = false;
-
     public function setGridView($value)
     {
         $this->gridView = $value;

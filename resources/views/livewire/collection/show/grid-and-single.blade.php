@@ -10,9 +10,7 @@
     <div class="relative flex flex-col h-full">
         <div class="flex flex-row justify-between pb-2">
             <div class="flex flex-row mx-2 mt-2">
-                @if($this->showBackButton)
-                    <button class="p-1 mr-5 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="goBack()">Back</button>
-                @endif
+                <button class="p-1 mr-5 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="goBack()">Back</button>
                 <button id="Grid"
                     class="p-1 border rounded hover:bg-gray-400 hover:dark:bg-gray-500"
                     x-on:click="gridView = true" :class="gridView ? 'bg-slate-400 dark:bg-gray-500' : ' bg-slate-600 dark:bg-gray-700'" >Grid</button>
