@@ -1,4 +1,4 @@
-<div class="relative w-full h-full overflow-hidden" x-data="collectionShow($wire.entangle('count'))">
+<div class="relative w-full h-full overflow-hidden" x-data="collectionShow($wire.entangle('count'), $wire.entangle('gridView'))">
     @if(isset($collectionName))
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -44,7 +44,7 @@
                     </x-slot>
 
                     @foreach ($this->images as $key => $image)
-                        <x-grid.image-card-button :image="$image" x-on:click="show({{ $key }})" owned="{{ $image->owner_id == Auth::user()->id }}" wire:key='grid-{{ $image->uuid }}'>
+                        <x-grid.image-card-button :image="$image" wire:click="show({{ $key }})" owned="{{ $image->owner_id == Auth::user()->id }}" wire:key='grid-{{ $image->uuid }}'>
                         </x-grid.image-card-button>
                     @endforeach
                 </x-grid>
