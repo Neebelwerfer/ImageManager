@@ -32,8 +32,6 @@ class Collection extends CollectionView
 
     public function mount($collectionType, $collectionID = null)
     {
-        $this->showBackButton = true;
-
         $this->collectionType = $collectionType;
         $this->collectionID = $collectionID;
 
