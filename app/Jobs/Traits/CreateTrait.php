@@ -45,7 +45,7 @@ class CreateTrait implements ShouldQueue, ShouldBeEncrypted
             ]);
 
 
-            foreach(Image::where('owner_id', $this->user->id)->get() as $image)
+            foreach(Image::ownedOrShared($this->user->id)->get() as $image)
             {
                 app(ImageService::class)->addTrait($image->uuid, $trait->id, $this->user->id, $trait->default);
             }

@@ -81,18 +81,8 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             }
 
             if(isset($data['traits']) && count($data['traits']) > 0) {
-                foreach ($data['traits'] as $trait_id) {
-                    $trait = $traits[$trait_id];
-
-                    $t = new ImageTraits(
-                        [
-                            'image_uuid' => $image->uuid,
-                            'trait_id' => $trait->getTrait()->id,
-                            'owner_id' => $image->owner_id,
-                            'value' => $trait->getValue()
-                        ]
-                    );
-                    $t->save();
+                foreach ($data['traits'] as $trait_id => $trait_value) {
+                    $imageService->addTrait($image->uuid, $trait_id, $image->owner_id, $trait_value);
                 }
             }
 
