@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Upload\UploadErrors;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 class ImageUpload extends Model
@@ -20,6 +22,12 @@ class ImageUpload extends Model
     public $primaryKey = 'uuid';
     public $incrementing = false;
     public $keyType = 'string';
+
+
+    public function error() : HasOne
+    {
+        return $this->hasOne(UploadErrors::class, 'image_upload_uuid', 'uuid');
+    }
 
     public function path() : string
     {

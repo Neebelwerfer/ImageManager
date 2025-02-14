@@ -111,7 +111,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             $this->imageUpload->save();
             UploadErrors::create([
                 'image_upload_uuid' => $this->imageUpload->uuid,
-                'message' => $e
+                'message' => $e->getMessage()
             ]);
             Broadcast::on('upload.' . $this->imageUpload->uuid)->as('processingFailed')->send();
             return;

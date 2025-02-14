@@ -77,7 +77,7 @@ class ImageTraitDTO implements Wireable
             'trait_id' => $this->trait->id,
             'owner_id' => $this->owner_id,
             'value' => $this->value,
-            '$imageTrait_id' => $this->imageTrait !== null ? $this->imageTrait->id : null
+            'imageTrait_id' => $this->imageTrait !== null ? $this->imageTrait->id : null
         ];
     }
 
@@ -86,7 +86,7 @@ class ImageTraitDTO implements Wireable
         $trait = Traits::owned($data['owner_id'])->find($data['trait_id']) ?? null;
         $owner_id = $data['owner_id'];
 
-        $imageTrait_id = intval($data['imageTrait_id']);
+        $imageTrait_id = $data['imageTrait_id'];
         $imageTrait = null;
         if(!is_nan($imageTrait_id))
         {

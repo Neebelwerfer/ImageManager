@@ -168,6 +168,19 @@
                                     wire:click="navigate()" type="button">Upload More</button>
                             </div>
                         </div>
+                    @elseif($state === 'error')
+                        <div class="flex flex-row">
+                        <h1 class="text-xl font-extrabold text-red-400 underline">Error: </h1>
+                        <p class="self-center ml-2 text-xl font-extrabold">"{{ $imageUpload->error->message }}"</p>
+                        </div>
+                        <div class="absolute bottom-0 flex flex-row justify-between w-2/3 gap-2">
+                            <div class="mb-3 @if($state !== "foundDuplicates")collapse @endif">
+                                <x-button wire:click='process'>Retry</x-button>
+                            </div>
+                            <div class="mb-3">
+                                <x-button  wire:click='cancel' type="button">Cancel</x-button>
+                            </div>
+                        </div>
                     @else
                         <div class="absolute bottom-0 flex flex-row justify-between w-2/3 gap-2">
                             <div class="mb-3 @if($state !== "foundDuplicates")collapse @endif">
