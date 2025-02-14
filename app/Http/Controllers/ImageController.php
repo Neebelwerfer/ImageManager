@@ -31,22 +31,6 @@ class ImageController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return $this->ImageService->index();
-    }
-
-    /**
-     * Display a listing of the resource in pages.
-     * @return Illuminate\Database\Eloquent\Collection
-     */
-    public function pagedIndex() {
-        return $this->ImageService->pagedIndex();
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -62,50 +46,61 @@ class ImageController extends Controller
         return view('image.show', $imageUuid);
     }
 
-    public function getImage(string $uuid) {
+    public function getImage(string $uuid)
+    {
         $image = Image::where('uuid', $uuid)->first();
 
-        if(!Auth::hasUser()) {
+        if (!Auth::hasUser()) {
             return redirect(route('login'));
         }
 
-        if(!isset($image) || Auth::user()->id != $image->owner_id) {
+        if (!isset($image) || Auth::user()->id != $image->owner_id) {
             redirect()->back();
         }
 
-        $data = file_get_contents(storage_path('app/' . $image->getImagePath()));
-        return response()->make(Crypt::decryptString($data, false), 200, ['Content-Type' => 'image/' . $image->format .';base64']);
+        try {
+            $data = file_get_contents(storage_path('app/' . $image->getImagePath()));
+            return response()->make(Crypt::decryptString($data, false), 200, ['Content-Type' => 'image/' . $image->format . ';base64']);
+        } catch (Exception $e) {
+            return response()->noContent('404');
+        }
     }
 
-    public function getThumbnail(string $uuid) {
+    public function getThumbnail(string $uuid)
+    {
         $image = Image::where('uuid', $uuid)->first();
 
-        if(!Auth::hasUser()) {
+        if (!Auth::hasUser()) {
             return redirect(route('login'));
         }
 
-        if(!isset($image) || Auth::user()->id != $image->owner_id) {
+        if (!isset($image) || Auth::user()->id != $image->owner_id) {
             redirect()->back();
         }
 
-        $data = Cache::remember('thumbnail-'.$image->uuid, 3600, function() use($image) {
-            return Crypt::decryptString(file_get_contents(storage_path('app/' . $image->getThumbnailPath())));
-        });
-        return response()->make($data, 200, ['Content-Type' => 'image/webp;base64']);
+
+        try {
+            $data = Cache::remember('thumbnail-' . $image->uuid, 3600, function () use ($image) {
+                return Crypt::decryptString(file_get_contents(storage_path('app/' . $image->getThumbnailPath())));
+            });
+            return response()->make($data, 200, ['Content-Type' => 'image/webp;base64']);
+        } catch (Exception $e) {
+            return response()->noContent('404');
+        }
     }
 
-    public function getTempImage(string $uuid) {
+    public function getTempImage(string $uuid)
+    {
         $image = ImageUpload::where('uuid', $uuid)->first();
 
-        if(!Auth::hasUser()) {
+        if (!Auth::hasUser()) {
             return redirect(route('login'));
         }
 
-        if(Auth::user()->id != $image->owner_id) {
+        if (Auth::user()->id != $image->owner_id) {
             redirect()->back();
         }
 
         return response()->file(storage_path('app/') . $image->path());
     }
-
 }

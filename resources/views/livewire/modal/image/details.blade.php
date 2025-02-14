@@ -18,11 +18,21 @@
                         </li>
                         <li>Width x Height: {{ $image->width }}x{{ $image->height }}</li>
                         <li>Format: .{{ $image->format }}</li>
-                        @foreach ($this->traits as $trait)
-                        <li>{{ $trait->display() }}</li>
-                        @endforeach
                         <li>Uploaded By: {{ $image->user->name }}</li>
+                        @foreach ($this->traits as $trait)
+                        <li>
+                            {{ $trait->display() }}
+                            <button class="border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="$dispatch('openModal', {component: 'modal.manage.edit-trait-value', arguments: {imageTrait: '{{ $trait->imageTrait()->id }}'}})">Edit</button>
+                        </li>
+                        @endforeach
                     </ol>
+{{--
+                    <div class="flex flex-col justify-center w-full">
+                        <h1 class="border-b border-black">Traits</h1>
+                        @foreach ($this->traits as $trait)
+                        <p>{{ $trait->display() }}</p>
+                        @endforeach
+                    </div> --}}
                 </div>
             </div>
 

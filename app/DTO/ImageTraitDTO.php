@@ -2,19 +2,24 @@
 
 namespace App\DTO;
 
+use App\Models\ImageTraits;
 use App\Models\Traits;
 use Livewire\Wireable;
+
+use function PHPUnit\Framework\isNan;
 
 class ImageTraitDTO implements Wireable
 {
     protected readonly Traits $trait;
+    protected readonly ?ImageTraits $imageTrait;
     protected readonly int $owner_id;
     protected string $value;
 
-    public function __construct(Traits $trait, int $owner_id, string $value) {
+    public function __construct(Traits $trait, int $owner_id, string $value, ImageTraits $imageTraits = null) {
         $this->trait = $trait;
         $this->owner_id = $owner_id;
         $this->value = $value;
+        $this->imageTrait = $imageTraits;
     }
 
     public function getTrait()
@@ -47,6 +52,20 @@ class ImageTraitDTO implements Wireable
         }
     }
 
+    public function ImageTrait()
+    {
+        return $this->imageTrait;
+    }
+
+    public function display()
+    {
+        if($this->trait->type === 'boolean') {
+            return $this->trait->name. ': ' . ($this->value === '1' ? 'True' : 'False');
+        }
+
+        return $this->trait->name.': '. $this->value;
+    }
+
     public function type()
     {
         return $this->trait->type;
@@ -58,15 +77,23 @@ class ImageTraitDTO implements Wireable
             'trait_id' => $this->trait->id,
             'owner_id' => $this->owner_id,
             'value' => $this->value,
+            '$imageTrait_id' => $this->imageTrait !== null ? $this->imageTrait->id : null
         ];
     }
 
-    public static function fromLivewire($value)
+    public static function fromLivewire($data)
     {
-        $trait = Traits::owned($value['owner_id'])->find($value['trait_id']) ?? null;
-        $owner_id = $value['owner_id'];
-        $value = $value['value'];
+        $trait = Traits::owned($data['owner_id'])->find($data['trait_id']) ?? null;
+        $owner_id = $data['owner_id'];
 
-        return new static($trait, $owner_id, $value);
+        $imageTrait_id = intval($data['imageTrait_id']);
+        $imageTrait = null;
+        if(!is_nan($imageTrait_id))
+        {
+            $imageTrait = ImageTraits::find($imageTrait_id);
+        }
+        $value = $data['value'];
+
+        return new static($trait, $owner_id, $value, $imageTrait);
     }
 }

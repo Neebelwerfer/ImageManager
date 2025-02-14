@@ -23,7 +23,10 @@
                     <div class="flex flex-col justify-center w-full">
                         <h1 class="border-b border-black">Traits</h1>
                         @foreach ($this->traits as $trait)
-                        <p>{{ $trait->display() }}</p>
+                        <li>
+                            {{ $trait->display() }}
+                            <button class="border border-gray-500 rounded bg-slate-500/75 w-fit hover:bg-slate-600" wire:click="$dispatch('openModal', {component: 'modal.manage.edit-trait-value', arguments: {imageTrait: '{{ $trait->imageTrait()->id }}'}})">Edit</button>
+                        </li>
                         @endforeach
                     </div>
                 </div>

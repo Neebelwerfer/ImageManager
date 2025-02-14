@@ -2,18 +2,22 @@
 
 namespace App\Livewire\Modal\Image;
 
+use App\DTO\ImageTraitDTO;
 use App\Events\ImageTagEdited;
 use App\Models\Album;
 use App\Models\Image;
 use App\Models\ImageCategory;
+use App\Models\ImageTraits;
 use App\Models\Tags;
 use App\Models\Traits;
 use App\Services\AlbumService;
 use App\Services\CategoryService;
 use App\Services\ImageService;
 use App\Support\Traits\DisplayTrait;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use LivewireUI\Modal\ModalComponent;
@@ -78,6 +82,12 @@ class Details extends ModalComponent
         app(AlbumService::class)->addImage(Auth::user(), $this->image, $res);
     }
 
+    #[On('traitUpdated')]
+    public function traitUpdated()
+    {
+        unset($this->traits);
+    }
+
     public function removeTag($tagID)
     {
         app(ImageService::class)->removeTag(Auth::user(), $this->image, $tagID);
@@ -107,18 +117,18 @@ class Details extends ModalComponent
     public function traits()
     {
         $res = [];
-        // $traits = Traits::personalOrGlobal()->get();
-        // $imageTrait = $this->image->traits();
+        $traits = Traits::owned(Auth::user()->id)->get();
 
-        // foreach($traits as $trait) {
-        //     $dT = new DisplayTrait($trait->id, $trait->name, $trait->type, $trait->default);
-        //     foreach($imageTrait as $imageTrait) {
-        //         if($imageTrait->id == $trait->id) {
-        //             $dT->setValue($imageTrait->value);
-        //         }
-        //     }
-        //     $res[$trait->id] = $dT;
-        // }
+        foreach($traits as $trait) {
+            $imTrait = ImageTraits::where('image_uuid', $this->image->uuid)->where('owner_id', Auth::user()->id)->where('trait_id', $trait->id)->first();
+            if($imTrait == null)
+            {
+                Log::error('Failed to find imageTraits for image', ['image' => $this->image->uuid, 'trait' => $trait->name]);
+                break;
+            }
+            $dT = new ImageTraitDTO($trait, Auth::user()->id, $imTrait->value, $imTrait);
+            $res[$trait->id] = $dT;
+        }
 
         return $res;
     }
