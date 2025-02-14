@@ -4,16 +4,21 @@ namespace App\Livewire\Collection\Show;
 
 use App\Models\Image;
 use App\Component\CollectionView;
+use App\DTO\Traits\SearchTraitDTO;
+use App\DTO\Traits\TraitDTO;
 use App\Models\Album;
 use App\Models\ImageCategory;
 use App\Models\SharedCollections;
 use App\Models\Tags;
+use App\Models\Traits;
 use App\Support\Shared\AccessLevel;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 
 #[Layout('layouts.collection')]
 class Collection extends CollectionView
@@ -27,8 +32,19 @@ class Collection extends CollectionView
     #[Locked]
     public $collectionName;
 
+    #[Locked]
+    public $searchTraits = [];
+
     #[Locked()]
     public AccessLevel $accessLevel = AccessLevel::view;
+
+
+    #[On('traitSelected')]
+    public function traitSelected($id)
+    {
+        $trait = Traits::owned(Auth::user()->id)->find($id);
+        $this->searchTraits[$id] = ['name' => $trait->name, 'value' => $trait->default, 'min' => $trait->min, 'max' => $trait->max];//new SearchTraitDTO($trait, $trait->default);
+    }
 
     public function mount($collectionType, $collectionID = null)
     {

@@ -19,13 +19,30 @@
                     x-on:click="gridView = false" :class="!gridView ? 'bg-slate-400 dark:bg-gray-500' : ' bg-slate-600 dark:bg-gray-700'">Single</button>
             </div>
 
+            @if(count($this->images) > 0)
             <div class="mt-2 mr-4 @if($gridView) hidden @endif">
                 <button wire:click="$dispatch('openModal', {component: 'modal.image.details', arguments: {imageUuid: '{{ $this->images[$count]->uuid }}', source: '{{ $collectionType }}'}})" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>
             </div>
+            @endif
             {{ $this->images->links() }}
         </div>
 
         <div x-show="gridView" class="flex justify-center">
+            {{-- <div class="w-2/12 mt-8 mb-2 border-t border-r shadow-sm bg-slate-900/20">
+                <h1 class="ml-1 text-3xl font-bold underline">Search Parameters</h1>
+                <div class="flex justify-center w-full">
+                    <x-button class="w-full" wire:click="$dispatch('openModal', {component: 'modal.search.add-trait'})">Add Trait</x-button>
+                </div>
+                @foreach ($searchTraits as $key => $entry)
+                    <div class="w-full border">
+                        <div class="flex justify-center">
+                        <p>{{ $entry['name'] }}</p>
+                        </div>
+                        <input class="text-black" wire:model='searchTraits.{{ $key }}.value' value="{{ $entry['value'] }}" type="number" size="4">
+                    </div>
+                @endforeach
+            </div> --}}
+
             <div class="flex flex-col justify-center w-7/12 justify-items-center">
                 <x-grid>
                     <x-slot name="header">
