@@ -174,8 +174,8 @@
                         <p class="self-center ml-2 text-xl font-extrabold">"{{ $imageUpload->error->message }}"</p>
                         </div>
                         <div class="absolute bottom-0 flex flex-row justify-between w-2/3 gap-2">
-                            <div class="mb-3 @if($state !== "foundDuplicates")collapse @endif">
-                                <x-button wire:click='process'>Retry</x-button>
+                            <div class="mb-3">
+                                <x-button wire:click='retry'>Retry</x-button>
                             </div>
                             <div class="mb-3">
                                 <x-button  wire:click='cancel' type="button">Cancel</x-button>

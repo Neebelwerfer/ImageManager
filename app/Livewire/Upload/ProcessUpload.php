@@ -14,6 +14,7 @@ use App\Models\Tags;
 use App\Models\Traits;
 use App\Models\User;
 use App\Services\ImageService;
+use App\Services\TagService;
 use App\Support\Enums\UploadState;
 use App\Support\Traits\AddedTrait;
 use Illuminate\Support\Facades\Auth;
@@ -150,6 +151,15 @@ class ProcessUpload extends Component
         }
     }
 
+    public function retry()
+    {
+        $this->imageUpload->state = "waiting";
+        $this->imageUpload->save();
+        $this->state = $this->imageUpload->state;
+        $this->SetupData();
+
+    }
+
     public function cancel() {
         $this->imageUpload->delete();
         return $this->redirectRoute('upload', navigate: true);
@@ -196,7 +206,34 @@ class ProcessUpload extends Component
         $data = json_decode($this->imageUpload->data, true);
         if(isset($data) && !empty($data))
         {
+            if(isset($data["category"]) && is_numeric($data['category']))
+            {
+                $this->category = ImageCategory::ownedOrShared(Auth::user()->id)->find($data['category']);
+            }
 
+            if(isset($data["tags"]))
+            {
+                foreach($data['tags'] as $name => $personal)
+                {
+                    $this->tagSelected(['id' => app(TagService::class)->getOrCreate($name)->id, 'personal' => $personal]);
+                }
+            }
+
+            if(isset($data['traits']))
+            {
+                foreach($data['traits'] as $id => $value)
+                {
+                    $this->traits[$id]->setValue($value);
+                }
+            }
+
+            if(isset($data['albums']))
+            {
+                foreach ($data['albums'] as $albumId)
+                {
+                    $this->albumSelected($albumId);
+                }
+            }
         }
     }
 

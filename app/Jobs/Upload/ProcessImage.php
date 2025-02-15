@@ -22,6 +22,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Throwable;
@@ -62,6 +63,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
         $image = new Image();
         try
         {
+            DB::beginTransaction();
             $image->uuid = $this->imageUpload->uuid;
             $image->owner_id = $this->user->id;
             $image->width = $data['dimensions']['width'];
@@ -69,8 +71,6 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             $image->image_hash = $this->imageUpload->hash;
             $image->format = $this->imageUpload->extension;
             $image->save();
-
-            $traits = Traits::where('owner_id', $this->user->id)->get();
 
             $imageInfo = ImageManager::imagick()->read($this->imageUpload->fullPath());
             $imageScaled = ImageManager::gd()->read($this->imageUpload->fullPath());
@@ -103,7 +103,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
         }
         catch(Exception $e)
         {
-            $image->delete();
+            DB::rollBack();
             Storage::disk('local')->delete('thumbnails/' . $path . '/' . $name);
             Storage::disk('local')->delete('images/' . $path . '/' . $name);
 
@@ -117,6 +117,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             return;
         }
 
+        DB::commit();
         $this->imageUpload->state = "done";
         $this->imageUpload->save();
         broadcast(new ImageProcessed($image->uuid));
