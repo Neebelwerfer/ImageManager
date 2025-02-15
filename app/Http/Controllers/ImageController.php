@@ -101,6 +101,7 @@ class ImageController extends Controller
             redirect()->back();
         }
 
-        return response()->file(storage_path('app/') . $image->path());
+        $data = Crypt::decryptString(file_get_contents($image->fullPath(), false));
+        return response()->make($data, 200, ['Content-Type' => 'image/' . $image->format . ';base64']);
     }
 }

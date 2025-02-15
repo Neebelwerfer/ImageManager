@@ -31,7 +31,7 @@ class ImageUpload extends Model
 
     public function path() : string
     {
-        return 'temp/' . $this->uuid . '.' . $this->extension;
+        return 'temp/' . $this->uuid;
     }
 
     public function fullPath() : string

@@ -22,6 +22,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
@@ -72,8 +73,10 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             $image->format = $this->imageUpload->extension;
             $image->save();
 
-            $imageInfo = ImageManager::imagick()->read($this->imageUpload->fullPath());
-            $imageScaled = ImageManager::gd()->read($this->imageUpload->fullPath());
+            $decryptedImage = Crypt::decryptString(file_get_contents($this->imageUpload->fullPath()), false);
+
+            $imageInfo = ImageManager::imagick()->read($decryptedImage);
+            $imageScaled = ImageManager::gd()->read($decryptedImage);
 
             if($data['category'] !== null) {
                 $category = ImageCategory::find($data['category']);

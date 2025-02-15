@@ -19,6 +19,7 @@ use App\Support\Enums\UploadState;
 use App\Support\Traits\AddedTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Livewire\Attributes\Computed;
@@ -188,7 +189,8 @@ class ProcessUpload extends Component
         if($cache === null)
         {
             $data = [];
-            $img = ImageManager::gd()->read(storage_path('app/') . $this->imageUpload->path());
+            $decryptedImage = Crypt::decrypt(file_get_contents($this->imageUpload->fullPath()), false);
+            $img = ImageManager::gd()->read($decryptedImage);
 
             $data['dimensions'] = ['height' => $img->size()->height(), 'width' => $img->size()->width()];
             $data['extension'] = Str::upper($this->imageUpload->extension);

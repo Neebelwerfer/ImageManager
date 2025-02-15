@@ -10,6 +10,7 @@ use App\Services\ImageService;
 use App\Support\Traits\AddedTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -50,7 +51,10 @@ class Upload extends Component
             ]);
         $upload->save();
 
-        $this->image->storeAs('temp/', $upload->uuid . '.' . $this->image->extension());
+
+
+        $cryptImage = Crypt::encrypt((string) $img->encodeByMediaType(), false);
+        Storage::disk('local')->put('temp/'. $upload->uuid, $cryptImage);
         $this->image->delete();
         $this->image = null;
 
