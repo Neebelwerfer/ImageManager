@@ -20,7 +20,7 @@
             </div>
 
             @if(count($this->images) > 0)
-            <div class="mt-2 mr-4 @if($gridView) hidden @endif">
+            <div class="mt-2 mr-4" :class="gridView ? 'hidden' : ''">
                 <button wire:click="$dispatch('openModal', {component: 'modal.image.details', arguments: {imageUuid: '{{ $this->images[$count]->uuid }}', source: '{{ $collectionType }}'}})" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>
             </div>
             @endif
