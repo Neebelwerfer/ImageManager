@@ -8,6 +8,11 @@
             <label for="name" class="">Name</label>
             <input type="text" class="text-black form-control" wire:model="name" placeholder="Name..."/>
         </div>
+
+        @error('name')
+            <span class="text-red-500">{{ $message }}</span>
+        @enderror
+
         <div>
             <label for="personal" class="">Personal?</label>
             <input type="checkbox" class="text-black form-control" wire:model="personal"/>

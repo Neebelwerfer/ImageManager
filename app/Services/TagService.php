@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Tags;
+use Exception;
 use Illuminate\Support\Str;
 
 class TagService
@@ -18,6 +19,9 @@ class TagService
 
     public function getOrCreate($name) : Tags
     {
+        if($name === "")
+            throw new Exception('Tag name is invalid');
+
         $name = Str::apa(Str::trim($name));
         $tag = Tags::where('name', $name)->first();
 
