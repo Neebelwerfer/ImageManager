@@ -35,10 +35,6 @@ class Collection extends CollectionView
     #[Locked]
     public $searchTraits = [];
 
-    #[Locked()]
-    public AccessLevel $accessLevel = AccessLevel::view;
-
-
     #[On('traitSelected')]
     public function traitSelected($id)
     {
@@ -61,10 +57,6 @@ class Collection extends CollectionView
                 abort(404, 'Category not found');
             }
 
-            if($res->owner_id !== Auth::user()->id) {
-                $resource = SharedCollections::where('resource_id', $collectionID)->where('type', 'category')->first();
-                $this->accessLevel = $resource->level;
-            }
             $this->collectionName = $res->name;
         }
 
@@ -74,10 +66,6 @@ class Collection extends CollectionView
                 abort(404, 'album not found');
             }
 
-            if($res->owner_id !== Auth::user()->id) {
-                $resource = SharedCollections::where('resource_id', $collectionID)->where('type', 'album')->first();
-                $this->accessLevel = $resource->level;
-            }
             $this->collectionName = $res->name;
         }
 
