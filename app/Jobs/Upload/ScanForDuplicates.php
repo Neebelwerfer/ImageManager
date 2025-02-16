@@ -6,6 +6,7 @@ use App\Events\Upload\FoundDuplicates;
 use App\Models\ImageUpload;
 use App\Models\User;
 use App\Services\ImageService;
+use App\Support\Enums\UploadStates;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -30,16 +31,13 @@ class ScanForDuplicates implements ShouldQueue, ShouldBeEncrypted
      */
     public function handle(ImageService $imageService): void
     {
-        $this->imageUpload->state = "scanning";
-        $this->imageUpload->save();
+        $this->imageUpload->setState(UploadStates::Scanning);
         $res = $imageService->compareHashes($this->user->id, $this->imageUpload->hash);
 
         if(count($res) > 0)
         {
             $this->imageUpload->duplicates = json_encode($res);
-            $this->imageUpload->state = "foundDuplicates";
-            $this->imageUpload->save();
-            broadcast(new FoundDuplicates($this->user, $this->imageUpload->uuid));
+            $this->imageUpload->setState(UploadStates::FoundDuplicates);
             return;
         }
         ProcessImage::dispatch($this->user, $this->imageUpload);

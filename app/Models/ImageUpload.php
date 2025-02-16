@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use App\Models\Upload\UploadErrors;
+use App\Support\Enums\UploadStates;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Storage;
 
 class ImageUpload extends Model
@@ -22,7 +25,6 @@ class ImageUpload extends Model
     public $primaryKey = 'uuid';
     public $incrementing = false;
     public $keyType = 'string';
-
 
     public function error() : HasOne
     {
@@ -47,6 +49,13 @@ class ImageUpload extends Model
     protected function pruning()
     {
         Storage::disk('local')->delete($this->path());
+    }
+
+    public function setState(UploadStates $state)
+    {
+        $this->state = $state->value;
+        $this->save();
+        Broadcast::on('upload.' . $this->uuid)->as('stateUpdated')->with(['state' => $state])->send();
     }
 
     protected static function booted(): void

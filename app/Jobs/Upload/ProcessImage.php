@@ -15,6 +15,7 @@ use App\Services\AlbumService;
 use App\Services\CategoryService;
 use App\Services\ImageService;
 use App\Services\TagService;
+use App\Support\Enums\UploadStates;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -51,10 +52,8 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
         $categoryService = app(CategoryService::class);
         $albumService = app(AlbumService::class);
 
-        $this->imageUpload->state = "processing";
-        $this->imageUpload->save();
+        $this->imageUpload->setState(UploadStates::Processing);
 
-        Broadcast::on('upload.' . $this->imageUpload->uuid)->as('begunProcessing')->sendNow();
         $data = json_decode($this->imageUpload->data, true);
 
         $name = $this->imageUpload->uuid;
@@ -110,20 +109,16 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             Storage::disk('local')->delete('thumbnails/' . $path . '/' . $name);
             Storage::disk('local')->delete('images/' . $path . '/' . $name);
 
-            $this->imageUpload->state = "error";
-            $this->imageUpload->save();
+            $this->imageUpload->setState(UploadStates::Error);
             UploadErrors::create([
                 'image_upload_uuid' => $this->imageUpload->uuid,
                 'message' => $e
             ]);
-            Broadcast::on('upload.' . $this->imageUpload->uuid)->as('processingFailed')->send();
             return;
         }
 
         DB::commit();
-        $this->imageUpload->state = "done";
-        $this->imageUpload->save();
-        broadcast(new ImageProcessed($image->uuid));
+        $this->imageUpload->setState(UploadStates::Done);
         Cache::forget('image-hashes.user-' . $image->owner_id);
     }
 
@@ -132,13 +127,11 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
      */
     public function failed(?Throwable $exception): void
     {
-        $this->imageUpload->state = "error";
-        $this->imageUpload->save();
+        $this->imageUpload->setState(UploadStates::Error);
         UploadErrors::create([
             'image_upload_uuid' => $this->imageUpload->uuid,
             'message' => $exception
         ]);
-        Broadcast::on('upload.' . $this->imageUpload->uuid)->as('processingFailed')->send();
     }
 
     /**

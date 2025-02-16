@@ -2,11 +2,12 @@
 
 namespace App\Support\Enums;
 
-enum UploadState : string
+enum UploadStates : string
 {
     case Waiting = "waiting";
     case Scanning = "scanning";
     case FoundDuplicates = "foundDuplicates";
     case Processing = "processing";
-    case Finished = "finished";
+    case Error = 'error';
+    case Done = "done";
 }

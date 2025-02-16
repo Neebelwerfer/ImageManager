@@ -16,7 +16,9 @@ use App\Models\User;
 use App\Services\ImageService;
 use App\Services\TagService;
 use App\Support\Enums\UploadState;
+use App\Support\Enums\UploadStates;
 use App\Support\Traits\AddedTrait;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
@@ -42,29 +44,40 @@ class ProcessUpload extends Component
     public $hash;
 
 
-    #[On('echo:upload.{imageUpload.uuid},.imageProcessed')]
-    public function imageProcessed()
-    {
-        $this->state = $this->imageUpload->state;
-    }
+    // #[On('echo:upload.{imageUpload.uuid},.imageProcessed')]
+    // public function imageProcessed()
+    // {
+    //     $this->state = $this->imageUpload->state;
+    // }
 
-    #[On('echo:upload.{imageUpload.uuid},.begunProcessing')]
-    public function begunProcessing()
-    {
-        $this->state = $this->imageUpload->state;
-    }
+    // #[On('echo:upload.{imageUpload.uuid},.begunProcessing')]
+    // public function begunProcessing()
+    // {
+    //     $this->state = $this->imageUpload->state;
+    // }
 
-    #[On('echo:upload.{imageUpload.uuid},.processingFailed')]
-    public function processingFailed()
-    {
-        $this->state = $this->imageUpload->state;
-    }
+    // #[On('echo:upload.{imageUpload.uuid},.processingFailed')]
+    // public function processingFailed()
+    // {
+    //     $this->state = $this->imageUpload->state;
+    // }
 
-    #[On('echo:upload.{imageUpload.uuid},.foundDuplicates')]
-    public function foundDuplicates()
+    // #[On('echo:upload.{imageUpload.uuid},.foundDuplicates')]
+    // public function foundDuplicates()
+    // {
+    //     $this->state = $this->imageUpload->state;
+    //     unset($this->duplicates);
+    // }
+
+    #[On('echo:upload.{imageUpload.uuid},.stateUpdated')]
+    public function stateUpdated($data)
     {
-        $this->state = $this->imageUpload->state;
-        unset($this->duplicates);
+        $this->state = $data['state'];
+
+        if($data['state'] === UploadStates::FoundDuplicates->value)
+        {
+            unset($this->duplicates);
+        }
     }
 
     public function process() {
@@ -258,8 +271,6 @@ class ProcessUpload extends Component
 
        if($this->state === "waiting")
             $this->SetupData();
-        else if($this->state === "foundDuplicates")
-            $this->foundDuplicates();
     }
 
     public function render()
