@@ -33,6 +33,11 @@ class ImageService
         $this->comparator = new ImageComparator();
     }
 
+    public function canDeleteImage(User $user, Image $image) : bool
+    {
+        return $image->owner_id = $user->id;
+    }
+
     public function deleteImage(Image $image)
     {
         $image->delete();
