@@ -14,7 +14,6 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Attributes\Js;
 use Livewire\WithPagination;
-use PhpParser\Node\Stmt\Continue_;
 
 #[Layout('layouts.collection')]
 class Images extends Component
@@ -75,6 +74,7 @@ class Images extends Component
 
     public function deleteSelected()
     {
+        $countNotDeleted = 0;
         foreach($this->selectedImages as $uuid => $selected)
         {
             if(!$selected) continue;
@@ -85,6 +85,14 @@ class Images extends Component
             {
                 $imageService->deleteImage($image);
             }
+            else
+            {
+                $countNotDeleted++;
+            }
+        }
+        if($countNotDeleted > 0)
+        {
+
         }
     }
 
