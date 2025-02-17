@@ -43,32 +43,6 @@ class ProcessUpload extends Component
     public $albums = [];
     public $hash;
 
-
-    // #[On('echo:upload.{imageUpload.uuid},.imageProcessed')]
-    // public function imageProcessed()
-    // {
-    //     $this->state = $this->imageUpload->state;
-    // }
-
-    // #[On('echo:upload.{imageUpload.uuid},.begunProcessing')]
-    // public function begunProcessing()
-    // {
-    //     $this->state = $this->imageUpload->state;
-    // }
-
-    // #[On('echo:upload.{imageUpload.uuid},.processingFailed')]
-    // public function processingFailed()
-    // {
-    //     $this->state = $this->imageUpload->state;
-    // }
-
-    // #[On('echo:upload.{imageUpload.uuid},.foundDuplicates')]
-    // public function foundDuplicates()
-    // {
-    //     $this->state = $this->imageUpload->state;
-    //     unset($this->duplicates);
-    // }
-
     #[On('echo:upload.{imageUpload.uuid},.stateUpdated')]
     public function stateUpdated($data)
     {
