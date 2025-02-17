@@ -73,7 +73,7 @@
                             if($wire.editMode)
                                 $wire.selectedImages['{{ $image->uuid }}'] = !$wire.selectedImages['{{ $image->uuid }}'];
                             else
-                                wire.show('{{ $key }}');">
+                                $wire.show('{{ $key }}');">
                         </x-grid.image-card-button>
                     @endforeach
                 </x-grid>
