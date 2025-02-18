@@ -1,40 +1,4 @@
-<div class="flex justify-center w-full h-full" x-data="{
-        selectedImages: $wire.entangle('selectedImages'),
-        allSelected: false,
-
-        selectAll(select)
-        {
-            Object.keys(this.selectedImages).forEach(key => {
-                this.selectedImages[key] = select;
-            });
-
-            this.allSelected = select;
-        },
-
-        changeSelectMode()
-        {
-            $wire.editMode = !$wire.editMode;
-
-            if($wire.editMode == false)
-            {
-                this.selectedImages = [];
-                this.allSelected = false;
-            }
-        },
-
-        onClick(uuid, action)
-        {
-            if($wire.editMode)
-            {
-                this.selectedImages[uuid] = !this.selectedImages[uuid];
-                this.allSelected = Object.keys(this.selectedImages).every(key => this.selectedImages[key] === true);
-            }
-            else
-            {
-                action();
-            }
-        }
-    }">
+<div class="flex justify-center w-full h-full" x-data="multiSelect($wire.entangle('selectedImages'))">
     <x-grid class="w-7/12">
         <x-slot name="header">
             <div>
@@ -54,7 +18,7 @@
                         <x-button class="h-fit" x-on:click='selectAll(false)' x-show="allSelected">Deselect All</x-button>
                         <x-button class="h-fit">Add To Category</x-button>
                         <x-button class="h-fit">Add To Album</x-button>
-                        <x-button class="h-fit" wire:click='deleteSelected'>Delete</x-button>
+                        <x-button class="h-fit" wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</x-button>
                     </div>
                 </template>
             </div>

@@ -12,7 +12,10 @@ Livewire.on('reloadPage', () => {
     location.reload();
 });
 
-Alpine.data('collectionShow', collectionShow);
-Alpine.data('multiSelect', MultiSelect);
+
+document.addEventListener('livewire:init', () => {
+    Alpine.data('collectionShow', collectionShow);
+    Alpine.data('multiSelect', MultiSelect);
+});
 
 Livewire.start()
