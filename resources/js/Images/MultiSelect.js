@@ -17,7 +17,7 @@ export default (selectedImagesArray) => ({
 
         if(this.$wire.editMode == false)
         {
-            this.allSelected(false);
+            this.selectAll(false);
         }
     },
 

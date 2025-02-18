@@ -7,7 +7,7 @@
     </x-slot>
     @endif
 
-    <div class="relative flex flex-col h-full">
+    <div class="relative flex flex-col h-full" x-data="multiSelect($wire.entangle('selectedImages'))">
         <div class="flex flex-row justify-between pb-2 mr-2">
             <div class="flex flex-row mx-2 mt-2">
                 <button class="p-1 mr-5 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="goBack()">Back</button>
@@ -55,11 +55,13 @@
                                 </div>
                                 <div class="flex self-end gap-2">
                                     <x-button class="h-fit" type="submit">Search</x-button>
-                                    <button class="p-1 px-2 mt-4 border rounded btn hover:bg-gray-400 hover:dark:bg-gray-500" type="button" wire:click="changeSelectMode" :class="$wire.editMode ? 'bg-gray-500' : 'bg-gray-700'">Edit</button>
+                                    <button class="p-1 px-2 mt-4 border rounded btn hover:bg-gray-400 hover:dark:bg-gray-500" type="button" x-on:click="changeSelectMode" :class="$wire.editMode ? 'bg-gray-500' : 'bg-gray-700'">Edit</button>
                                 </div>
                             </form>
                             <template x-if="$wire.editMode">
                                 <div class="ml-3">
+                                    <x-button class="h-fit" x-on:click='selectAll(true)'  x-show="!allSelected">Select All</x-button>
+                                    <x-button class="h-fit" x-on:click='selectAll(false)' x-show="allSelected">Deselect All</x-button>
                                     <x-button class="h-fit">Add To Category</x-button>
                                     <x-button class="h-fit">Add To Album</x-button>
                                     <x-button class="h-fit" wire:click='deleteSelected'>Delete</x-button>
@@ -69,11 +71,7 @@
                     </x-slot>
 
                     @foreach ($this->images as $key => $image)
-                        <x-grid.image-card-button :image="$image" wire:model="selectedImages.{{ $image->uuid }}" owned="{{ $image->owner_id == Auth::user()->id }}" wire:key='grid-{{ $image->uuid }}' x-on:click="
-                            if($wire.editMode)
-                                $wire.selectedImages['{{ $image->uuid }}'] = !$wire.selectedImages['{{ $image->uuid }}'];
-                            else
-                                $wire.show('{{ $key }}');">
+                        <x-grid.image-card-button :image="$image" wire:model="selectedImages.{{ $image->uuid }}" owned="{{ $image->owner_id == Auth::user()->id }}" wire:key='grid-{{ $image->uuid }}' x-on:click="onClick('{{ $image->uuid }}', () => $wire.show('{{ $key }}'))">
                         </x-grid.image-card-button>
                     @endforeach
                 </x-grid>

@@ -99,14 +99,21 @@ class Collection extends CollectionView
                 $query->where('category_id', $this->collectionID);
             });
 
-            return Tags::sortTags($query, $this->tags)->paginate(20);
+            $images = Tags::sortTags($query, $this->tags)->paginate(20);
         }
         else if($this->collectionType == 'albums') {
             $query = Image::whereHas('albums', function ($query) {
                 $query->where('album_id', $this->collectionID);
             });
 
-            return Tags::sortTags($query, $this->tags)->paginate(20);
+            $images = Tags::sortTags($query, $this->tags)->paginate(20);
         }
+
+        foreach($images->items() as $image)
+        {
+            $this->selectedImages[$image->uuid] = false;
+        }
+
+        return $images;
     }
 }

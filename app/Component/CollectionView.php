@@ -36,18 +36,6 @@ abstract class CollectionView extends Component
     public $editMode = false;
     public $selectedImages = [];
 
-    #[Js]
-    public function changeSelectMode(){
-        return <<<'JS'
-            $wire.editMode = !$wire.editMode;
-
-            if($wire.editMode == false)
-            {
-                $wire.selectedImages = [];
-            }
-        JS;
-    }
-
     public function setGridView($value)
     {
         $this->gridView = $value;
