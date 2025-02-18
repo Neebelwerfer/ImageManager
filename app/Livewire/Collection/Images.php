@@ -30,18 +30,6 @@ class Images extends Component
     public $editMode = false;
     public $selectedImages = [];
 
-    #[Js]
-    public function changeSelectMode(){
-        return <<<'JS'
-            $wire.editMode = !$wire.editMode;
-
-            if($wire.editMode == false)
-            {
-                $wire.selectedImages = [];
-            }
-        JS;
-    }
-
     public function addSelectedToCategory()
     {
         foreach($this->selectedImages as $uuid => $selected)
@@ -84,6 +72,7 @@ class Images extends Component
             if($imageService->canDeleteImage(Auth::user(), $image))
             {
                 $imageService->deleteImage($image);
+                unset($this->selectedImages[$uuid]);
             }
             else
             {
@@ -98,14 +87,30 @@ class Images extends Component
 
     public function filter()
     {
-        throw new Exception(count($this->selectedImages));
+        unset($this->images);
+    }
+
+    #[Computed()]
+    public function images()
+    {
+        $images = Tags::sortTags(Image::ownedOrShared(Auth::user()->id), $this->tags)->paginate(20);
+
+        $this->selectedImages = [];
+        foreach($images->items() as $image)
+        {
+            $this->selectedImages[$image->uuid] = false;
+        }
+
+        return $images;
+    }
+
+    public function mount()
+    {
+
     }
 
     public function render()
     {
-        return view('livewire.collection.images',
-            [
-                'images' => Tags::sortTags(Image::ownedOrShared(Auth::user()->id), $this->tags)->paginate(20)
-            ]);
+        return view('livewire.collection.images');
     }
 }
