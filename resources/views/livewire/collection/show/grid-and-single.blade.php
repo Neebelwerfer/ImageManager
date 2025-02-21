@@ -19,7 +19,7 @@
                     x-on:click="gridView = false" :class="!gridView ? 'bg-slate-400 dark:bg-gray-500' : ' bg-slate-600 dark:bg-gray-700'">Single</button>
             </div>
             {{ $this->images->links() }}
-            <x-button class="px-2 h-fit" type="button" wire:click="$dispatch('openModal', {component: 'modal.manage.edit-collection', arguments: {'collectionId': '{{ $collectionID }}', 'collectionType': '{{ $collectionType }}'} })">Edit Collection</x-button>
+            <x-button class="px-2 h-fit" type="button" x-show="gridView" wire:click="$dispatch('openModal', {component: 'modal.manage.edit-collection', arguments: {'collectionId': '{{ $collectionID }}', 'collectionType': '{{ $collectionType }}'} })">Edit Collection</x-button>
 
             @if(count($this->images) > 0)
             <div class="mt-2 mr-4" :class="gridView ? 'hidden' : ''">
@@ -59,12 +59,22 @@
                                 </div>
                             </form>
                             <template x-if="$wire.editMode">
-                                <div class="ml-3">
+                                <div class="flex flex-row ml-3">
                                     <x-button class="h-fit" x-on:click='selectAll(true)'  x-show="!allSelected">Select All</x-button>
                                     <x-button class="h-fit" x-on:click='selectAll(false)' x-show="allSelected">Deselect All</x-button>
-                                    <x-button class="h-fit">Add To Category</x-button>
-                                    <x-button class="h-fit">Add To Album</x-button>
-                                    <x-button class="h-fit" wire:click='deleteSelected'>Delete</x-button>
+                                    <x-dropdown class="ml-2" align="left">
+                                        <x-slot name="trigger">
+                                            <p class="p-1 mt-4 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Options</p>
+                                        </x-slot>
+                                        <x-slot name="content">
+                                            <div class="flex flex-col mx-0.5">
+                                                <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add To Category</button>
+                                                <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add To Album</button>
+                                                <button class="p-1 bg-teal-700 border rounded border-slate-600 hover:bg-teal-400" >Share</button>
+                                                <button class="p-1 bg-red-700 border rounded border-slate-600 hover:bg-red-400" wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</button>
+                                            </div>
+                                        </x-slot>
+                                    </x-dropdown>
                                 </div>
                             </template>
                         </div>
