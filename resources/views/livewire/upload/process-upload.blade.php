@@ -1,6 +1,6 @@
-<div class="flex flex-col h-full mx-5 mt-5">
-    <div class="flex justify-center w-full">
-        <x-section class="w-3/5">
+<div class="flex flex-col mx-5 mt-5">
+    <div class="flex justify-center flex-shrink-0 w-full h-full">
+        <x-section class="w-3/5" style="height: 40rem">
             @if($state == "waiting")
                 <div class="flex flex-row justify-between h-full">
                     <div class="w-3/6 border-r border-slate-500">
@@ -130,7 +130,7 @@
             @endif
 
             @if($state !== "waiting")
-            <div class="relative flex flex-row w-full">
+            <div class="relative flex flex-row w-full h-full">
                 <div class="w-2/6 border-r border-slate-500">
                     <div class="flex flex-col justify-center w-full">
                         @if($state === "done")
