@@ -9,6 +9,7 @@ $alignmentClasses = match ($align) {
 
 
 $width = match ($width) {
+    '96' => 'w-96',
     '48' => 'w-48',
     '12' => 'w-12',
     '18' => 'w-18',
@@ -33,7 +34,7 @@ $width = match ($width) {
             class="absolute z-50 mt-2 {{ $width }} rounded-md shadow-lg {{ $alignmentClasses }}"
             style="display: none;"
             @click="open = false">
-        <div class="rounded-md item ring-1 ring-black dark:ring-opacity-50 py-1 bg-gray-300 dark:bg-gray-700">
+        <div class="py-1 bg-gray-300 rounded-md item ring-1 ring-black dark:ring-opacity-50 dark:bg-gray-700">
             {{ $content }}
         </div>
     </div>
