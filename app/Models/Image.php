@@ -41,6 +41,12 @@ class Image extends Model
         return 'images/' . $split . '/' . hash('sha1', $this->uuid);
     }
 
+    public function getOriginalImagePath() : string
+    {
+        $split = Image::splitUUID($this->uuid);
+        return 'originalImage/' . $split . '/' . hash('sha1', $this->uuid);
+    }
+
     public function category() : BelongsTo
     {
         return $this->belongsTo(ImageCategory::class);
@@ -95,6 +101,7 @@ class Image extends Model
         static::deleting(function (Image $image) {
             Storage::disk('local')->delete($image->getImagePath());
             Storage::disk('local')->delete($image->getThumbnailPath());
+            Storage::disk('local')->delete($image->getOriginalImagePath());
             Cache::forget('image-hashes.user-'. $image->owner_id);
         });
     }
