@@ -5,46 +5,6 @@
 </x-slot>
 
 <div class="relative flex flex-row h-full">
-    <x-hidable-side-menu>
-        <x-slot name="title">
-            Image Uploads
-        </x-slot>
-        <div class="overflow-scroll">
-            @if(count($completedImageUploads) > 0)
-                    <p class="underline">Completed</p>
-                    <ul class="space-y-1">
-                        @foreach ($completedImageUploads as $uuid => $imageUpload)
-                            <li>
-                                <button x-on:click="Livewire.navigate('/upload/{{ $uuid }}')" class="w-full border rounded shadow-md bg-green-800/80 shadow-black">
-                                    <p class="overflow-clip">{{ $uuid }}</p>
-                                    <div class="flex flex-row justify-between mx-2">
-                                        <p>{{ $imageUpload['startTime'] }}
-                                        <p>{{ $imageUpload['state'] }}</p>
-                                    </div>
-                                </button>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
-
-                @if(count($imageUploads) > 0)
-                    <p class="underline">In Progress</p>
-                    <ul class="space-y-1">
-                        @foreach ($imageUploads as $uuid => $imageUpload)
-                            <li>
-                                <button x-on:click="Livewire.navigate('/upload/{{ $uuid }}')" class="w-full border rounded shadow-md {{ $this->getStateColour($imageUpload['state']) }} shadow-black">
-                                    <p class="overflow-clip">{{ $uuid }}</p>
-                                    <div class="flex flex-row justify-between mx-2">
-                                        <p>{{ $imageUpload['startTime'] }}
-                                        <p>{{ $imageUpload['state'] }}</p>
-                                    </div>
-                                </button>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
-        </div>
-    </x-hidable-side-menu>
 
     <div class="flex justify-center w-full"
         x-on:livewire-upload-finish="$wire.onUploadFinished">

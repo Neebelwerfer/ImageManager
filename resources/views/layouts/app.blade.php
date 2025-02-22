@@ -35,8 +35,6 @@
             {{ $slot }}
         </main>
 
-
-
         <footer
             class="z-10 w-full text-center text-black bg-gray-200 border-t border-slate-600 dark:text-white/70 dark:bg-black">
             Image Manager v0.0.1

@@ -13,6 +13,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
+use Livewire\Attributes\Js;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -30,6 +31,10 @@ abstract class CollectionView extends Component
 
     #[Locked()]
     public $collectionType;
+
+
+    public $editMode = false;
+    public $selectedImages = [];
 
     public function setGridView($value)
     {

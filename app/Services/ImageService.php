@@ -33,6 +33,11 @@ class ImageService
         $this->comparator = new ImageComparator();
     }
 
+    public function canDeleteImage(User $user, Image $image) : bool
+    {
+        return $image->owner_id = $user->id;
+    }
+
     public function deleteImage(Image $image)
     {
         $image->delete();
@@ -75,22 +80,30 @@ class ImageService
         $image->push();
     }
 
-    public function storeImageAndThumbnail(ImageInterface $image, ImageInterface $thumbnail, string $path, string $name)
+    public function storeImageAndThumbnail(ImageInterface $originalImage, ImageInterface $image, ImageInterface $thumbnail, string $path, string $name)
     {
         $thumbnail_path = 'thumbnails/' . $path;
         $image_path = 'images/' . $path;
+        $originalImage_path = 'originalImage/' . $path;
+
         if(!Storage::disk('local')->exists($thumbnail_path)) {
             Storage::disk('local')->makeDirectory($thumbnail_path);
         }
         if(!Storage::disk('local')->exists($image_path)) {
             Storage::disk('local')->makeDirectory($image_path);
         }
+        if(!Storage::disk('local')->exists($originalImage_path)) {
+            Storage::disk('local')->makeDirectory($originalImage_path);
+        }
 
         $cryptThumb = Crypt::encrypt((string) $thumbnail->toWebp(), false);
-        $cryptImage = Crypt::encrypt((string) $image->encodeByMediaType(), false);
+        $cryptImage = Crypt::encrypt((string) $image->toWebp(), false);
+        $cryptOriginalImage = Crypt::encrypt((string) $originalImage->encodeByMediaType(), false);
+        $hashedName = hash('sha1', $name);
 
-        Storage::disk('local')->put($thumbnail_path . '/' . $name, $cryptThumb);
-        Storage::disk('local')->put($image_path . '/' . $name,$cryptImage);
+        Storage::disk('local')->put($thumbnail_path . '/' . $hashedName, $cryptThumb);
+        Storage::disk('local')->put($image_path . '/' . $hashedName,$cryptImage);
+        Storage::disk('local')->put($originalImage_path . '/' . $hashedName,$cryptOriginalImage);
     }
 
     public function compareHashes(int $user_id, $newHash, $threshold = 95) : array

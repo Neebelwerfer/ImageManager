@@ -7,8 +7,8 @@
     </x-slot>
     @endif
 
-    <div class="relative flex flex-col h-full">
-        <div class="flex flex-row justify-between pb-2">
+    <div class="relative flex flex-col h-full" x-data="multiSelect($wire.entangle('selectedImages'))">
+        <div class="flex flex-row justify-between pb-2 mr-2">
             <div class="flex flex-row mx-2 mt-2">
                 <button class="p-1 mr-5 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="goBack()">Back</button>
                 <button id="Grid"
@@ -18,13 +18,14 @@
                     class="p-1 border rounded hover:bg-gray-400 hover:dark:bg-gray-500"
                     x-on:click="gridView = false" :class="!gridView ? 'bg-slate-400 dark:bg-gray-500' : ' bg-slate-600 dark:bg-gray-700'">Single</button>
             </div>
+            {{ $this->images->links() }}
+            <x-button class="px-2 h-fit" type="button" x-show="gridView" wire:click="$dispatch('openModal', {component: 'modal.manage.edit-collection', arguments: {'collectionId': '{{ $collectionID }}', 'collectionType': '{{ $collectionType }}'} })">Edit Collection</x-button>
 
             @if(count($this->images) > 0)
             <div class="mt-2 mr-4" :class="gridView ? 'hidden' : ''">
                 <button wire:click="$dispatch('openModal', {component: 'modal.image.details', arguments: {imageUuid: '{{ $this->images[$count]->uuid }}', source: '{{ $collectionType }}'}})" class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500">Details</button>
             </div>
             @endif
-            {{ $this->images->links() }}
         </div>
 
         <div x-show="gridView" class="flex justify-center">
@@ -54,14 +55,33 @@
                                 </div>
                                 <div class="flex self-end gap-2">
                                     <x-button class="h-fit" type="submit">Search</x-button>
-                                    <x-button class="px-2 h-fit" type="button" wire:click="$dispatch('openModal', {component: 'modal.manage.edit-collection', arguments: {'collectionId': '{{ $collectionID }}', 'collectionType': '{{ $collectionType }}'} })">Edit</x-button>
+                                    <button class="p-1 px-2 mt-4 border rounded btn hover:bg-gray-400 hover:dark:bg-gray-500" type="button" x-on:click="changeSelectMode" :class="$wire.editMode ? 'bg-gray-500' : 'bg-gray-700'">Edit</button>
                                 </div>
                             </form>
+                            <template x-if="$wire.editMode">
+                                <div class="flex flex-row ml-3">
+                                    <x-button class="h-fit" x-on:click='selectAll(true)'  x-show="!allSelected">Select All</x-button>
+                                    <x-button class="h-fit" x-on:click='selectAll(false)' x-show="allSelected">Deselect All</x-button>
+                                    <x-dropdown class="ml-2" align="left">
+                                        <x-slot name="trigger">
+                                            <p class="p-1 mt-4 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Options</p>
+                                        </x-slot>
+                                        <x-slot name="content">
+                                            <div class="flex flex-col mx-0.5">
+                                                <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add To Category</button>
+                                                <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add To Album</button>
+                                                <button class="p-1 bg-teal-700 border rounded border-slate-600 hover:bg-teal-400" >Share</button>
+                                                <button class="p-1 bg-red-700 border rounded border-slate-600 hover:bg-red-400" wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</button>
+                                            </div>
+                                        </x-slot>
+                                    </x-dropdown>
+                                </div>
+                            </template>
                         </div>
                     </x-slot>
 
                     @foreach ($this->images as $key => $image)
-                        <x-grid.image-card-button :image="$image" wire:click="show({{ $key }})" owned="{{ $image->owner_id == Auth::user()->id }}" wire:key='grid-{{ $image->uuid }}'>
+                        <x-grid.image-card-button :image="$image" wire:model="selectedImages.{{ $image->uuid }}" owned="{{ $image->owner_id == Auth::user()->id }}" wire:key='grid-{{ $image->uuid }}' x-on:click="onClick('{{ $image->uuid }}', () => $wire.show('{{ $key }}'))">
                         </x-grid.image-card-button>
                     @endforeach
                 </x-grid>

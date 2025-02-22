@@ -60,7 +60,7 @@ class ImageController extends Controller
 
         try {
             $data = file_get_contents(storage_path('app/' . $image->getImagePath()));
-            return response()->make(Crypt::decryptString($data, false), 200, ['Content-Type' => 'image/' . $image->format . ';base64']);
+            return response()->make(Crypt::decryptString($data, false), 200, ['Content-Type' => 'image/webp;base64']);
         } catch (Exception $e) {
             return response()->noContent('404');
         }
@@ -78,14 +78,13 @@ class ImageController extends Controller
             redirect()->back();
         }
 
-
         try {
             $data = Cache::remember('thumbnail-' . $image->uuid, 3600, function () use ($image) {
                 return Crypt::decryptString(file_get_contents(storage_path('app/' . $image->getThumbnailPath())));
             });
             return response()->make($data, 200, ['Content-Type' => 'image/webp;base64']);
         } catch (Exception $e) {
-            return response()->noContent('404');
+            return response()->noContent('404', ['m' => $e->getMessage()]);
         }
     }
 

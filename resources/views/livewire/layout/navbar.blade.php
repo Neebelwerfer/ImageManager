@@ -56,9 +56,14 @@ $logout = function (Logout $logout) {
 
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-
                 <!-- Theme Dropdown -->
                 <div class="sm:flex sm:items-center sm:ms-6">
+
+                    @auth
+                    <livewire:component.upload-status />
+                    @endauth
+
+
                     <x-dropdown align="right" width="14">
                         <x-slot name="trigger">
                             <button
