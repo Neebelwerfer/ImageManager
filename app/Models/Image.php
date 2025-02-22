@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 
 class Image extends Model
@@ -31,13 +32,13 @@ class Image extends Model
     public function getThumbnailPath() : string
     {
         $split = Image::splitUUID($this->uuid);
-        return 'thumbnails/' . $split . '/' . $this->uuid;
+        return 'thumbnails/' . $split . '/' . hash('sha1', $this->uuid);
     }
 
     public function getImagePath() : string
     {
         $split = Image::splitUUID($this->uuid);
-        return 'images/' . $split . '/' . $this->uuid;
+        return 'images/' . $split . '/' . hash('sha1', $this->uuid);
     }
 
     public function category() : BelongsTo

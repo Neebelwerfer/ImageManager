@@ -75,6 +75,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             $decryptedImage = Crypt::decryptString(file_get_contents($this->imageUpload->fullPath()), false);
 
             $imageInfo = ImageManager::imagick()->read($decryptedImage);
+            $imageOriginal = ImageManager::gd()->read($decryptedImage);
             $imageScaled = ImageManager::gd()->read($decryptedImage);
 
             if($data['category'] !== null) {
@@ -101,7 +102,17 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             }
 
             $imageInfo->scaleDown(256, 256);
-            $imageService->storeImageAndThumbnail($imageScaled, $imageInfo, $path, $name);
+
+            if($imageScaled->height() > $imageScaled->width())
+            {
+                $imageScaled->scaleDown(1080, 1920);
+            }
+            else
+            {
+                $imageScaled->scaleDown(1920, 1080);
+            }
+
+            $imageService->storeImageAndThumbnail($imageOriginal, $imageScaled, $imageInfo, $path, $name);
         }
         catch(Exception $e)
         {
