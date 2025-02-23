@@ -17,14 +17,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Illuminate\Support\Str;
-
+use SapientPro\ImageComparator\ImageComparator;
 
 class ProcessUpload implements ShouldQueue, ShouldQueueAfterCommit, ShouldBeUnique
 {
     use Queueable;
 
 
-    public $timeout = 300;
+    public $timeout = 600;
 
     /**
      * Create a new job instance.
@@ -65,6 +65,29 @@ class ProcessUpload implements ShouldQueue, ShouldQueueAfterCommit, ShouldBeUniq
                 Storage::disk('local')->put('temp/'. $upload->uuid, $cryptImage);
                 unlink($data['path']);
             }
+
+
+
+            //Remove Obvious duplicates
+            $comparator = new ImageComparator;
+            $toDelete = [];
+            foreach ($imageUploads as $key => $imageUpload)
+            {
+                if(array_key_exists($key, $toDelete)) continue;
+
+                foreach($imageUploads as $otherKey => $otherUpload)
+                {
+                    if($otherUpload->uuid == $imageUpload->uuid || array_key_exists($otherKey, $toDelete)) continue;
+
+                    if($comparator->compareHashStrings($imageUpload->hash, $otherUpload->hash) === 100)
+                    {
+                        $toDelete[$otherKey] = true;
+                        $otherUpload->delete();
+                        unset($imageUploads[$otherKey]);
+                    }
+                }
+            }
+
         } catch (\Throwable $th) {
             DB::rollBack();
             return;
