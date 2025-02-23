@@ -35,6 +35,35 @@ class Upload extends Component
     #[Validate(['images.*' => 'image'])]
     public $images = [];
 
+    public $chunks = [];
+
+    public $uploading = false;
+    public $fileCount = 0;
+    public $processing = false;
+
+    #[On('UploadCancelled')]
+    public function UploadCancelled()
+    {
+    }
+
+
+    #[On('ChunkComplete')]
+    public function ChunckComplete($index)
+    {
+        $i = count($this->images);
+        foreach($this->chunks[$index] as $image)
+        {
+            $this->images[$i] = $image;
+            $i += 1;
+        }
+
+        if(count($this->images) === $this->fileCount)
+        {
+            $this->onUploadFinished();
+        }
+    }
+
+    #[On('UploadFinished')]
     public function onUploadFinished() {
 
         $uploadModel = UploadModel::create(
@@ -48,7 +77,6 @@ class Upload extends Component
 
         foreach ($this->images as $key => $image)
         {
-
             $img = ImageManager::gd()->read($image);
 
             $upload = new ImageUpload(

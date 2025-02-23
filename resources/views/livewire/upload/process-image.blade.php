@@ -1,6 +1,6 @@
 <div class="flex flex-col mx-5 mt-5">
     <div class="flex justify-center flex-shrink-0 w-full h-full">
-        <x-section class="w-3/5" style="height: 40rem">
+        <x-section class="w-3/5" style="height: 37rem">
             @if(!$error)
                 @if($state == "waiting")
                     <div class="flex flex-row justify-between h-full">

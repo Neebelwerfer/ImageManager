@@ -28,7 +28,7 @@ class TempImage extends Component
     {
         return <<<'HTML'
         <div>
-            <img class="object-scale-down px-1 mt-1" style="width: 255px; height: 290px;" src="{{ url('temp/'.$image->uuid) }}">
+            <img class="object-scale-down px-1" style="width: 190px; height: 215px;" src="{{ url('temp/'.$image->uuid) }}">
         </div>
         HTML;
     }

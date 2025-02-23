@@ -21,6 +21,7 @@ class ProcessMultiple extends Component
     public Upload $upload;
 
     public $state = "waiting";
+    public $selectedUUID = "";
 
     #[On('echo:upload.{upload.user_id},.stateUpdated')]
     public function stateUpdated($data)
@@ -32,6 +33,27 @@ class ProcessMultiple extends Component
         if($data['state'] === UploadStates::FoundDuplicates->value)
         {
 
+        }
+    }
+
+    public function select($uuid)
+    {
+        if($uuid === $this->selectedUUID)
+            $this->selectedUUID = "";
+        else
+            $this->selectedUUID = $uuid;
+    }
+
+    #[Computed()]
+    public function images()
+    {
+        if($this->state == UploadStates::FoundDuplicates)
+        {
+            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('state', 'foundDuplicates')->where('user_id', Auth::user()->id)->get();
+        }
+        else
+        {
+            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('user_id', Auth::user()->id)->get();
         }
     }
 
@@ -54,17 +76,12 @@ class ProcessMultiple extends Component
 
     public function uploadCancel()
     {
+        foreach($this->upload->images as $imageUpload)
+        {
+            $imageUpload->delete();
+        }
         $this->upload->delete();
         return $this->redirectRoute('upload', navigate: true);
-    }
-
-    #[Computed()]
-    public function ImageUploads()
-    {
-        if($this->state !== UploadStates::FoundDuplicates->value)
-            return ImageUpload::where('upload_ulid', $this->upload->ulid)->orderBy('created_at', 'desc')->paginate(1);
-        else
-            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('state', 'foundDuplicates')->orderBy('created_at', 'desc')->paginate(1);
     }
 
     public function render()
