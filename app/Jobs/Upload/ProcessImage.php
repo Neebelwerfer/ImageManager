@@ -119,7 +119,7 @@ class ProcessImage implements ShouldQueue, ShouldBeUnique, ShouldBeEncrypted
             DB::rollBack();
             $hasedName = hash('sha1', $name);
             Storage::disk('local')->delete('thumbnails/' . $path . '/' . $hasedName);
-            Storage::disk('local')->delete('originalImage/' . $path . '/' . $hasedName);
+            Storage::disk('local')->delete('originalImages/' . $path . '/' . $hasedName);
             Storage::disk('local')->delete('images/' . $path . '/' . $hasedName);
 
             $this->imageUpload->setState(UploadStates::Error);

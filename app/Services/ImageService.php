@@ -84,7 +84,7 @@ class ImageService
     {
         $thumbnail_path = 'thumbnails/' . $path;
         $image_path = 'images/' . $path;
-        $originalImage_path = 'originalImage/' . $path;
+        $originalImage_path = 'originalImages/' . $path;
 
         if(!Storage::disk('local')->exists($thumbnail_path)) {
             Storage::disk('local')->makeDirectory($thumbnail_path);

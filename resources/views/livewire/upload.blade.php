@@ -15,7 +15,7 @@
             </div>
             <div class="flex flex-col">
                 <div class="mb-3">
-                    <input type="file" wire:model='image' name="image" placeholder="Choose image" id="imageInput">
+                    <input type="file" wire:model='images' name="image" placeholder="Choose images" id="imageInput" multiple>
                     @error('image')
                         <div class="mt-1 mb-1 text-red-600 alert">{{ $message }}</div>
                     @enderror

@@ -6,11 +6,14 @@ use App\Models\ImageCategory;
 use App\Models\Tags;
 use App\Models\ImageUpload;
 use App\Models\Traits;
+use App\Models\Upload as UploadModel;
 use App\Services\ImageService;
 use App\Support\Traits\AddedTrait;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -29,30 +32,42 @@ class Upload extends Component
     use WithFileUploads;
 
     // 100MB Max
-    #[Validate('image')]
-    public $image;
+    #[Validate(['images.*' => 'image'])]
+    public $images = [];
 
     public function onUploadFinished() {
-        $img = ImageManager::gd()->read($this->image);
 
-
-        $upload = new ImageUpload(
+        $uploadModel = UploadModel::create(
             [
-                'uuid' => str::uuid(),
-                'user_id' => Auth::user()->id,
-                'extension' => $this->image->extension(),
-                'hash' => app(ImageService::class)->createImageHash($img->core()->native())
-            ]);
-        $upload->save();
+                'ulid' => Str::ulid()->toString(),
+                'user_id' => Auth::user()->id
+            ]
+        );
 
+        $imageUploads = [];
 
+        foreach ($this->images as $key => $image)
+        {
 
-        $cryptImage = Crypt::encrypt((string) $img->encodeByMediaType(), false);
-        Storage::disk('local')->put('temp/'. $upload->uuid, $cryptImage);
-        $this->image->delete();
-        $this->image = null;
+            $img = ImageManager::gd()->read($image);
 
-        return $this->redirectRoute('upload.process', ['uuid' => $upload->uuid], navigate: true);
+            $upload = new ImageUpload(
+                [
+                    'uuid' => str::uuid(),
+                    'upload_ulid' => $uploadModel->ulid,
+                    'user_id' => Auth::user()->id,
+                    'extension' => $image->extension(),
+                    'hash' => app(ImageService::class)->createImageHash($img->core()->native())
+                ]);
+            $upload->save();
+            $imageUploads[$key] = $upload;
+
+            $cryptImage = Crypt::encrypt((string) $img->encodeByMediaType(), false);
+            Storage::disk('local')->put('temp/'. $upload->uuid, $cryptImage);
+            $image->delete();
+        }
+
+        return $this->redirectRoute('upload.multiple', ['ulid' => $uploadModel->ulid], navigate: true);
     }
 
     public function render()

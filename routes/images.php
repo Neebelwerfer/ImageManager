@@ -13,6 +13,7 @@ use App\Livewire\Manage\Categories;
 use App\Livewire\Manage\Tags;
 use App\Livewire\Manage\Traits;
 use App\Livewire\Upload;
+use App\Livewire\Upload\ProcessMultiple;
 use App\Livewire\Upload\ProcessUpload;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('upload/{uuid}', ProcessUpload::class)
         ->name('upload.process');
+
+    Route::get('upload/multiple/{ulid}', ProcessMultiple::class)
+        ->name('upload.multiple');
 
     Route::get('manage', Manage::class)
         ->name('manage');

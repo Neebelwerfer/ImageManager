@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,9 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 
 class Image extends Model
@@ -44,7 +41,7 @@ class Image extends Model
     public function getOriginalImagePath() : string
     {
         $split = Image::splitUUID($this->uuid);
-        return 'originalImage/' . $split . '/' . hash('sha1', $this->uuid);
+        return 'originalImages/' . $split . '/' . hash('sha1', $this->uuid);
     }
 
     public function category() : BelongsTo
