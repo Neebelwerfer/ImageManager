@@ -30,24 +30,12 @@
             component.set('fileCount', files.length);
 
             try {
-                // for (const [index, file] of files.entries()) {
-                //     component.upload('images.'+index, file,
-                //         (n) => {},
-                //         () => {
-                //             alert('Error')
-                //         },
-                //         (e) => {},
-                //         () => {
-                //             Livewire.dispatch('UploadCancelled');
-                //         }
-                //     );
-                //     await sleep(500);
-                // };
-
                 if(files.length <= 20)
                 {
                     component.uploadMultiple('images', files,
-                        (n) => {},
+                        (n) => {
+                            Livewire.dispatch('UploadFinished');
+                        },
                         () => {},
                         (e) => {},
                         () => {}
@@ -75,9 +63,7 @@
                 Livewire.dispatch('UploadCancelled');
                 return;
             }
-
         });
-
     });
 </script>
 @endscript
@@ -97,14 +83,15 @@
                             <div class="mt-1 mb-1 text-red-600 alert">{{ $message }}</div>
                         @enderror
                     </div>
-                @elseif(!$processing)
+                @else
                     <div class="">
                         <h1 class="text-6xl font-bold underline">Upload In progress: {{ count($images) }}/{{ $fileCount }}</h1>
                     </div>
-                @else
-                    <div class="w-96 h-96">
-                        <x-spinning-loader />
-                    </div>
+                    @if($processing)
+                        <div class="w-96 h-96">
+                            <x-spinning-loader />
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>

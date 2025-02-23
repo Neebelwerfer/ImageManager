@@ -10,7 +10,16 @@
         <button class="p-1 bg-red-700 border rounded dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='uploadCancel'>Cancel Upload</button>
     </div>
 
-    @if($state == "waiting")
+    @if($state == "uploading")
+        <div class="flex justify-center w-full">
+            <div class="flex flex-col justify-center">
+                <p class="text-4xl font-bold">Preparing upload</p>
+                <div class="w-60 h-60">
+                    <x-spinning-loader/>
+                </div>
+            </div>
+        </div>
+    @elseif($state == "waiting")
         @if(!empty($selectedUUID))
             <div wire:replace>
                 <livewire:upload.process-image uuid="{{ $selectedUUID }}" wire:key='preview-{{ $selectedUUID }}'/>
@@ -22,7 +31,6 @@
                 <x:grid.upload-image-card :image="$image" wire:key='grid-{{ $image->uuid }}' wire:click="select('{{ $image->uuid }}')"  />
             @endforeach
         </div>
-
     @elseif($state == "scanning")
         <div class="flex justify-center w-full mt-2">
             <div class="flex flex-row">
@@ -32,7 +40,6 @@
                 </div>
             </div>
         </div>
-
     @elseif ($state == "foundDuplicates")
         @if(!empty($selectedUUID))
             <div wire:replace>

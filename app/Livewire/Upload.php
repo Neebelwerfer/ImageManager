@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Jobs\Upload\ProcessUpload;
 use App\Models\ImageCategory;
 use App\Models\Tags;
 use App\Models\ImageUpload;
@@ -25,6 +26,7 @@ use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 #[Layout('layouts.app')]
 class Upload extends Component
@@ -59,7 +61,8 @@ class Upload extends Component
 
         if(count($this->images) === $this->fileCount)
         {
-            $this->onUploadFinished();
+            $this->processing = true;
+            $this->dispatch('UploadFinished')->self();
         }
     }
 
@@ -73,28 +76,13 @@ class Upload extends Component
             ]
         );
 
-        $imageUploads = [];
-
+        $data = [];
         foreach ($this->images as $key => $image)
         {
-            $img = ImageManager::gd()->read($image);
-
-            $upload = new ImageUpload(
-                [
-                    'uuid' => str::uuid(),
-                    'upload_ulid' => $uploadModel->ulid,
-                    'user_id' => Auth::user()->id,
-                    'extension' => $image->extension(),
-                    'hash' => app(ImageService::class)->createImageHash($img->core()->native())
-                ]);
-            $upload->save();
-            $imageUploads[$key] = $upload;
-
-            $cryptImage = Crypt::encrypt((string) $img->encodeByMediaType(), false);
-            Storage::disk('local')->put('temp/'. $upload->uuid, $cryptImage);
-            $image->delete();
+            $data[$key] = ['path' => $image->getRealPath(), 'extension' => $image->extension()];
         }
 
+        ProcessUpload::dispatch(Auth::user(), $uploadModel, $data);
         return $this->redirectRoute('upload.multiple', ['ulid' => $uploadModel->ulid], navigate: true);
     }
 
