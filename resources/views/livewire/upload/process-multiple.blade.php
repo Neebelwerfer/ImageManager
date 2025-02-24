@@ -21,10 +21,11 @@
         </div>
     @elseif($state == "waiting")
         @if($count != -1)
-            <div class="flex flex-col w-full">
+            <div class="flex flex-col w-full" id="process">
                 <div class="flex justify-center">
                     <div class="flex flex-row justify-between w-2/4">
                         <button :disabled="count === 0" id="previous" :class="count === 0 ? 'bg-gray-400 dark:bg-gray-500' : 'bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500'" class="p-1 border rounded" wire:click='previous'>Previous</button>
+                        <p class="self-center">{{ $count+1 }} of {{ count($this->images) }}</p>
                         <button :disabled="count === maxValue - 1" :class="count === maxValue - 1 ? 'bg-gray-400 dark:bg-gray-500' : 'bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500'" id="next" class="p-1 border rounded " wire:click='next'>Next</button>
                     </div>
                 </div>
@@ -36,7 +37,7 @@
 
         <div class="grid-flow-col mx-2 mt-2">
             @foreach ($this->images as $key => $image)
-                <x:grid.upload-image-card :image="$image" wire:key='grid-{{ $key }}' wire:click="select('{{ $key }}')"  />
+                <x:grid.upload-image-card :image="$image" wire:key='grid-{{ $key }}' x-bind:disabled="count === '{{ $key }}'" x-on:click="$wire.select('{{ $key }}')"/>
             @endforeach
         </div>
     @elseif($state == "scanning")

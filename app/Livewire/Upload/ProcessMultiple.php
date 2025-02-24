@@ -38,6 +38,7 @@ class ProcessMultiple extends Component
 
     public function next(){
         $this->count += 1;
+        if($this->count > count($this->images) - 1) $this->count = (count($this->images) - 1);
     }
 
     public function previous(){
@@ -48,10 +49,10 @@ class ProcessMultiple extends Component
 
     public function select($count)
     {
-        if($count === $this->count)
-            $this->count = -1;
-        else
+        if($count != $this->count)
             $this->count = $count;
+
+        $this->js('document.getElementById("process").scrollIntoView();');
     }
 
     #[Computed(persist: true, seconds: 600)]
