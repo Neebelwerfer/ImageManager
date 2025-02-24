@@ -12,6 +12,7 @@ use App\Services\ImageService;
 use App\Support\Traits\AddedTrait;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -82,6 +83,7 @@ class Upload extends Component
             $data[$key] = ['path' => $image->getRealPath(), 'extension' => $image->extension()];
         }
 
+        Broadcast::on('upload.' . Auth::user()->id)->as('newUpload')->with(['ulid' => $uploadModel->ulid])->send();
         ProcessUpload::dispatch(Auth::user(), $uploadModel, $data);
         return $this->redirectRoute('upload.multiple', ['ulid' => $uploadModel->ulid], navigate: true);
     }

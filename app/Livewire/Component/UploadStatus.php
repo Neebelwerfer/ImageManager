@@ -4,8 +4,10 @@ namespace App\Livewire\Component;
 
 use App\Models\ImageUpload;
 use App\Models\Upload;
+use App\Support\Enums\UploadStates;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class UploadStatus extends Component
@@ -17,6 +19,26 @@ class UploadStatus extends Component
     #[Locked]
     public $imageUploads = [];
 
+    #[Locked]
+    public int $id;
+
+    public bool $updated = false;
+
+    #[On('echo:upload.{id},.stateUpdated')]
+    public function onStateUpdated($data)
+    {
+        $this->retrieveImageUploads();
+        $this->updated = true;
+    }
+
+    #[On('echo:upload.{id},.newUpload')]
+    public function NewUpload($data)
+    {
+        $upload = Upload::where('user_id', Auth::user()->id)->where('ulid', $data['ulid'])->first();
+        $this->imageUploads[$data['ulid']] = ['state' => $upload->state, 'startTime' => $upload->created_at->diffForHumans(), 'count' => $upload->images()->count()];
+        $this->updated = true;
+    }
+
     public function getStateColour($state)
     {
         switch($state){
@@ -24,6 +46,7 @@ class UploadStatus extends Component
                 return 'border-gray-600';
             case 'scanning':
             case 'processing':
+            case 'uploading':
                 return 'border-orange-500';
             case 'foundDuplicates':
             case 'error':
@@ -55,6 +78,7 @@ class UploadStatus extends Component
 
     public function mount()
     {
+        $this->id = Auth::user()->id;
         $this->retrieveImageUploads();
     }
 
@@ -63,7 +87,9 @@ class UploadStatus extends Component
         return <<<'HTML'
         <x-dropdown align="left" width="96">
             <x-slot name="trigger">
-                <p class="p-1 text-sm border rounded hover:bg-gray-400 hover:dark:bg-gray-500">Uploads</p>
+                <button class="relative p-1 border rounded hover:bg-gray-400 hover:dark:bg-gray-500" x-data="{updated: $wire.entangle('updated')}" :class="updated ? 'bg-yellow-500/80' : ''" x-on:click="updated = false">
+                    <p class="text-sm" >Uploads</p>
+                </button>
             </x-slot>
             <x-slot name="content">
                 <div class="overflow-scroll" x-data="{showCompleted: false, showInProgress: false}">
@@ -114,7 +140,6 @@ class UploadStatus extends Component
                     </template>
                 </div>
             </x-slot>
-
         </x-dropdown>
         HTML;
     }

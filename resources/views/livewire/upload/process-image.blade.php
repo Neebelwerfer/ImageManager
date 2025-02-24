@@ -25,9 +25,8 @@
                                             wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type:'category', noneOption: true}})">+</button>
                                     </div>
                                 </div>
-                                <img id="image-preview" class="object-scale-down" src="{{ url('temp/'.$imageUpload->uuid) }}" style="max-height: 500px;">
+                                <img id="image-preview" class="object-scale-down mr-2" src="{{ url('temp/'.$imageUpload->uuid) }}" style="max-height: 500px;">
                             </div>
-
                         </div>
 
                         <form class="relative content-between w-full h-full ml-2 space-y-4" wire:submit="save">

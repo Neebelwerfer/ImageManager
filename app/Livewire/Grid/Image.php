@@ -5,7 +5,7 @@ namespace App\Livewire\Grid;
 use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
-#[Lazy()]
+#[Lazy(isolate: false)]
 class Image extends Component
 {
     public $image;

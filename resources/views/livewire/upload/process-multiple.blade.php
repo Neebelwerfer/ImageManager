@@ -4,7 +4,7 @@
     </h2>
 </x-slot>
 
-<div class="w-full h-full">
+<div class="w-full h-full" x-data="{count: $wire.entangle('count'), maxValue: '{{ count($this->images) }}'}">
     <div class="flex flex-row justify-center w-full gap-5 mt-2">
         <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='finalizeUpload'>Finalize Upload</button>
         <button class="p-1 bg-red-700 border rounded dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='uploadCancel'>Cancel Upload</button>
@@ -20,15 +20,23 @@
             </div>
         </div>
     @elseif($state == "waiting")
-        @if(!empty($selectedUUID))
-            <div wire:replace>
-                <livewire:upload.process-image uuid="{{ $selectedUUID }}" wire:key='preview-{{ $selectedUUID }}'/>
+        @if($count != -1)
+            <div class="flex flex-col w-full">
+                <div class="flex justify-center">
+                    <div class="flex flex-row justify-between w-2/4">
+                        <button :disabled="count === 0" id="previous" :class="count === 0 ? 'bg-gray-400 dark:bg-gray-500' : 'bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500'" class="p-1 border rounded" wire:click='previous'>Previous</button>
+                        <button :disabled="count === maxValue - 1" :class="count === maxValue - 1 ? 'bg-gray-400 dark:bg-gray-500' : 'bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500'" id="next" class="p-1 border rounded " wire:click='next'>Next</button>
+                    </div>
+                </div>
+                <div wire:replace>
+                    <livewire:upload.process-image uuid="{{ $this->images[$count]->uuid }}" wire:key='preview-{{ $count }}'/>
+                </div>
             </div>
         @endif
 
         <div class="grid-flow-col mx-2 mt-2">
-            @foreach ($this->images as $image)
-                <x:grid.upload-image-card :image="$image" wire:key='grid-{{ $image->uuid }}' wire:click="select('{{ $image->uuid }}')"  />
+            @foreach ($this->images as $key => $image)
+                <x:grid.upload-image-card :image="$image" wire:key='grid-{{ $key }}' wire:click="select('{{ $key }}')"  />
             @endforeach
         </div>
     @elseif($state == "scanning")

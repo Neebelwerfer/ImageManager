@@ -5,7 +5,6 @@ namespace App\Livewire\Upload;
 use App\Models\ImageUpload;
 use App\Models\Upload;
 use App\Support\Enums\UploadStates;
-use Exception;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -22,6 +21,7 @@ class ProcessMultiple extends Component
 
     public $state = "waiting";
     public $selectedUUID = "";
+    public $count = 0;
 
     #[On('echo:upload.{upload.user_id},.stateUpdated')]
     public function stateUpdated($data)
@@ -36,35 +36,47 @@ class ProcessMultiple extends Component
         }
     }
 
-    public function select($uuid)
-    {
-        if($uuid === $this->selectedUUID)
-            $this->selectedUUID = "";
-        else
-            $this->selectedUUID = $uuid;
+    public function next(){
+        $this->count += 1;
     }
 
-    #[Computed()]
+    public function previous(){
+        if($this->count === 0)
+            return;
+        $this->count -= 1;
+    }
+
+    public function select($count)
+    {
+        if($count === $this->count)
+            $this->count = -1;
+        else
+            $this->count = $count;
+    }
+
+    #[Computed(persist: true, seconds: 600)]
     public function images()
     {
         if($this->state == UploadStates::FoundDuplicates)
         {
-            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('state', 'foundDuplicates')->where('user_id', Auth::user()->id)->get();
+            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('state', 'foundDuplicates')->orderBy('uuid', 'desc')->where('user_id', Auth::user()->id)->get();
         }
         else
         {
-            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('user_id', Auth::user()->id)->get();
+            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('user_id', Auth::user()->id)->orderBy('uuid', 'desc')->get()->values();
         }
     }
 
     public function mount($ulid)
     {
-        $this->upload = Upload::find($ulid);
+        $res = Upload::find($ulid);
 
-        if(!isset($this->upload) || $this->upload->user_id != Auth::user()->id)
+        if(!isset($res) || $res->user_id != Auth::user()->id)
         {
             return $this->redirectRoute('upload', navigate: true);
         }
+
+        $this->upload = $res;
 
         $this->state = $this->upload->state;
     }
