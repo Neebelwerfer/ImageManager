@@ -44,6 +44,8 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
     ) {
     }
 
+    public $timeout = 600;
+
     /**
      * Execute the job.
      */
@@ -55,8 +57,8 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
         $categoryService = app(CategoryService::class);
         $albumService = app(AlbumService::class);
 
-        $imageUploads = $this->upload->images;
 
+        $imageUploads = $this->upload->images;
         $error = false;
 
         foreach ($imageUploads as $imageUpload)
@@ -122,6 +124,9 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
                 }
 
                 $imageService->storeImageAndThumbnail($imageOriginal, $imageScaled, $imageInfo, $path, $name);
+
+                $imageUpload->setState(ImageUploadStates::Done);
+                DB::commit();
             }
             catch(Exception $e)
             {
@@ -137,17 +142,14 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
                     'image_upload_uuid' => $imageUpload->uuid,
                     'message' => $e
                 ]);
-                return;
+                continue;
             }
-
-            DB::commit();
-
         }
 
         if($error)
-            $imageUpload->setState(ImageUploadStates::Waiting);
+            $this->upload->setState(UploadStates::Waiting);
         else
-            $imageUpload->setState(ImageUploadStates::Done);
+            $this->upload->setState(UploadStates::Done);
 
         Cache::forget('image-hashes.user-' . $image->owner_id);
     }

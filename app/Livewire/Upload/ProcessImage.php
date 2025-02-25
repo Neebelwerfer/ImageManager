@@ -9,6 +9,7 @@ use App\Models\ImageUpload;
 use App\Models\Tags;
 use App\Models\Traits;
 use App\Services\TagService;
+use App\Support\Enums\ImageUploadStates;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -68,14 +69,12 @@ class ProcessImage extends Component
         if($this->imageUpload == null) return null;
 
         return Cache::remember('imageUpload-'.$this->imageUpload->uuid, 3600, function () {
-            $data = [];
-            $decryptedImage = Crypt::decrypt(file_get_contents($this->imageUpload->fullPath()), false);
-            $img = ImageManager::gd()->read($decryptedImage);
 
-            $data['dimensions'] = ['height' => $img->size()->height(), 'width' => $img->size()->width()];
+
+            $data = json_decode($this->imageUpload->data, true);
             $data['extension'] = Str::upper($this->imageUpload->extension);
             $data['size'] = number_format(Storage::disk('local')->size($this->imageUpload->path()) / 1024 / 1024, 2);
-            Cache::set('image-upload-'.$this->imageUpload->uuid, $data, now()->addHour());
+
             return $data;
         });
     }
@@ -162,6 +161,13 @@ class ProcessImage extends Component
     {
         $this->imageUpload->delete();
         $this->error = true;
+    }
+
+    public function accept()
+    {
+        $this->imageUpload->setState(ImageUploadStates::Waiting);
+        $this->state = ImageUploadStates::Waiting->value;
+        $this->dispatch('imageUploadUpdated', ['uuid' => $this->imageUpload->uuid]);
     }
 
     public function mount($uuid)

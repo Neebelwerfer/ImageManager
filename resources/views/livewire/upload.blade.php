@@ -68,6 +68,7 @@
                             percentage.innerHTML = val + "%";
                         }
                     );
+                    Livewire.dispatch('UploadFinished');
                 }
                 else {
                     const chunks = chunkArray(files, 20);
@@ -104,7 +105,7 @@
 </script>
 @endscript
 
-<div class="relative flex flex-row h-full" x-data="{uploading: $wire.entangle('uploading')}">
+<div class="relative flex flex-row h-full" x-data="{uploading: $wire.entangle('uploading'), processing: $wire.entangle('processing')}">
     <div class="flex justify-center w-full">
         <div>
             <div wire:loading wire:target="image">
@@ -120,14 +121,13 @@
                 </div>
 
                 <div class="flex flex-col" x-show="uploading" x-cloak>
-                    <h1 class="text-6xl font-bold underline">Upload In progress: <span id="percentage">{{ number_format($progress, 0) }}%</span></h1>
+                    <h1 class="mb-2 text-6xl font-bold underline">Upload In progress: <span id="percentage">{{ number_format($progress, 0) }}%</span></h1>
                     <progress max="100" value="{{ $progress }}" id="progress"></progress>
                 </div>
-                @if($processing)
-                    <div class="w-96 h-96">
-                        <x-spinning-loader />
-                    </div>
-                @endif
+
+                <div class="w-96 h-96" x-show="processing">
+                    <x-spinning-loader />
+                </div>
             </div>
         </div>
     </div>

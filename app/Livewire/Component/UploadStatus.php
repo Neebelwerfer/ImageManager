@@ -65,13 +65,7 @@ class UploadStatus extends Component
                 $this->completedImageUploads[$upload->ulid] = ['state' => $upload->state, 'startTime' => $upload->created_at->diffForHumans(), 'count' => $upload->images()->count()];
             else
             {
-                if($upload->state === "processing")
-                {
-                    $activeImage = $upload->active_upload;
-                    $this->imageUploads[$upload->ulid] = ['state' => $activeImage->state, 'startTime' => $upload->created_at->diffForHumans(), 'count' => $upload->images()->count()];
-                }
-                else
-                    $this->imageUploads[$upload->ulid] = ['state' => $upload->state, 'startTime' => $upload->created_at->diffForHumans(), 'count' => $upload->images()->count()];
+                $this->imageUploads[$upload->ulid] = ['state' => $upload->state, 'startTime' => $upload->created_at->diffForHumans(), 'count' => $upload->images()->count()];
             }
         }
     }

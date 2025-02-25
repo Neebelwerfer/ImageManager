@@ -134,10 +134,22 @@
                             </div>
                         </div>
                         <img id="image-preview" class="object-scale-down" src="{{ url('temp/'.$imageUpload->uuid) }}" style="max-height: 500px;">
+
+                        <div class="absolute bottom-0 flex flex-row justify-between w-full gap-2">
+                            <div class="mb-3">
+                            <button type="button"
+                                class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
+                                wire:click='accept'>Accept and proceed</button>
+                            </div>
+
+                            <div class="mb-3">
+                                <button
+                                    class="p-1 bg-red-600 border rounded dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500"
+                                    wire:click='removeImage' type="button">Remove image</button>
+                            </div>
+                        </div>
                     </div>
                 @endif
-            @else
-
             @endif
         </x-section>
     </div>

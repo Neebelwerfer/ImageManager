@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('uploads', function (Blueprint $table) {
             $table->ulid()->primary();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->enum('state', ['uploading', 'waiting', 'scanning', 'foundDuplicates', 'processing', 'done'])->default('uploading');
+            $table->enum('state', ['uploading', 'waiting', 'processing', 'done'])->default('uploading');
             $table->string('active_upload_uuid')->nullable();
             $table->timestamps();
         });
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignUlid('upload_ulid')->constrained('uploads', 'ulid')->cascadeOnDelete();
             $table->string('extension');
-            $table->enum('state', ['waiting', 'scanning', 'foundDuplicates', 'processing', 'error', 'done'])->default('waiting');
+            $table->enum('state', ['waiting', 'foundDuplicates', 'processing', 'error', 'done'])->default('waiting');
             $table->text('hash');
             $table->json('duplicates')->nullable();
             $table->json('data')->nullable();

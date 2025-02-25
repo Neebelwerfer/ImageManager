@@ -107,6 +107,18 @@ class Upload extends Component
                     'hash' =>  $hash
                 ]);
 
+            $dimension = $image->dimensions();
+
+            $model->data = json_encode([
+                'category' => null,
+                'tags' => [],
+                'traits' => [],
+                'albums' => [],
+                'dimensions' => ['width' => $dimension["0"], 'height' => $dimension['1']]
+            ]);
+
+            $model->save();
+
             Storage::disk('local')->put('temp/' . $model->uuid, Crypt::encryptString(file_get_contents($path)));
             $image->delete();
         }
@@ -116,6 +128,7 @@ class Upload extends Component
     public function onUploadFinished()
     {
         assert($this->upload !== null, 'Upload is null?');
+        Broadcast::on('upload.' . Auth::user()->id)->as('newUpload')->with(['ulid' => $this->upload->ulid])->send();
         ProcessUpload::dispatch(Auth::user(), $this->upload);
         return $this->redirectRoute('upload.multiple', ['ulid' => $this->upload->ulid], navigate: true);
     }

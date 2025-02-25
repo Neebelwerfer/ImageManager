@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Upload;
 
+use App\Jobs\Upload\ProcessMultipleImages;
 use App\Models\ImageUpload;
 use App\Models\Upload;
+use App\Support\Enums\ImageUploadStates;
 use App\Support\Enums\UploadStates;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -29,11 +31,6 @@ class ProcessMultiple extends Component
         if($data['ulid'] != $this->upload->ulid) return;
 
         $this->state = $data['state'];
-
-        if($data['state'] === UploadStates::FoundDuplicates->value)
-        {
-
-        }
     }
 
     public function next(){
@@ -58,14 +55,7 @@ class ProcessMultiple extends Component
     #[Computed(persist: true, seconds: 600)]
     public function images()
     {
-        if($this->state == UploadStates::FoundDuplicates)
-        {
-            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('state', 'foundDuplicates')->orderBy('uuid', 'desc')->where('user_id', Auth::user()->id)->get()->values();
-        }
-        else
-        {
-            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('user_id', Auth::user()->id)->orderBy('uuid', 'desc')->get()->values();
-        }
+        return ImageUpload::where('upload_ulid', $this->upload->ulid)->whereNot('state', 'done')->where('user_id', Auth::user()->id)->orderBy('uuid', 'desc')->get()->values();
     }
 
     public function mount($ulid)
@@ -82,9 +72,27 @@ class ProcessMultiple extends Component
         $this->state = $this->upload->state;
     }
 
+    #[On('imageUploadUpdated')]
+    public function imageUploadUpdated()
+    {
+        unset($this->images);
+    }
+
+
     public function finalizeUpload()
     {
-        $this->state = UploadStates::Scanning->value;
+
+        foreach($this->images as $image)
+        {
+            if($image->state == ImageUploadStates::FoundDuplicates->value)
+            {
+                $this->js("alert('Cant upload while images need response')");
+                return;
+            }
+        }
+
+        $this->state === UploadStates::Processing->value;
+        ProcessMultipleImages::dispatch(Auth::user(), $this->upload);
     }
 
     public function uploadCancel()

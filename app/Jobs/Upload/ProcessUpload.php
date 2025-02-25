@@ -2,10 +2,12 @@
 
 namespace App\Jobs\Upload;
 
+use App\Events\Upload\FoundDuplicates;
 use App\Models\ImageUpload;
 use App\Models\Upload;
 use App\Models\User;
 use App\Services\ImageService;
+use App\Support\Enums\ImageUploadStates;
 use App\Support\Enums\UploadStates;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -41,15 +43,25 @@ class ProcessUpload implements ShouldQueue, ShouldQueueAfterCommit, ShouldBeUniq
      */
     public function handle(): void
     {
-        Broadcast::on('upload.' . $this->user->id)->as('newUpload')->with(['ulid' => $this->upload->ulid])->send();
+        $imageService = app(ImageService::class);
 
-        // try {
+        try {
+            $images = $this->upload->images;
 
+            foreach($images as $imageUpload)
+            {
+                $res = $imageService->compareHashes($this->user->id, $imageUpload->hash);
 
-        // } catch (\Throwable $th) {
-        //     Log::error($th->getMessage());
-        //     return;
-        // }
+                if(count($res) > 0)
+                {
+                    $imageUpload->duplicates = json_encode($res);
+                    $imageUpload->setState(ImageUploadStates::FoundDuplicates);
+                }
+            }
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+        }
+
         $this->upload->setState(UploadStates::Waiting);
     }
 
