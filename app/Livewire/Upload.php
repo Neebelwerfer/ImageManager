@@ -28,6 +28,7 @@ use Intervention\Image\ImageManager;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use SapientPro\ImageComparator\ImageComparator;
 
 #[Layout('layouts.app')]
 class Upload extends Component
@@ -38,29 +39,78 @@ class Upload extends Component
     #[Validate(['images.*' => 'image'])]
     public $images = [];
 
-    public $chunks = [];
+    public $imageCount = 0;
 
     public $uploading = false;
     public $fileCount = 0;
     public $processing = false;
+    public UploadModel $upload;
+
+    public $hashes = [];
+
+    public TemporaryUploadedFile $test;
 
     #[On('UploadCancelled')]
     public function UploadCancelled()
     {
+        $this->upload->delete();
     }
 
+
+    #[On('UploadStarted')]
+    public function UploadStarted()
+    {
+        $this->upload = UploadModel::create(
+            [
+                'ulid' => Str::ulid()->toString(),
+                'user_id' => Auth::user()->id
+            ]
+        );
+    }
 
     #[On('ChunkComplete')]
     public function ChunckComplete($index)
     {
-        $i = count($this->images);
-        foreach($this->chunks[$index] as $image)
+        $imageService = app(ImageService::class);
+
+        foreach($this->images[$index] as $image)
         {
-            $this->images[$i] = $image;
-            $i += 1;
+            $this->imageCount += 1;
+            $path = $image->getRealPath();
+            $hash = $imageService->createImageHash($path);
+
+            //Remove obvious duplicates
+            $comparator = new ImageComparator;
+            $duplicate = false;
+            foreach ($this->hashes as $otherHash)
+            {
+                if($comparator->compareHashStrings($hash, $otherHash) > 99.9)
+                {
+                    $duplicate = true;
+                    break;
+                }
+            }
+            if($duplicate)
+            {
+                $image->delete();
+                continue;
+            }
+            $this->hashes[] = $hash;
+
+            $model = ImageUpload::create(
+                [
+                    'uuid' => str::uuid(),
+                    'upload_ulid' => $this->upload->ulid,
+                    'user_id' => Auth::user()->id,
+                    'extension' => $image->extension(),
+                    'hash' =>  $hash
+                ]);
+
+            Storage::disk('local')->put('temp/' . $model->uuid, Crypt::encryptString(file_get_contents($path)));
+            $image->delete();
         }
 
-        if(count($this->images) === $this->fileCount)
+        if($this->imageCount === $this->fileCount)
         {
             $this->processing = true;
             $this->dispatch('UploadFinished')->self();
@@ -68,24 +118,11 @@ class Upload extends Component
     }
 
     #[On('UploadFinished')]
-    public function onUploadFinished() {
-
-        $uploadModel = UploadModel::create(
-            [
-                'ulid' => Str::ulid()->toString(),
-                'user_id' => Auth::user()->id
-            ]
-        );
-
-        $data = [];
-        foreach ($this->images as $key => $image)
-        {
-            $data[$key] = ['path' => $image->getRealPath(), 'extension' => $image->extension()];
-        }
-
-        Broadcast::on('upload.' . Auth::user()->id)->as('newUpload')->with(['ulid' => $uploadModel->ulid])->send();
-        ProcessUpload::dispatch(Auth::user(), $uploadModel, $data);
-        return $this->redirectRoute('upload.multiple', ['ulid' => $uploadModel->ulid], navigate: true);
+    public function onUploadFinished()
+    {
+        assert($this->upload !== null, 'Upload is null?');
+        ProcessUpload::dispatch(Auth::user(), $this->upload);
+        return $this->redirectRoute('upload.multiple', ['ulid' => $this->upload->ulid], navigate: true);
     }
 
     public function render()

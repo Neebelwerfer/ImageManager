@@ -60,7 +60,7 @@ class ProcessMultiple extends Component
     {
         if($this->state == UploadStates::FoundDuplicates)
         {
-            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('state', 'foundDuplicates')->orderBy('uuid', 'desc')->where('user_id', Auth::user()->id)->get();
+            return ImageUpload::where('upload_ulid', $this->upload->ulid)->where('state', 'foundDuplicates')->orderBy('uuid', 'desc')->where('user_id', Auth::user()->id)->get()->values();
         }
         else
         {

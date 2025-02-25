@@ -25,36 +25,51 @@
 
         document.getElementById('imageInput').addEventListener('change', async function() {
             const files = [...document.getElementById("imageInput").files];
+            const progressBar = document.getElementById("progress");
 
+            progressBar.value = 0;
             component.set('uploading', true);
             component.set('fileCount', files.length);
+            Livewire.dispatch('UploadStarted');
 
             try {
                 if(files.length <= 20)
                 {
-                    component.uploadMultiple('images', files,
+                    component.uploadMultiple('images.0', files,
                         (n) => {
-                            Livewire.dispatch('UploadFinished');
+                            Livewire.dispatch('ChunkComplete', { index: 0 });
                         },
                         () => {},
-                        (e) => {},
-                        () => {}
+                        (e) => {
+                                progressBar.value = e.detail.progress;
+                        },
+                        () => {
+                            Livewire.dispatch('UploadCancelled');
+                        }
                     );
                 }
                 else {
                     const chunks = chunkArray(files, 20);
 
+                    let value = 0;
                     for (const [index, chunk] of chunks.entries())
                     {
-                        component.uploadMultiple('chunks.'+index, chunk,
+                        let step = chunk.length / files.length;
+                        component.uploadMultiple('images.'+index, chunk,
                             (n) => {
                                 Livewire.dispatch('ChunkComplete', { index: index });
+                                value += step * 100;
+                                progressBar.value = value;
                             },
                             (error) => {
                                 alert(error)
                             },
-                            (e) => {},
-                            () => {}
+                            (e) => {
+                            },
+                            () => {
+                                console.log('cancelled');
+                                Livewire.dispatch('UploadCancelled');
+                            }
                         );
                     };
                 }
@@ -68,7 +83,7 @@
 </script>
 @endscript
 
-<div class="relative flex flex-row h-full">
+<div class="relative flex flex-row h-full" x-data="{uploading: $wire.entangle('uploading')}">
     <div class="flex justify-center w-full">
         <div>
             <div wire:loading wire:target="image">
@@ -76,22 +91,21 @@
                 <x-spinning-loader />
             </div>
             <div class="flex flex-col">
-                @if(!$uploading)
-                    <div class="mb-3">
-                        <input type="file" accept="image/*" name="images" placeholder="Choose images" id="imageInput" multiple>
-                        @error('image')
-                            <div class="mt-1 mb-1 text-red-600 alert">{{ $message }}</div>
-                        @enderror
+                <div class="mb-3" x-show="!uploading">
+                    <input type="file" accept="image/*" name="images" placeholder="Choose images" id="imageInput" multiple>
+                    @error('image')
+                        <div class="mt-1 mb-1 text-red-600 alert">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="flex flex-col" x-show="uploading" x-cloak>
+                    <h1 class="text-6xl font-bold underline">Upload In progress</h1>
+                    <progress id="progress" max="100"></progress>
+                </div>
+                @if($processing)
+                    <div class="w-96 h-96">
+                        <x-spinning-loader />
                     </div>
-                @else
-                    <div class="">
-                        <h1 class="text-6xl font-bold underline">Upload In progress: {{ count($images) }}/{{ $fileCount }}</h1>
-                    </div>
-                    @if($processing)
-                        <div class="w-96 h-96">
-                            <x-spinning-loader />
-                        </div>
-                    @endif
                 @endif
             </div>
         </div>
