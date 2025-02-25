@@ -104,7 +104,7 @@ class ImageService
     {
         $images = Cache::remember('image-hashes.user-'. $user_id, 3600, function () use ($user_id)
         {
-            return Image::where('owner_id', $user_id)->select('image_hash', 'uuid')->get();
+            return Image::ownedOrShared($user_id)->select('image_hash', 'uuid')->get();
         });
 
         $hits = [];

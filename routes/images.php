@@ -21,10 +21,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('upload', Upload::class)
         ->name('upload');
 
-    Route::get('upload/{uuid}', ProcessUpload::class)
-        ->name('upload.process');
-
-    Route::get('upload/multiple/{ulid}', ProcessMultiple::class)
+    Route::get('upload/{ulid}', ProcessMultiple::class)
         ->name('upload.multiple');
 
     Route::get('manage', Manage::class)
