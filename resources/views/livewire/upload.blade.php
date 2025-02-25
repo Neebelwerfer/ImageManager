@@ -7,7 +7,7 @@
 
 @script
 <script>
-    document.addEventListener('livewire:initialized', function () {
+    document.addEventListener('livewire:navigated', () => {
         let component = Livewire.getByName('upload')[0];
 
         function sleep(ms) {
@@ -101,7 +101,7 @@
                 return;
             }
         });
-    });
+    }   , { once: true })
 </script>
 @endscript
 
@@ -123,10 +123,6 @@
                 <div class="flex flex-col" x-show="uploading" x-cloak>
                     <h1 class="mb-2 text-6xl font-bold underline">Upload In progress: <span id="percentage">{{ number_format($progress, 0) }}%</span></h1>
                     <progress max="100" value="{{ $progress }}" id="progress"></progress>
-                </div>
-
-                <div class="w-96 h-96" x-show="processing">
-                    <x-spinning-loader />
                 </div>
             </div>
         </div>

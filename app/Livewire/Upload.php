@@ -43,7 +43,6 @@ class Upload extends Component
 
     public $uploading = false;
     public $fileCount = 0;
-    public $processing = false;
     public $progress = 0;
     public UploadModel $upload;
 
