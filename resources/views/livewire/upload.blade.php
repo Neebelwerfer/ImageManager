@@ -23,11 +23,34 @@
             return chunks;
         }
 
+        // Wrap the uploadMultiple function in a Promise
+        function uploadChunk(index, chunk, onComplete, onProgress) {
+            return new Promise((resolve, reject) => {
+                component.uploadMultiple('images.' + index, chunk,
+                (n) => {
+                    onComplete();
+                    resolve();
+                },
+                (error) => {
+                    reject(error);
+                },
+                (e) => {
+                    onProgress(e);
+                },
+                () => {
+                    console.log('cancelled');
+                    Livewire.dispatch('UploadCancelled');
+                });
+            });
+        }
+
         document.getElementById('imageInput').addEventListener('change', async function() {
             const files = [...document.getElementById("imageInput").files];
             const progressBar = document.getElementById("progress");
+            const percentage =  document.getElementById("percentage")
 
             progressBar.value = 0;
+            percentage.innerHTML = "0%";
             component.set('uploading', true);
             component.set('fileCount', files.length);
             Livewire.dispatch('UploadStarted');
@@ -35,16 +58,14 @@
             try {
                 if(files.length <= 20)
                 {
-                    component.uploadMultiple('images.0', files,
-                        (n) => {
-                            Livewire.dispatch('ChunkComplete', { index: 0 });
-                        },
-                        () => {},
-                        (e) => {
-                                progressBar.value = e.detail.progress;
-                        },
+                    await uploadChunk(0, files,
                         () => {
-                            Livewire.dispatch('UploadCancelled');
+                            Livewire.dispatch('ChunkComplete', { index: 0 });
+                        }, (e) => {
+                            let val = e.detail.progress;
+                            component.set('progress', val);
+                            progressBar.value = val;
+                            percentage.innerHTML = val + "%";
                         }
                     );
                 }
@@ -54,24 +75,24 @@
                     let value = 0;
                     for (const [index, chunk] of chunks.entries())
                     {
-                        let step = chunk.length / files.length;
-                        component.uploadMultiple('images.'+index, chunk,
-                            (n) => {
-                                Livewire.dispatch('ChunkComplete', { index: index });
-                                value += step * 100;
-                                progressBar.value = value;
-                            },
-                            (error) => {
-                                alert(error)
-                            },
-                            (e) => {
-                            },
-                            () => {
-                                console.log('cancelled');
-                                Livewire.dispatch('UploadCancelled');
-                            }
-                        );
+                        let step = (chunk.length / files.length) * 100;
+                        progressBar.value = value;
+                        percentage.innerHTML = value.toFixed(0) + "%";
+
+                        await uploadChunk(index, chunk,
+                        () => {
+                            value += step
+                            Livewire.dispatch('ChunkComplete', { index: index });
+                        },
+                        (e) => {
+                            let val = value + (step * (e.detail.progress / 100));
+                            component.set('progress', val);
+                            progressBar.value = val;
+                            percentage.innerHTML = val.toFixed(0) + "%";
+                        });
                     };
+
+                    Livewire.dispatch('UploadFinished');
                 }
             } catch (error) {
                 alert(error);
@@ -99,8 +120,8 @@
                 </div>
 
                 <div class="flex flex-col" x-show="uploading" x-cloak>
-                    <h1 class="text-6xl font-bold underline">Upload In progress</h1>
-                    <progress id="progress" max="100"></progress>
+                    <h1 class="text-6xl font-bold underline">Upload In progress: <span id="percentage">{{ number_format($progress, 0) }}%</span></h1>
+                    <progress max="100" value="{{ $progress }}" id="progress"></progress>
                 </div>
                 @if($processing)
                     <div class="w-96 h-96">

@@ -44,6 +44,7 @@ class Upload extends Component
     public $uploading = false;
     public $fileCount = 0;
     public $processing = false;
+    public $progress = 0;
     public UploadModel $upload;
 
     public $hashes = [];
@@ -108,12 +109,6 @@ class Upload extends Component
 
             Storage::disk('local')->put('temp/' . $model->uuid, Crypt::encryptString(file_get_contents($path)));
             $image->delete();
-        }
-
-        if($this->imageCount === $this->fileCount)
-        {
-            $this->processing = true;
-            $this->dispatch('UploadFinished')->self();
         }
     }
 
