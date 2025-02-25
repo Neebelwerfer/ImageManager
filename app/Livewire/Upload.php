@@ -98,6 +98,7 @@ class Upload extends Component
             }
             $this->hashes[] = $hash;
 
+
             $model = ImageUpload::create(
                 [
                     'uuid' => str::uuid(),
@@ -118,6 +119,10 @@ class Upload extends Component
             ]);
 
             $model->save();
+
+            $thumbnail = ImageManager::imagick()->read(file_get_contents($path));
+            $thumbnail->scaleDown(256, 256);
+            Storage::disk('local')->put('temp/' . $model->uuid . '.thumbnail', Crypt::encrypt((string)$thumbnail->toWebp(), false));
 
             Storage::disk('local')->put('temp/' . $model->uuid, Crypt::encryptString(file_get_contents($path)));
             $image->delete();

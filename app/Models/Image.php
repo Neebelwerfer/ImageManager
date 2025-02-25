@@ -29,7 +29,7 @@ class Image extends Model
     public function getThumbnailPath() : string
     {
         $split = Image::splitUUID($this->uuid);
-        return 'thumbnails/' . $split . '/' . hash('sha1', $this->uuid);
+        return 'images/' . $split . '/' . hash('sha1', $this->uuid) . '.thumbnail';
     }
 
     public function getImagePath() : string

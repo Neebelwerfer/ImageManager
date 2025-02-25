@@ -85,8 +85,6 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
 
                 $decryptedImage = Crypt::decryptString(file_get_contents($imageUpload->fullPath()), false);
 
-                $imageInfo = ImageManager::imagick()->read($decryptedImage);
-                $imageOriginal = ImageManager::gd()->read($decryptedImage);
                 $imageScaled = ImageManager::gd()->read($decryptedImage);
 
                 if($data['category'] !== null) {
@@ -112,8 +110,6 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
                     $albumService->addImage($this->user, $image, $albumID);
                 }
 
-                $imageInfo->scaleDown(256, 256);
-
                 if($imageScaled->height() > $imageScaled->width())
                 {
                     $imageScaled->scaleDown(1080, 1920);
@@ -123,7 +119,7 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
                     $imageScaled->scaleDown(1920, 1080);
                 }
 
-                $imageService->storeImageAndThumbnail($imageOriginal, $imageScaled, $imageInfo, $path, $name);
+                $imageService->storeImageAndThumbnail($imageScaled, $path, $name);
 
                 $imageUpload->setState(ImageUploadStates::Done);
                 DB::commit();
@@ -133,9 +129,9 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
                 DB::rollBack();
                 $error = true;
                 $hasedName = hash('sha1', $name);
-                Storage::disk('local')->delete('thumbnails/' . $path . '/' . $hasedName);
-                Storage::disk('local')->delete('originalImages/' . $path . '/' . $hasedName);
                 Storage::disk('local')->delete('images/' . $path . '/' . $hasedName);
+                Storage::disk('local')->delete('originalImages/' . $path . '/' . $hasedName);
+                Storage::disk('local')->delete('images/' . $path . '/' . $hasedName . '.thumbnail');
 
                 $imageUpload->setState(ImageUploadStates::Error);
                 UploadErrors::create([

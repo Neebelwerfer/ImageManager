@@ -38,9 +38,19 @@ class ImageUpload extends Model
         return 'temp/' . $this->uuid;
     }
 
+    public function thumbnailPath() : string
+    {
+        return 'temp/' . $this->uuid . '.thumbnail';
+    }
+
     public function fullPath() : string
     {
         return Storage::disk('local')->path($this->path());
+    }
+
+    public function fullThumbnailPath() : string
+    {
+        return Storage::disk('local')->path($this->thumbnailPath());
     }
 
     public function prunable()
@@ -63,6 +73,7 @@ class ImageUpload extends Model
     protected static function booted(): void
     {
         static::deleting(function (ImageUpload $imageUpload) {
+            Storage::disk('local')->delete($imageUpload->thumbnailPath());
             Storage::disk('local')->delete($imageUpload->path());
         });
     }}
