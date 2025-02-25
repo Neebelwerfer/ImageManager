@@ -12,7 +12,7 @@
             <button class="p-1 bg-red-700 border rounded dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='uploadCancel'>Cancel Upload</button>
         </div>
 
-    @else
+    @elseif($state == 'done')
         <div class="flex justify-center w-full">
             <p class="text-5xl font-bold">DONE!</p>
         </div>

@@ -118,7 +118,7 @@ class UploadStatus extends Component
                     <ul class="space-y-1">
                         @foreach ($imageUploads as $ulid => $imageUpload)
                             <li>
-                                <button x-on:click="Livewire.navigate('/upload/multiple/{{ $ulid }}')" class="w-full border rounded shadow-md {{ $this->getStateColour($imageUpload['state']) }} shadow-black">
+                                <button x-on:click="Livewire.navigate('/upload/{{ $ulid }}')" class="w-full border rounded shadow-md {{ $this->getStateColour($imageUpload['state']) }} shadow-black">
                                     <div class="flex flex-row justify-between mx-2">
                                         <p class="overflow-clip">{{ $ulid }}</p>
                                         <p >Images: {{ $imageUpload['count'] }}</p>

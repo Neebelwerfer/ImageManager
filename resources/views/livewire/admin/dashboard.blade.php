@@ -17,11 +17,12 @@
                         <li><p class="p-1">Images: {{ $this->ImageCount() }}</p></li>
                         <li><p class="p-1">Memory Usage: {{ $this->MemoryUsage() }} MB</p></li>
                         <li><p class="p-1">Storage available: {{ $this->SizeUsage()['free'] }} GB</p></li>
-                        <li><p class="p-1">Storagespace used by images: {{ $this->SizeUsage()['usedByImages'] }} MB</p></li>
-                        <li><p class="p-1">Storagespace used by thumbnails: {{ $this->SizeUsage()['usedByThumbnails'] }} MB</p></li>
+                        <li><p class="p-1">Storagespace used by images & thumbnails: {{ $this->SizeUsage()['usedByImages'] }} MB</p></li>
+                        <li><p class="p-1">Storagespace used by full sized Images: {{ $this->SizeUsage()['usedByFullImages'] }} MB</p></li>
+                        <li><p class="p-1">Storagespace used by temporary upload files: {{ $this->SizeUsage()['usedByTemp'] }} MB</p></li>
                         <li>
                             <div class="flex flex-row">
-                                <p class="p-1">Storagespace used by temporary images: {{ $this->SizeUsage()['usedByTemp'] }} MB </p>
+                                <p class="p-1">Storagespace used by livewire uploaded images: {{ $this->SizeUsage()['usedByLiveWireTemp'] }} MB </p>
                                 <button class="p-1 ml-2 border rounded bg-red-600/90" wire:click="deleteTempImages()"
                                     wire:confirm="Are you sure you want to delete all temporary images? It might brick ongoing upload session">Delete
                                     temporary images</button>

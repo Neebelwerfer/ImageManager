@@ -42,13 +42,14 @@ class Dashboard extends Component
     {
         $available = intval(disk_total_space(storage_path('app')) / 1024 / 1024 / 1024);
         $usedByImages = number_format((float)$this->GetDirectorySize(storage_path('app/images')) / 1024 / 1024, 2);
-        $usedByThumbnails = number_format((float)$this->GetDirectorySize(storage_path('app/thumbnails')) / 1024 / 1024, 2);
-        $usedByTemp = number_format((float)$this->GetDirectorySize(storage_path('app/livewire-tmp')) / 1024 / 1024, 2);
+        $usedByFullImages = number_format((float)$this->GetDirectorySize(storage_path('app/originalImages')) / 1024 / 1024, 2);
+        $usedByTemp = number_format((float)$this->GetDirectorySize(storage_path('app/temp')) / 1024 / 1024, 2);
+        $usedByLiveWireTemp = number_format((float)$this->GetDirectorySize(storage_path('app/livewire-tmp')) / 1024 / 1024, 2);
 
-        $used = $usedByImages + $usedByThumbnails;
+        $used = $usedByFullImages + $usedByImages;
 
         $percent = ($used / $available) * 100;
-        return ['used' => $used, 'free' => $available, 'percent' => $percent, 'usedByImages' => $usedByImages, 'usedByThumbnails' => $usedByThumbnails, 'usedByTemp' => $usedByTemp];
+        return ['used' => $used, 'free' => $available, 'percent' => $percent, 'usedByImages' => $usedByImages, 'usedByFullImages' => $usedByFullImages, 'usedByLiveWireTemp' => $usedByLiveWireTemp, 'usedByTemp' => $usedByTemp];
 
     }
 
