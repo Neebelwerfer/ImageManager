@@ -81,7 +81,6 @@ class ProcessMultiple extends Component
 
     public function finalizeUpload()
     {
-
         foreach($this->images as $image)
         {
             if($image->state == ImageUploadStates::FoundDuplicates->value)
@@ -91,7 +90,7 @@ class ProcessMultiple extends Component
             }
         }
 
-        $this->state === UploadStates::Processing->value;
+        $this->state = UploadStates::Processing->value;
         ProcessMultipleImages::dispatch(Auth::user(), $this->upload);
     }
 

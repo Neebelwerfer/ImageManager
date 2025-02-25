@@ -6,7 +6,7 @@
 
 <div class="w-full h-full" x-data="{count: $wire.entangle('count'), maxValue: '{{ count($this->images) }}'}">
 
-    @if($state !== "done")
+    @if($state == "waiting" || $state == "foundDuplicates")
         <div class="flex flex-row justify-center w-full gap-5 mt-2">
             <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='finalizeUpload'>Finalize Upload</button>
             <button class="p-1 bg-red-700 border rounded dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='uploadCancel'>Cancel Upload</button>
@@ -18,7 +18,7 @@
         </div>
         <div class="flex flex-row justify-center w-full gap-5 mt-2">
             <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="Livewire.navigate('{{ route('collection') }}')">Go to images</button>
-            <button class="p-1 bg-red-700 border rounded dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="Livewire.navigate('{{ route('upload') }}')">Upload More</button>
+            <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="Livewire.navigate('{{ route('upload') }}')">Upload More</button>
         </div>
     @endif
 
@@ -52,7 +52,6 @@
                 <x:grid.upload-image-card :image="$image" wire:key='grid-{{ $key }}' foundDuplicate='{{ $image->state === "foundDuplicates" }}' x-bind:disabled="count === '{{ $key }}'" x-on:click="count !== {{ $key }} ? $wire.select('{{ $key }}') : ''"/>
             @endforeach
         </div>
-
 
     @elseif($state == "processing")
         <div class="flex justify-center w-full mt-2">
