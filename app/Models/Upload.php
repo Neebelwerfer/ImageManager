@@ -48,4 +48,14 @@ class Upload extends Model
         $this->save();
         Broadcast::on('upload.' . $this->user_id)->as('stateUpdated')->with(['ulid' => $this->ulid,'state' => $state])->send();
     }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Upload $Upload) {
+            foreach($Upload->images as $image)
+            {
+                $image->delete();
+            }
+        });
+    }
 }

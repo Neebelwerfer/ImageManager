@@ -20,6 +20,11 @@
             <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="Livewire.navigate('{{ route('collection') }}')">Go to images</button>
             <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="Livewire.navigate('{{ route('upload') }}')">Upload More</button>
         </div>
+
+    @else
+        <div class="flex flex-row justify-center w-full gap-5 mt-2">
+            <button class="p-1 bg-red-700 border rounded dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='uploadCancel'>Cancel Upload</button>
+        </div>
     @endif
 
     @if($state == "uploading")
@@ -55,9 +60,9 @@
 
     @elseif($state == "processing")
         <div class="flex justify-center w-full mt-2">
-            <div class="flex flex-row">
-                <h1 class="text-xl font-bold underline w-fit">Processing images</h1>
-                <div class="flex justify-center" style="width: 40%">
+            <div class="flex flex-col">
+                <h1 class="text-4xl font-bold underline">Processing images</h1>
+                <div class="flex justify-center w-60 h-60">
                     <x-spinning-loader />
                 </div>
             </div>

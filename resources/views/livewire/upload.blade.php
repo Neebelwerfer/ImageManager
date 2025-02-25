@@ -7,6 +7,20 @@
 
 @script
 <script>
+
+    document.addEventListener('livewire:navigate', () => {
+        let component = Livewire.getByName('upload')[0];
+
+        const uploading = component.get('uploading');
+
+        console.log(uploading);
+        if(uploading)
+        {
+            Livewire.dispatch('UploadCancelled');
+        }
+
+    }, {once: true});
+
     document.addEventListener('livewire:navigated', () => {
         let component = Livewire.getByName('upload')[0];
 
@@ -101,11 +115,11 @@
                 return;
             }
         });
-    }   , { once: true })
+    }, { once: true })
 </script>
 @endscript
 
-<div class="relative flex flex-row h-full" x-data="{uploading: $wire.entangle('uploading'), processing: $wire.entangle('processing')}">
+<div class="relative flex flex-row h-full" x-data="{uploading: $wire.entangle('uploading')}">
     <div class="flex justify-center w-full">
         <div>
             <div wire:loading wire:target="image">

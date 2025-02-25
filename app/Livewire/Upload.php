@@ -131,6 +131,7 @@ class Upload extends Component
     #[On('UploadFinished')]
     public function onUploadFinished()
     {
+        $this->uploading = false;
         assert($this->upload !== null, 'Upload is null?');
         Broadcast::on('upload.' . Auth::user()->id)->as('newUpload')->with(['ulid' => $this->upload->ulid])->send();
         ProcessUpload::dispatch(Auth::user(), $this->upload);
