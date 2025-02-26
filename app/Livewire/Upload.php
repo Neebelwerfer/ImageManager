@@ -45,6 +45,7 @@ class Upload extends Component
     public $uploading = false;
     public $fileCount = 0;
     public $progress = 0;
+    public $currentChunk = 0;
     public UploadModel $upload;
 
     public $hashes = [];
@@ -56,6 +57,7 @@ class Upload extends Component
 
         $this->uploading = false;
         $this->upload->delete();
+
 
         foreach($this->images as $chunk)
         {
@@ -82,11 +84,16 @@ class Upload extends Component
     #[On('ChunkComplete')]
     public function ChunckComplete($index)
     {
-        if(!$this->uploading) return;
         $imageService = app(ImageService::class);
 
         foreach($this->images[$index] as $image)
         {
+            if(!$this->uploading)
+            {
+                $image->delete();
+                continue;
+            }
+
             $this->imageCount += 1;
             $path = $image->getRealPath();
             $hash = $imageService->createImageHash($path);
