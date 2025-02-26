@@ -8,17 +8,31 @@
 @script
 <script>
 
-    document.addEventListener('livewire:navigate', () => {
+    window.onCancel = function (event) {
         let component = Livewire.getByName('upload')[0];
 
         const uploading = component.get('uploading');
 
-        console.log(uploading);
         if(uploading)
         {
-            Livewire.dispatch('UploadCancelled');
+            if(confirm("Leaving this page will cancel the upload"))
+            {
+                event.preventDefault();
+                component.cancelUpload("images");
+                Livewire.dispatch('UploadCancelled', {url: event.detail.url});
+            }
+            else
+            {
+                event.preventDefault();
+                document.addEventListener('livewire:navigate', (event) => {
+                    window.onCancel(event);
+                }, {once: true});
+            }
         }
+    }
 
+    document.addEventListener('livewire:navigate', (event) => {
+        window.onCancel(event);
     }, {once: true});
 
     document.addEventListener('livewire:navigated', () => {
@@ -52,8 +66,8 @@
                     onProgress(e);
                 },
                 () => {
-                    console.log('cancelled');
-                    Livewire.dispatch('UploadCancelled');
+                    console.log('chunk upload cancelled')
+                    reject('upload cancelled');
                 });
             });
         }
@@ -110,8 +124,7 @@
                     Livewire.dispatch('UploadFinished');
                 }
             } catch (error) {
-                alert(error);
-                Livewire.dispatch('UploadCancelled');
+                console.log(error);
                 return;
             }
         });

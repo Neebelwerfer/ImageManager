@@ -39,6 +39,13 @@ class UploadStatus extends Component
         $this->updated = true;
     }
 
+    #[On('echo:upload.{id},.uploadDeleted')]
+    public function UploadDeleted($data)
+    {
+        $this->retrieveImageUploads();
+    }
+
+
     public function getStateColour($state)
     {
         switch($state){

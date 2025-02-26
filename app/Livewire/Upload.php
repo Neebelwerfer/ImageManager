@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Jobs\Upload\CancelUpload;
 use App\Jobs\Upload\ProcessUpload;
 use App\Models\ImageCategory;
 use App\Models\Tags;
@@ -48,12 +49,22 @@ class Upload extends Component
 
     public $hashes = [];
 
-    public TemporaryUploadedFile $test;
-
     #[On('UploadCancelled')]
-    public function UploadCancelled()
+    public function UploadCancelled($url)
     {
+        if(!$this->uploading) return;
+
+        $this->uploading = false;
         $this->upload->delete();
+
+        foreach($this->images as $chunk)
+        {
+            foreach($chunk as $image)
+            {
+                $image->delete();
+            }
+        }
+        $this->redirect($url);
     }
 
 
@@ -71,6 +82,7 @@ class Upload extends Component
     #[On('ChunkComplete')]
     public function ChunckComplete($index)
     {
+        if(!$this->uploading) return;
         $imageService = app(ImageService::class);
 
         foreach($this->images[$index] as $image)
@@ -131,6 +143,7 @@ class Upload extends Component
     #[On('UploadFinished')]
     public function onUploadFinished()
     {
+        if(!$this->uploading) return;
         $this->uploading = false;
         assert($this->upload !== null, 'Upload is null?');
         Broadcast::on('upload.' . Auth::user()->id)->as('newUpload')->with(['ulid' => $this->upload->ulid])->send();

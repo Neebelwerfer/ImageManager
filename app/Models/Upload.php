@@ -52,6 +52,7 @@ class Upload extends Model
     protected static function booted(): void
     {
         static::deleting(function (Upload $Upload) {
+            Broadcast::on('upload.' . $Upload->user_id)->as('uploadDeleted')->with(['ulid' => $Upload->ulid])->send();
             foreach($Upload->images as $image)
             {
                 $image->delete();
