@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Jobs\Upload\CancelUpload;
+use App\Jobs\Upload\CleanupImages;
 use App\Jobs\Upload\ProcessUpload;
 use App\Models\ImageCategory;
 use App\Models\Tags;
@@ -57,18 +58,22 @@ class Upload extends Component
 
         $this->uploading = false;
         $this->upload->delete();
+        Cache::forget('uploading-' . $this->upload->ulid);
+        $this->redirect($url);
+    }
 
-
+    public function cleanup()
+    {
+        $data = [];
         foreach($this->images as $chunk)
         {
             foreach($chunk as $image)
             {
-                $image->delete();
+                $data[] = $image->getRealPath();
             }
         }
-        $this->redirect($url);
+        CleanupImages::dispatch(Auth::user(), $data);
     }
-
 
     #[On('UploadStarted')]
     public function UploadStarted()
@@ -79,6 +84,16 @@ class Upload extends Component
                 'user_id' => Auth::user()->id
             ]
         );
+        Cache::set('uploading-' . $this->upload->ulid, true);
+    }
+
+    public function cleanupChunck($index){
+        $data = [];
+        foreach ($this->images[$index] as $image)
+        {
+            $data[] = $image->getRealPath();
+        }
+        CleanupImages::dispatch(Auth::user(), $data);
     }
 
     #[On('ChunkComplete')]
@@ -88,10 +103,10 @@ class Upload extends Component
 
         foreach($this->images[$index] as $image)
         {
-            if(!$this->uploading)
+            if(!Cache::get('uploading-' . $this->upload->ulid, false))
             {
-                $image->delete();
-                continue;
+                $this->cleanup();
+                return;
             }
 
             $this->imageCount += 1;
@@ -150,8 +165,13 @@ class Upload extends Component
     #[On('UploadFinished')]
     public function onUploadFinished()
     {
-        if(!$this->uploading) return;
+        if(!$this->uploading)
+        {
+            return;
+        }
+
         $this->uploading = false;
+        Cache::forget('uploading-' . $this->upload->ulid);
         assert($this->upload !== null, 'Upload is null?');
         Broadcast::on('upload.' . Auth::user()->id)->as('newUpload')->with(['ulid' => $this->upload->ulid])->send();
         ProcessUpload::dispatch(Auth::user(), $this->upload);

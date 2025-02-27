@@ -104,14 +104,14 @@
                     let value = 0;
                     for (const [index, chunk] of chunks.entries())
                     {
-                        component.set('currentChunk', index);
                         let step = (chunk.length / files.length) * 100;
                         progressBar.value = value;
                         percentage.innerHTML = value.toFixed(0) + "%";
 
                         const uploading = component.get('uploading');
+                        if(!uploading) return;
 
-                        if(!uploading) break;
+                        component.set('currentChunk', index);
 
                         await uploadChunk(index, chunk,
                         () => {

@@ -9,7 +9,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class CancelUpload implements ShouldQueue
+class CleanupImages implements ShouldQueue
 {
     use Queueable;
 
@@ -18,7 +18,6 @@ class CancelUpload implements ShouldQueue
      */
     public function __construct(
         public readonly User $user,
-        public readonly Upload $upload,
         public readonly array $data
     )
     {
@@ -30,8 +29,6 @@ class CancelUpload implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->upload->delete();
-
         foreach ($this->data as $path)
         {
             unlink($path);
