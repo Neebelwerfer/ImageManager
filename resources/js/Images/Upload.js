@@ -11,10 +11,8 @@ export default (baseRoute) => ({
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
-                        console.log('Started Upload');
                         resolve(xhr.getResponseHeader('ulid'));
                     } else {
-                        //console.error('Failed to upload files.');
                         reject('Failed to start uploading');
                     }
                 }
@@ -31,7 +29,6 @@ export default (baseRoute) => ({
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
-                        console.log('completed Upload');
                         resolve(xhr.getResponseHeader('url'));
                     } else {
                         reject('something went wrong completing upload');
@@ -67,18 +64,18 @@ export default (baseRoute) => ({
         if(files.length == 0)
         {
             OnCancelled();
+            return;
         }
 
         for (let i = 0; i < files.length; i++) {
             formData.append("images[]", files[i]);
         }
-        //console.log('Sending ' + files.length + ' images to ulid: ' + ulid);
 
         const xhr = new XMLHttpRequest();
-        xhr.onprogress = function(event) {
+        xhr.upload.onprogress = function(event) {
             if (event.lengthComputable) {
-                console.log('total: ' + event.total + ' loaded: ' + event.loaded);
                 const percentComplete = (event.loaded / event.total) * 100;
+                console.log(percentComplete + '%');
                 OnProgress(percentComplete);
             }
         };
@@ -91,10 +88,8 @@ export default (baseRoute) => ({
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    //console.log('Files uploaded successfully!');
-                    onComplete();
+                     onComplete();
                 } else {
-                    //console.error('Failed to upload files.');
                     OnError()
                 }
                 this.activeUpload = null;
@@ -123,7 +118,8 @@ export default (baseRoute) => ({
                         percentage.innerHTML = "100%";
                     },
                     (p) => {
-                        console.log(p);
+                        progressBar.value = p;
+                        percentage.innerHTML = p.toFixed(0) + '%';
                     }
                 );
             }
@@ -146,7 +142,10 @@ export default (baseRoute) => ({
                         percentage.innerHTML = value.toFixed(0) + '%';
                     },
                     (p) => {
-                        console.log(p);
+
+                        let v = value + (step / p);
+                        progressBar.value = v;
+                        percentage.innerHTML = v.toFixed(0) + '%';
                     });
                 }
             }
