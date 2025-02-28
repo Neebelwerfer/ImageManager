@@ -37,10 +37,7 @@
 
     document.addEventListener('livewire:navigated', () => {
         let component = Livewire.getByName('upload')[0];
-
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
+        let ulid = null;
 
         function chunkArray(array, chunkSize) {
             const chunks = [];
@@ -51,25 +48,86 @@
             return chunks;
         }
 
-        // Wrap the uploadMultiple function in a Promise
-        function uploadChunk(index, chunk, onComplete, onProgress) {
+        function startUpload() {
             return new Promise((resolve, reject) => {
-                component.uploadMultiple('images.' + index, chunk,
-                (n) => {
-                    onComplete();
+                const xhr = new XMLHttpRequest();
+                xhr.open("Get", '{{ route('media.upload.start') }}', true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            console.log('Started Upload');
+                            ulid = xhr.getResponseHeader('ulid');
+                            console.log('ulid: ' + ulid);
+                            resolve();
+                        } else {
+                            console.error('Failed to upload files.');
+                            reject('Failed to start uploading');
+                        }
+                    }
+                };
+                xhr.send();
+            });
+        }
+
+
+        function asyncUpload(ulid, files, onComplete, OnProgress)
+        {
+            return new Promise((resolve, reject) => {
+                uploadImages(ulid, files,
+                () => {
+
                     resolve();
                 },
-                (error) => {
-                    reject(error);
-                },
-                (e) => {
-                    onProgress(e);
+                (percentage) => {
+                    OnProgress(percentage);
                 },
                 () => {
-                    console.log('chunk upload cancelled')
+                    reject('upload failed');
+                },
+                () => {
+
                     reject('upload cancelled');
-                });
+                })
             });
+        }
+
+        function uploadImages(ulid, files, onComplete, OnProgress, OnError, OnCancelled)
+        {
+            const formData = new FormData();
+
+            if(files.length == 0)
+            {
+                OnCancelled();
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append("images[]", files[i]);
+            }
+            console.log('Sending ' + files.length + ' images');
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("Post", '{{ route('media.upload') }}', true);
+            xhr.setRequestHeader('ulid', ulid);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        console.log('Files uploaded successfully!');
+                        onComplete();
+                    } else {
+                        console.error('Failed to upload files.');
+                        OnError()
+                    }
+                }
+            };
+            xhr.addEventListener("progress", (event) => {
+                if (event.lengthComputable) {
+                    const percentComplete = (event.loaded / event.total) * 100;
+                    OnProgress(percentComplete);
+                }
+            });
+            xhr.addEventListener("error", OnError);
+            xhr.addEventListener("abort", OnCancelled);
+            xhr.send(formData);
         }
 
         document.getElementById('imageInput').addEventListener('change', async function() {
@@ -79,24 +137,17 @@
 
             progressBar.value = 0;
             percentage.innerHTML = "0%";
-            component.set('fileCount', files.length);
-            component.set('uploading', true);
-            Livewire.dispatch('UploadStarted');
+            await startUpload();
 
             try {
                 if(files.length <= 20)
                 {
-                    await uploadChunk(0, files,
-                        () => {
-                            Livewire.dispatch('ChunkComplete', { index: 0 });
-                        }, (e) => {
-                            let val = e.detail.progress;
-                            component.set('progress', val);
-                            progressBar.value = val;
-                            percentage.innerHTML = val + "%";
+                    await asyncUpload(ulid, files,
+                        () => {},
+                        (p) => {
+                            console.log(p);
                         }
                     );
-                    Livewire.dispatch('UploadFinished');
                 }
                 else {
                     const chunks = chunkArray(files, 20);
@@ -111,21 +162,12 @@
                         const uploading = component.get('uploading');
                         if(!uploading) return;
 
-                        await uploadChunk(index, chunk,
-                        () => {
-                            value += step
-                            Livewire.dispatch('ChunkComplete', { index: index });
-                        },
-                        (e) => {
-                            let val = value + (step * (e.detail.progress / 100));
-                            component.set('progress', val);
-                            progressBar.value = val;
-                            percentage.innerHTML = val.toFixed(0) + "%";
+                        await asyncUpload(ulid, chunk,
+                        () => {},
+                        (p) => {
+                            console.log(p);
                         });
-                    };
-
-                    if(component.get('uploading'))
-                        Livewire.dispatch('UploadFinished');
+                    }
                 }
             } catch (error) {
                 console.log(error);

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\UploadController;
 use App\Livewire\Collection;
 use App\Livewire\Collection\Albums as CollectionAlbums;
 use App\Livewire\Collection\Categories as CollectionCategories;
@@ -15,6 +16,7 @@ use App\Livewire\Manage\Traits;
 use App\Livewire\Upload;
 use App\Livewire\Upload\ProcessMultiple;
 use App\Livewire\Upload\ProcessUpload;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
@@ -60,4 +62,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('collection/{collectionType}/{collectionID?}', ShowCollection::class)
         ->name('collection.type.show');
+
+    Route::post('media/upload', [UploadController::class, 'uploadImages'])
+        ->withoutMiddleware(VerifyCsrfToken::class)
+        ->name('media.upload');
+
+    Route::get('media/upload/start',  [UploadController::class, 'uploadStart'])
+        ->name('media.upload.start');
 });

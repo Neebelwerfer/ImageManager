@@ -37,35 +37,22 @@ class ProcessUpload implements ShouldQueue
     public function handle(): void
     {
         Broadcast::on('upload.' . $this->user->id)->as('newUpload')->with(['ulid' => $this->upload->ulid])->send();
-        foreach($this->data as $image)
+        foreach($this->upload->images as $image)
         {
-            $uuid = $image['uuid'];
-            $path = $image['path'];
-            $hash = $image['hash'];
-
-            $model = new ImageUpload(
-                [
-                    'uuid' => $uuid,
-                    'upload_ulid' => $this->upload->ulid,
-                    'user_id' => $this->user->id,
-                    'extension' => $image['extension'],
-                    'hash' =>  $hash
-                ]);
-
-            $model->data = json_encode([
+            $path = $image->path();
+            $thumbnail = ImageManager::imagick()->read(file_get_contents($path));
+            $image->data = json_encode([
                 'category' => null,
                 'tags' => [],
                 'traits' => [],
                 'albums' => [],
-                'dimensions' => $image['dimensions']
+                'dimensions' => ['width' => $thumbnail->width(), 'height' => $thumbnail->height()]
             ]);
-            $model->save();
+            $image->save();
 
-            $thumbnail = ImageManager::imagick()->read(file_get_contents($path));
             $thumbnail->scaleDown(256, 256);
-            Storage::disk('local')->put('temp/' . $uuid . '.thumbnail', Crypt::encrypt((string)$thumbnail->toWebp(), false));
-            Storage::disk('local')->put('temp/' . $uuid, Crypt::encryptString(file_get_contents($path)));
-            unlink($path);
+            Storage::disk('local')->put('temp/' . $image->uuid . '.thumbnail', Crypt::encrypt((string)$thumbnail->toWebp(), false));
+            Storage::disk('local')->put('temp/' . $image->uuid, Crypt::encryptString(file_get_contents($path)));
         }
     }
 }
