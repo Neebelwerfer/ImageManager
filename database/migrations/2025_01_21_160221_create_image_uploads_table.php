@@ -17,7 +17,6 @@ return new class extends Migration
             $table->enum('state', ['uploading', 'waiting', 'processing', 'done'])->default('uploading');
             $table->string('active_upload_uuid')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
 
         Schema::create('image_uploads', function (Blueprint $table) {

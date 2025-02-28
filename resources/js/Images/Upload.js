@@ -1,7 +1,8 @@
-export default (bRoute) => ({
+export default (baseRoute) => ({
     uploading: false,
     ulid: null,
-    baseRoute: bRoute,
+    baseRoute: baseRoute,
+    activeUpload: null,
 
     startUpload() {
         return new Promise((resolve, reject) => {
@@ -13,7 +14,7 @@ export default (bRoute) => ({
                         console.log('Started Upload');
                         resolve(xhr.getResponseHeader('ulid'));
                     } else {
-                        console.error('Failed to upload files.');
+                        //console.error('Failed to upload files.');
                         reject('Failed to start uploading');
                     }
                 }
@@ -71,7 +72,7 @@ export default (bRoute) => ({
         for (let i = 0; i < files.length; i++) {
             formData.append("images[]", files[i]);
         }
-        console.log('Sending ' + files.length + ' images to ulid: ' + ulid);
+        //console.log('Sending ' + files.length + ' images to ulid: ' + ulid);
 
         const xhr = new XMLHttpRequest();
         xhr.onprogress = function(event) {
@@ -90,15 +91,17 @@ export default (bRoute) => ({
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    console.log('Files uploaded successfully!');
+                    //console.log('Files uploaded successfully!');
                     onComplete();
                 } else {
-                    console.error('Failed to upload files.');
+                    //console.error('Failed to upload files.');
                     OnError()
                 }
+                this.activeUpload = null;
             }
         };
         xhr.send(formData);
+        this.activeUpload = xhr;
     },
 
     async handleUpload() {
@@ -130,6 +133,8 @@ export default (bRoute) => ({
                 let value = 0;
                 for (const [index, chunk] of chunks.entries())
                 {
+                    if(!this.uploading) break;
+
                     let step = (chunk.length / files.length) * 100;
                     progressBar.value = value;
                     percentage.innerHTML = value.toFixed(0) + "%";
@@ -154,14 +159,34 @@ export default (bRoute) => ({
             }
         } catch (error) {
             console.log(error);
+            this.cancelUpload();
             return;
         }
+    },
+
+    cancelUpload()
+    {
+        if(!this.uploading) return;
+
+        this.uploading = false;
+        document.getElementById("imageInput").value = '';
+        console.log('upload cancelled');
+
+        if(this.activeUpload != null)
+        {
+            this.activeUpload.abort();
+            this.activeUpload = null;
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("Get", this.baseRoute + '/cancel', true);
+        xhr.setRequestHeader('ulid', this.ulid);
+        xhr.send();
     },
 
     chunkArray(array, chunkSize) {
         const chunks = [];
         for (let i = 0; i < array.length; i += chunkSize) {
-            // Slice the array into chunks of 'chunkSize'
             chunks.push(array.slice(i, i + chunkSize));
         }
         return chunks;
@@ -173,14 +198,10 @@ export default (bRoute) => ({
             {
                 if(confirm("Leaving this page will cancel the upload"))
                 {
-                    this.uploading = false;
                     event.preventDefault();
-                    console.log('upload cancelled');
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("Get", this.baseRoute + '/cancel', true);
-                    xhr.setRequestHeader('ulid', this.ulid);
-                    xhr.send();
-                    Livewire.navigate(event.detail.url);
+                    let url = event.detail.url;
+                    this.cancelUpload();
+                    Livewire.navigate(url);
                 }
                 else
                 {

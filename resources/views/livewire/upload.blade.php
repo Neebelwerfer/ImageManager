@@ -21,8 +21,8 @@
                 </div>
 
                 <div class="flex flex-col" x-show="uploading" x-cloak>
-                    <h1 class="mb-2 text-6xl font-bold underline">Upload In progress: <span id="percentage">{{ number_format($progress, 0) }}%</span></h1>
-                    <progress max="100" value="{{ $progress }}" id="progress"></progress>
+                    <h1 class="mb-2 text-6xl font-bold underline">Upload In progress: <span id="percentage">0%</span></h1>
+                    <progress max="100" id="progress"></progress>
                 </div>
             </div>
         </div>
