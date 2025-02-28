@@ -68,7 +68,7 @@ class UploadController extends Controller
         //     new CheckUploadForDuplicates(Auth::user(), $this->upload)
         // ])->dispatch();
 
-        //return response()->make('', 200, ['ulid' => $upload->ulid]);
+        return response()->make('Upload in Progress', 200, ['ulid' => $upload->ulid]);
     }
 
     public function uploadCancel(Request $request)
@@ -114,8 +114,6 @@ class UploadController extends Controller
         {
             return response('No files detected', 404);
         }
-
-        log::debug($request->file('images[]'));
 
         foreach ($request->file('images') as $image)
         {
