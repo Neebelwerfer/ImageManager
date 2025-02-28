@@ -2,35 +2,22 @@
 
 namespace App\Livewire;
 
-use App\Jobs\Upload\CancelUpload;
+use App\Jobs\Upload\CheckUploadForDuplicates;
 use App\Jobs\Upload\CleanupImages;
 use App\Jobs\Upload\ProcessUpload;
-use App\Models\ImageCategory;
-use App\Models\Tags;
-use App\Models\ImageUpload;
-use App\Models\Traits;
 use App\Models\Upload as UploadModel;
 use App\Services\ImageService;
-use App\Support\Traits\AddedTrait;
-use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Url;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use SapientPro\ImageComparator\ImageComparator;
+
 
 #[Layout('layouts.app')]
 class Upload extends Component
@@ -50,6 +37,7 @@ class Upload extends Component
     public UploadModel $upload;
 
     public $hashes = [];
+    public $data = [];
 
     #[On('UploadCancelled')]
     public function UploadCancelled($url)
@@ -57,8 +45,7 @@ class Upload extends Component
         if(!$this->uploading) return;
 
         $this->uploading = false;
-        $this->upload->delete();
-        Cache::forget('uploading-' . $this->upload->ulid);
+        $this->cleanup();
         $this->redirect($url);
     }
 
@@ -72,12 +59,14 @@ class Upload extends Component
                 $data[] = $image->getRealPath();
             }
         }
-        CleanupImages::dispatch(Auth::user(), $data);
+        CleanupImages::dispatch(Auth::user(), $this->upload, $this->data);
     }
 
     #[On('UploadStarted')]
     public function UploadStarted()
     {
+        $this->uploading = true;
+        $this->data = [];
         $this->upload = UploadModel::create(
             [
                 'ulid' => Str::ulid()->toString(),
@@ -103,15 +92,10 @@ class Upload extends Component
 
         foreach($this->images[$index] as $image)
         {
-            if(!Cache::get('uploading-' . $this->upload->ulid, false))
-            {
-                $this->cleanup();
-                return;
-            }
-
             $this->imageCount += 1;
             $path = $image->getRealPath();
             $hash = $imageService->createImageHash($path);
+            $uuid = str::uuid()->toString();
 
             //Remove obvious duplicates
             $comparator = new ImageComparator;
@@ -131,34 +115,14 @@ class Upload extends Component
             }
             $this->hashes[] = $hash;
 
-
-            $model = ImageUpload::create(
-                [
-                    'uuid' => str::uuid(),
-                    'upload_ulid' => $this->upload->ulid,
-                    'user_id' => Auth::user()->id,
-                    'extension' => $image->extension(),
-                    'hash' =>  $hash
-                ]);
-
             $dimension = $image->dimensions();
-
-            $model->data = json_encode([
-                'category' => null,
-                'tags' => [],
-                'traits' => [],
-                'albums' => [],
+            $this->data[] = [
+                'uuid' => $uuid,
+                'path' => $path,
+                'hash' => $hash,
+                'extension' => $image->extension(),
                 'dimensions' => ['width' => $dimension["0"], 'height' => $dimension['1']]
-            ]);
-
-            $model->save();
-
-            $thumbnail = ImageManager::imagick()->read(file_get_contents($path));
-            $thumbnail->scaleDown(256, 256);
-            Storage::disk('local')->put('temp/' . $model->uuid . '.thumbnail', Crypt::encrypt((string)$thumbnail->toWebp(), false));
-
-            Storage::disk('local')->put('temp/' . $model->uuid, Crypt::encryptString(file_get_contents($path)));
-            $image->delete();
+            ];
         }
     }
 
@@ -171,10 +135,12 @@ class Upload extends Component
         }
 
         $this->uploading = false;
-        Cache::forget('uploading-' . $this->upload->ulid);
         assert($this->upload !== null, 'Upload is null?');
-        Broadcast::on('upload.' . Auth::user()->id)->as('newUpload')->with(['ulid' => $this->upload->ulid])->send();
-        ProcessUpload::dispatch(Auth::user(), $this->upload);
+
+        Bus::chain([
+            new ProcessUpload(Auth::user(), $this->upload, $this->data),
+            new CheckUploadForDuplicates(Auth::user(), $this->upload)
+        ])->dispatch();
         return $this->redirectRoute('upload.multiple', ['ulid' => $this->upload->ulid], navigate: true);
     }
 

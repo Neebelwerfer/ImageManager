@@ -18,7 +18,7 @@
             if(confirm("Leaving this page will cancel the upload"))
             {
                 event.preventDefault();
-                component.cancelUpload("images." + component.set('currentChunk'));
+                component.cancelUpload("images");
                 Livewire.dispatch('UploadCancelled', {url: event.detail.url});
             }
             else
@@ -79,8 +79,8 @@
 
             progressBar.value = 0;
             percentage.innerHTML = "0%";
-            component.set('uploading', true);
             component.set('fileCount', files.length);
+            component.set('uploading', true);
             Livewire.dispatch('UploadStarted');
 
             try {
@@ -110,8 +110,6 @@
 
                         const uploading = component.get('uploading');
                         if(!uploading) return;
-
-                        component.set('currentChunk', index);
 
                         await uploadChunk(index, chunk,
                         () => {

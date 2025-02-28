@@ -46,17 +46,21 @@
                         <button :disabled="count === maxValue - 1" :class="count === maxValue - 1 ? 'bg-gray-400 dark:bg-gray-500' : 'bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500'" id="next" class="p-1 border rounded " wire:click='next'>Next</button>
                     </div>
                 </div>
-                <div>
-                    <livewire:upload.process-image uuid="{{ $this->images[$count]->uuid }}" wire:key='preview-{{ $this->images[$count]->uuid }}'/>
-                </div>
+                @if(count($this->images) > 0)
+                    <div>
+                        <livewire:upload.process-image uuid="{{ $this->images[$count]->uuid }}" wire:key='preview-{{ $this->images[$count]->uuid }}'/>
+                    </div>
+                @endif
             </div>
         @endif
 
-        <div class="grid-flow-col mx-2 mt-2">
-            @foreach ($this->images as $key => $image)
-                <x:grid.upload-image-card :image="$image" wire:key='grid-{{ $key }}' foundDuplicate='{{ $image->state === "foundDuplicates" }}' x-bind:disabled="count === '{{ $key }}'" x-on:click="count !== {{ $key }} ? $wire.select('{{ $key }}') : ''"/>
-            @endforeach
-        </div>
+        @if(count($this->images) > 0)
+            <div class="grid-flow-col mx-2 mt-2">
+                @foreach ($this->images as $key => $image)
+                    <x:grid.upload-image-card :image="$image" wire:key='grid-{{ $key }}' foundDuplicate='{{ $image->state === "foundDuplicates" }}' x-bind:disabled="count === '{{ $key }}'" x-on:click="count !== {{ $key }} ? $wire.select('{{ $key }}') : ''"/>
+                @endforeach
+            </div>
+        @endif
 
     @elseif($state == "processing")
         <div class="flex justify-center w-full mt-2">

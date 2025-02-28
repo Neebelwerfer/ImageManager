@@ -18,6 +18,7 @@ class CleanupImages implements ShouldQueue
      */
     public function __construct(
         public readonly User $user,
+        public readonly Upload $upload,
         public readonly array $data
     )
     {
@@ -29,12 +30,16 @@ class CleanupImages implements ShouldQueue
      */
     public function handle(): void
     {
-        foreach ($this->data as $path)
+        $this->upload->delete();
+        foreach ($this->data as $data)
         {
-            unlink($path);
+            try{
+                unlink($data['path']);
+            } catch (\Throwable $th) {
+                Log::error($th->getMessage());
+            }
         }
     }
-
     public function failed(?Throwable $exception) {
         Log::error($exception->getMessage());
     }

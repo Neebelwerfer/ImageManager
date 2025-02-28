@@ -31,6 +31,10 @@ class ProcessMultiple extends Component
         if($data['ulid'] != $this->upload->ulid) return;
 
         $this->state = $data['state'];
+        if($this->state === "waiting")
+        {
+            $this->dispatch('reloadPage');
+        }
     }
 
     public function next(){
