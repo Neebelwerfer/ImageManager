@@ -68,7 +68,7 @@ class UploadController extends Controller
         //     new CheckUploadForDuplicates(Auth::user(), $this->upload)
         // ])->dispatch();
 
-        return response()->make('Upload in Progress', 200, ['ulid' => $upload->ulid]);
+        return response()->make('Upload in Progress', 200, ['url' => route('upload.multiple', ['ulid' => $ulid])]);
     }
 
     public function uploadCancel(Request $request)

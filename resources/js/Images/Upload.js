@@ -31,7 +31,7 @@ export default (bRoute) => ({
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
                         console.log('completed Upload');
-                        resolve();
+                        resolve(xhr.getResponseHeader('url'));
                     } else {
                         reject('something went wrong completing upload');
                     }
@@ -110,7 +110,6 @@ export default (bRoute) => ({
         progressBar.value = 0;
         percentage.innerHTML = "0%";
         this.ulid = await this.startUpload();
-        console.log('ulid ' + this.ulid);
 
         try {
             if(files.length <= 20)
@@ -135,9 +134,6 @@ export default (bRoute) => ({
                     progressBar.value = value;
                     percentage.innerHTML = value.toFixed(0) + "%";
 
-                    const uploading = component.get('uploading');
-                    if(!uploading) return;
-
                     await this.asyncUpload(this.ulid, chunk,
                     () => {
                         value += step;
@@ -151,7 +147,11 @@ export default (bRoute) => ({
             }
 
             if(this.uploading)
-                this.completeUpload(this.ulid);
+            {
+                const url = await this.completeUpload(this.ulid);
+                this.uploading = false;
+                Livewire.navigate(url);
+            }
         } catch (error) {
             console.log(error);
             return;
