@@ -43,8 +43,8 @@ export default (baseRoute) => ({
         return new Promise((resolve, reject) => {
             this.uploadImages(ulid, files,
             () => {
-                resolve();
                 OnComplete();
+                resolve();
             },
             (percentage) => {
                 OnProgress(percentage);
@@ -53,13 +53,12 @@ export default (baseRoute) => ({
                 reject('upload failed');
             },
             () => {
-
-                reject('upload cancelled');
+                reject('upload aborted');
             })
         });
     },
 
-    uploadImages(ulid, files, onComplete, OnProgress, OnError, OnCancelled) {
+    uploadImages(ulid, files, OnComplete, OnProgress, OnError, OnCancelled) {
         const formData = new FormData();
         if(files.length == 0)
         {
@@ -75,26 +74,18 @@ export default (baseRoute) => ({
         xhr.upload.onprogress = function(event) {
             if (event.lengthComputable) {
                 const percentComplete = (event.loaded / event.total) * 100;
-                console.log(percentComplete + '%');
                 OnProgress(percentComplete);
             }
         };
 
         xhr.addEventListener("error", OnError);
         xhr.addEventListener("abort", OnCancelled);
+        xhr.addEventListener("load", OnComplete);
+        xhr.addEventListener("loadend", () => this.activeUpload = null);
 
         xhr.open("Post", this.baseRoute, true);
         xhr.setRequestHeader('ulid', ulid);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                     onComplete();
-                } else {
-                    OnError()
-                }
-                this.activeUpload = null;
-            }
-        };
+
         xhr.send(formData);
         this.activeUpload = xhr;
     },
@@ -127,7 +118,7 @@ export default (baseRoute) => ({
                 const chunks = this.chunkArray(files, 20);
 
                 let value = 0;
-                for (const [index, chunk] of chunks.entries())
+                for (const [_, chunk] of chunks.entries())
                 {
                     if(!this.uploading) break;
 
@@ -142,8 +133,8 @@ export default (baseRoute) => ({
                         percentage.innerHTML = value.toFixed(0) + '%';
                     },
                     (p) => {
-
-                        let v = value + (step / p);
+                        let v = value + ((step * p) / 100);
+                        console.log(v);
                         progressBar.value = v;
                         percentage.innerHTML = v.toFixed(0) + '%';
                     });

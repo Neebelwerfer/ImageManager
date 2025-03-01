@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\Upload\CheckUploadForDuplicates;
+use App\Jobs\Upload\CleanupUpload;
 use App\Jobs\Upload\ProcessUpload;
 use App\Models\ImageUpload;
 use App\Models\Upload;
@@ -82,7 +83,8 @@ class UploadController extends Controller
         {
             return response()->noContent();
         }
-        $upload->delete();
+        CleanupUpload::dispatch(Auth::user(), $upload);
+        return response('Upload Cancelled');
     }
 
     public function uploadImages(Request $request)

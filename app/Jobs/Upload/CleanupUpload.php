@@ -9,7 +9,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class CleanupImages implements ShouldQueue
+class CleanupUpload implements ShouldQueue
 {
     use Queueable;
 
@@ -19,7 +19,6 @@ class CleanupImages implements ShouldQueue
     public function __construct(
         public readonly User $user,
         public readonly Upload $upload,
-        public readonly array $data
     )
     {
         //
@@ -30,15 +29,12 @@ class CleanupImages implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->upload->delete();
-        foreach ($this->data as $data)
+        $images = $this->upload->images;
+        foreach($images as $image)
         {
-            try{
-                unlink($data['path']);
-            } catch (\Throwable $th) {
-                Log::error($th->getMessage());
-            }
+            $image->delete();
         }
+        $this->upload->delete();
     }
     public function failed(?Throwable $exception) {
         Log::error($exception->getMessage());
