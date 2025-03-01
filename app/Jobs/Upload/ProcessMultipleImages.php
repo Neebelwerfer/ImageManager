@@ -2,13 +2,8 @@
 
 namespace App\Jobs\Upload;
 
-use App\Events\ImageProcessed;
 use App\Models\Image;
 use App\Models\ImageCategory;
-use App\Models\ImageTraits;
-use App\Models\ImageUpload;
-use App\Models\Tags;
-use App\Models\Traits;
 use App\Models\Upload;
 use App\Models\Upload\UploadErrors;
 use App\Models\User;
@@ -18,15 +13,14 @@ use App\Services\ImageService;
 use App\Services\TagService;
 use App\Support\Enums\ImageUploadStates;
 use App\Support\Enums\UploadStates;
-use Exception;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Throwable;
@@ -124,9 +118,10 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
                 $imageUpload->setState(ImageUploadStates::Done);
                 DB::commit();
             }
-            catch(Exception $e)
+            catch(Throwable $e)
             {
                 DB::rollBack();
+                Log::error($e->getMessage());
                 $error = true;
                 $hasedName = hash('sha1', $name);
                 Storage::disk('local')->delete('images/' . $path . '/' . $hasedName);

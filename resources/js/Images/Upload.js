@@ -3,11 +3,18 @@ export default (baseRoute) => ({
     ulid: null,
     baseRoute: baseRoute,
     activeUpload: null,
+    csrf: document.querySelector('meta[name="csrf-token"]').content,
+
+    getXHR(type, route) {
+        const xhr = new XMLHttpRequest();
+        xhr.open(type, route, true);
+        xhr.setRequestHeader('X-CSRF-Token', this.csrf);
+        return xhr;
+    },
 
     startUpload() {
         return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open("Get", this.baseRoute + '/start', true);
+            const xhr = this.getXHR('Post', this.baseRoute + '/start');
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
@@ -23,8 +30,7 @@ export default (baseRoute) => ({
 
     completeUpload(ulid) {
         return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open("Get", this.baseRoute + '/complete', true);
+            const xhr = this.getXHR('Post', this.baseRoute + '/complete');
             xhr.setRequestHeader('ulid', ulid);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -70,7 +76,7 @@ export default (baseRoute) => ({
             formData.append("images[]", files[i]);
         }
 
-        const xhr = new XMLHttpRequest();
+        const xhr = this.getXHR('Post', this.baseRoute);
         xhr.upload.onprogress = function(event) {
             if (event.lengthComputable) {
                 const percentComplete = (event.loaded / event.total) * 100;
@@ -83,7 +89,6 @@ export default (baseRoute) => ({
         xhr.addEventListener("load", OnComplete);
         xhr.addEventListener("loadend", () => this.activeUpload = null);
 
-        xhr.open("Post", this.baseRoute, true);
         xhr.setRequestHeader('ulid', ulid);
 
         xhr.send(formData);
@@ -134,7 +139,6 @@ export default (baseRoute) => ({
                     },
                     (p) => {
                         let v = value + ((step * p) / 100);
-                        console.log(v);
                         progressBar.value = v;
                         percentage.innerHTML = v.toFixed(0) + '%';
                     });
@@ -168,8 +172,7 @@ export default (baseRoute) => ({
             this.activeUpload = null;
         }
 
-        const xhr = new XMLHttpRequest();
-        xhr.open("Get", this.baseRoute + '/cancel', true);
+        const xhr = this.getXHR("Post", this.baseRoute + '/cancel');
         xhr.setRequestHeader('ulid', this.ulid);
         xhr.send();
     },

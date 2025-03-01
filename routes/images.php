@@ -20,25 +20,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('upload', Upload::class)
-        ->name('upload');
-
-    Route::get('upload/{ulid}', ProcessMultiple::class)
-        ->name('upload.multiple');
-
-    Route::post('media/upload', [UploadController::class, 'uploadImages'])
-        ->withoutMiddleware(VerifyCsrfToken::class)
-        ->name('media.upload');
-
-    Route::get('media/upload/start',  [UploadController::class, 'uploadStart'])
-        ->name('media.upload.start');
-
-    Route::get('media/upload/cancel',  [UploadController::class, 'uploadCancel'])
-        ->name('media.upload.cancel');
-
-    Route::get('media/upload/complete',  [UploadController::class, 'uploadComplete'])
-        ->name('media.upload.complete');
-
     Route::get('manage', Manage::class)
         ->name('manage');
 

@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'home')->name('home');
 
 Route::middleware(['auth'])->group(function () {
-
     Route::view('profile', 'profile')
         ->name('profile');
 
@@ -24,5 +23,6 @@ Route::middleware(['auth', EnsureUserIsAdmin::class])->group(function () {
         ->name('admin.users');
 });
 
+require __DIR__.'/upload.php';
 require __DIR__.'/images.php';
 require __DIR__.'/auth.php';

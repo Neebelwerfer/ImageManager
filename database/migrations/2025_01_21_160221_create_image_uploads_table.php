@@ -26,8 +26,8 @@ return new class extends Migration
             $table->string('extension');
             $table->enum('state', ['waiting', 'foundDuplicates', 'processing', 'error', 'done'])->default('waiting');
             $table->text('hash');
-            $table->json('duplicates')->nullable();
-            $table->json('data')->nullable();
+            $table->jsonb('duplicates')->nullable();
+            $table->jsonb('data')->nullable();
             $table->timestamps();
         });
 
