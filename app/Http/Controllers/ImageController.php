@@ -100,7 +100,7 @@ class ImageController extends Controller
             redirect()->back();
         }
 
-        $data = Crypt::decryptString(file_get_contents($image->fullPath(), false));
+        $data = Crypt::decryptString(file_get_contents($image->fullThumbnailPath(), false));
         return response()->make($data, 200, ['Content-Type' => 'image/' . $image->format . ';base64']);
     }
 }

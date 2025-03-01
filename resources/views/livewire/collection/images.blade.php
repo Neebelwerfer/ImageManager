@@ -12,6 +12,9 @@
                         <button class="p-1 mx-3 mt-4 border rounded btn hover:bg-gray-400 hover:dark:bg-gray-500" type="button" x-on:click="changeSelectMode" :class="$wire.editMode ? 'bg-gray-500' : 'bg-gray-700'">Edit</button>
                     </div>
                 </form>
+                <div class="my-2">
+                    {{ $this->images->links() }}
+                </div>
                 <template x-if="$wire.editMode">
                     <div class="flex flex-row ml-3">
                         <x-button class="h-fit" x-on:click='selectAll(true)'  x-show="!allSelected">Select All</x-button>
@@ -32,9 +35,7 @@
                     </div>
                 </template>
             </div>
-            <div>
-                {{ $this->images->links() }}
-            </div>
+
         </x-slot>
         @foreach ($this->images as $image)
             <x-grid.image-card-button :image="$image" wire:model="selectedImages.{{ $image->uuid }}" x-on:click="onClick('{{ $image->uuid }}', () => Livewire.navigate('{{ route('image.show', $image->uuid) }}'))"

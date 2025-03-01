@@ -80,15 +80,11 @@ class ImageService
         $image->push();
     }
 
-    public function storeImageAndThumbnail(ImageInterface $originalImage, ImageInterface $image, ImageInterface $thumbnail, string $path, string $name)
+    public function storeImageAndThumbnail(ImageInterface $image, string $path, string $name)
     {
-        $thumbnail_path = 'thumbnails/' . $path;
         $image_path = 'images/' . $path;
-        $originalImage_path = 'originalImage/' . $path;
+        $originalImage_path = 'originalImages/' . $path;
 
-        if(!Storage::disk('local')->exists($thumbnail_path)) {
-            Storage::disk('local')->makeDirectory($thumbnail_path);
-        }
         if(!Storage::disk('local')->exists($image_path)) {
             Storage::disk('local')->makeDirectory($image_path);
         }
@@ -96,21 +92,19 @@ class ImageService
             Storage::disk('local')->makeDirectory($originalImage_path);
         }
 
-        $cryptThumb = Crypt::encrypt((string) $thumbnail->toWebp(), false);
         $cryptImage = Crypt::encrypt((string) $image->toWebp(), false);
-        $cryptOriginalImage = Crypt::encrypt((string) $originalImage->encodeByMediaType(), false);
         $hashedName = hash('sha1', $name);
 
-        Storage::disk('local')->put($thumbnail_path . '/' . $hashedName, $cryptThumb);
         Storage::disk('local')->put($image_path . '/' . $hashedName,$cryptImage);
-        Storage::disk('local')->put($originalImage_path . '/' . $hashedName,$cryptOriginalImage);
+        Storage::disk('local')->move('temp/'. $name . '.thumbnail', $image_path . '/' . $hashedName . '.thumbnail');
+        Storage::disk('local')->move('temp/'. $name, $originalImage_path . '/' . $hashedName);
     }
 
     public function compareHashes(int $user_id, $newHash, $threshold = 95) : array
     {
         $images = Cache::remember('image-hashes.user-'. $user_id, 3600, function () use ($user_id)
         {
-            return Image::where('owner_id', $user_id)->select('image_hash', 'uuid')->get();
+            return Image::ownedOrShared($user_id)->select('image_hash', 'uuid')->get();
         });
 
         $hits = [];

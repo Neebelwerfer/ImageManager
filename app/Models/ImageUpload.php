@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Upload\UploadErrors;
+use App\Support\Enums\ImageUploadStates;
 use App\Support\Enums\UploadStates;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ class ImageUpload extends Model
     protected $fillable = [
         'uuid',
         'extension',
+        'upload_ulid',
         'user_id',
         'hash'
     ];
@@ -36,9 +38,19 @@ class ImageUpload extends Model
         return 'temp/' . $this->uuid;
     }
 
+    public function thumbnailPath() : string
+    {
+        return 'temp/' . $this->uuid . '.thumbnail';
+    }
+
     public function fullPath() : string
     {
         return Storage::disk('local')->path($this->path());
+    }
+
+    public function fullThumbnailPath() : string
+    {
+        return Storage::disk('local')->path($this->thumbnailPath());
     }
 
     public function prunable()
@@ -51,16 +63,17 @@ class ImageUpload extends Model
         Storage::disk('local')->delete($this->path());
     }
 
-    public function setState(UploadStates $state)
+    public function setState(ImageUploadStates $state)
     {
         $this->state = $state->value;
         $this->save();
-        Broadcast::on('upload.' . $this->uuid)->as('stateUpdated')->with(['state' => $state])->send();
+        //Broadcast::on('upload.' . $this->uuid)->as('stateUpdated')->with(['state' => $state])->send();
     }
 
     protected static function booted(): void
     {
         static::deleting(function (ImageUpload $imageUpload) {
+            Storage::disk('local')->delete($imageUpload->thumbnailPath());
             Storage::disk('local')->delete($imageUpload->path());
         });
     }}

@@ -3,39 +3,27 @@
 namespace App\Livewire\Upload;
 
 use App\DTO\ImageTraitDTO;
-use App\Jobs\Upload\CheckForDuplicates;
-use App\Jobs\Upload\ProcessImage;
-use App\Jobs\Upload\ScanForDuplicates;
-use App\Livewire\Upload;
 use App\Models\Album;
 use App\Models\ImageCategory;
 use App\Models\ImageUpload;
 use App\Models\Tags;
 use App\Models\Traits;
-use App\Models\User;
-use App\Services\ImageService;
 use App\Services\TagService;
-use App\Support\Enums\UploadState;
-use App\Support\Enums\UploadStates;
-use App\Support\Traits\AddedTrait;
+use App\Support\Enums\ImageUploadStates;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
-use Illuminate\Support\Str;
-use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.app')]
-class ProcessUpload extends Component
+class ProcessImage extends Component
 {
     public ImageUpload $imageUpload;
-
-    public $state = "waiting";
 
     public $category;
     public $tags = [];
@@ -43,21 +31,8 @@ class ProcessUpload extends Component
     public $albums = [];
     public $hash;
 
-    #[On('echo:upload.{imageUpload.uuid},.stateUpdated')]
-    public function stateUpdated($data)
-    {
-        $this->state = $data['state'];
-
-        if($data['state'] === UploadStates::FoundDuplicates->value)
-        {
-            unset($this->duplicates);
-        }
-    }
-
-    public function process() {
-        $this->state = "processing";
-        ProcessImage::dispatchAfterResponse(Auth::user(), $this->imageUpload);
-    }
+    public $error = false;
+    public $state = "waiting";
 
     #[On('categorySelected')]
     public function categorySelected($category)
@@ -88,12 +63,24 @@ class ProcessUpload extends Component
         $this->tags[$id] = ['tag' => Tags::find($id), 'personal' => $personal];
     }
 
-    public function submit()
+    #[Computed()]
+    public function ImageMetadata()
     {
-        if($this->imageUpload->state !== "waiting")
-            return;
+        if($this->imageUpload == null) return null;
+
+        return Cache::remember('imageUpload-'.$this->imageUpload->uuid, 3600, function () {
 
 
+            $data = json_decode($this->imageUpload->data, true);
+            $data['extension'] = Str::upper($this->imageUpload->extension);
+            $data['size'] = number_format(Storage::disk('local')->size($this->imageUpload->path()) / 1024 / 1024, 2);
+
+            return $data;
+        });
+    }
+
+    public function save()
+    {
         $tags = [];
         foreach ($this->tags as $id => $data)
         {
@@ -116,20 +103,7 @@ class ProcessUpload extends Component
 
         $this->imageUpload->data = json_encode($data);
         $this->imageUpload->save();
-        $this->state = "scanning";
-        ScanForDuplicates::dispatchAfterResponse(Auth::user(), $this->imageUpload);
     }
-
-    public function removeTag($tagID)
-    {
-        unset($this->tags[$tagID]);
-    }
-
-    #[On('traitUpdated')]
-    public function traitUpdated($id, $value) {
-        $this->traits[$id]->setValue($value);
-    }
-
 
     public function setupTraits() {
         $traits = Traits::owned(Auth::user()->id)->get();
@@ -137,55 +111,6 @@ class ProcessUpload extends Component
             $at = new ImageTraitDTO($trait, Auth::user()->id, $trait->default);
             $this->traits[$trait->id] = $at;
         }
-    }
-
-    public function retry()
-    {
-        $this->imageUpload->state = "waiting";
-        $this->imageUpload->save();
-        $this->state = $this->imageUpload->state;
-        $this->SetupData();
-
-    }
-
-    public function cancel() {
-        $this->imageUpload->delete();
-        return $this->redirectRoute('upload', navigate: true);
-    }
-
-    public function navigate($toImage = false)
-    {
-        if($toImage)
-        {
-            return $this->redirectRoute('image.show', ['imageUuid' => $this->imageUpload->uuid]);
-        }
-        return $this->redirectRoute('upload', navigate:true);
-    }
-
-    #[Computed()]
-    public function duplicates()
-    {
-        return json_decode($this->imageUpload->duplicates);
-    }
-
-    #[Computed()]
-    public function ImageMetadata()
-    {
-        if($this->imageUpload == null) return null;
-        $cache = Cache::get('image-upload-'.$this->imageUpload->uuid);
-        if($cache === null)
-        {
-            $data = [];
-            $decryptedImage = Crypt::decrypt(file_get_contents($this->imageUpload->fullPath()), false);
-            $img = ImageManager::gd()->read($decryptedImage);
-
-            $data['dimensions'] = ['height' => $img->size()->height(), 'width' => $img->size()->width()];
-            $data['extension'] = Str::upper($this->imageUpload->extension);
-            $data['size'] = number_format(Storage::disk('local')->size($this->imageUpload->path()) / 1024 / 1024, 2);
-            Cache::set('image-upload-'.$this->imageUpload->uuid, $data, now()->addHour());
-            return $data;
-        }
-        return $cache;
     }
 
     public function SetupData()
@@ -226,9 +151,23 @@ class ProcessUpload extends Component
         }
     }
 
-    public function boot()
+    #[Computed()]
+    public function duplicates()
     {
+        return json_decode($this->imageUpload->duplicates);
+    }
 
+    public function removeImage()
+    {
+        $this->imageUpload->delete();
+        $this->error = true;
+    }
+
+    public function accept()
+    {
+        $this->imageUpload->setState(ImageUploadStates::Waiting);
+        $this->state = ImageUploadStates::Waiting->value;
+        $this->dispatch('imageUploadUpdated', ['uuid' => $this->imageUpload->uuid]);
     }
 
     public function mount($uuid)
@@ -237,18 +176,19 @@ class ProcessUpload extends Component
 
         if($res === null || $res->user_id != Auth::user()->id)
         {
-            return $this->redirectRoute('upload', navigate: true);
+            return $this->error = true;
         }
 
         $this->imageUpload = $res;
         $this->state = $res->state;
 
-       if($this->state === "waiting")
+        if($this->state == "waiting"){
             $this->SetupData();
+        }
     }
 
     public function render()
     {
-        return view('livewire.upload.process-upload');
+        return view('livewire.upload.process-image');
     }
 }

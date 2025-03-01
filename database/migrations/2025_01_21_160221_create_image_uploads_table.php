@@ -11,11 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('uploads', function (Blueprint $table) {
+            $table->ulid()->primary();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->enum('state', ['uploading', 'waiting', 'processing', 'done'])->default('uploading');
+            $table->string('active_upload_uuid')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('image_uploads', function (Blueprint $table) {
             $table->uuid()->primary();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUlid('upload_ulid')->constrained('uploads', 'ulid')->cascadeOnDelete();
             $table->string('extension');
-            $table->enum('state', ['waiting', 'scanning', 'foundDuplicates', 'processing', 'error', 'done'])->default('waiting');
+            $table->enum('state', ['waiting', 'foundDuplicates', 'processing', 'error', 'done'])->default('waiting');
             $table->text('hash');
             $table->json('duplicates')->nullable();
             $table->json('data')->nullable();
@@ -27,6 +36,7 @@ return new class extends Migration
             $table->foreignUuid('image_upload_uuid')->constrained('image_uploads', 'uuid')->cascadeOnDelete();
             $table->text('message')->default('');
         });
+
     }
 
     /**
@@ -35,5 +45,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('image_uploads');
+        Schema::dropIfExists('upload_errors');
+        Schema::dropIfExists('uploads');
     }
 };

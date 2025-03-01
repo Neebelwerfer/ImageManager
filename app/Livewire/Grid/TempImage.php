@@ -6,7 +6,7 @@ use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
 #[Lazy(isolate: false)]
-class Image extends Component
+class TempImage extends Component
 {
     public $image;
 
@@ -28,7 +28,7 @@ class Image extends Component
     {
         return <<<'HTML'
         <div>
-            <img class="object-scale-down px-1 mt-1" style="width: 255px; height: 290px;" src="{{ url('thumbnail/'.$image->uuid) }}">
+            <img class="object-scale-down px-1" style="width: 190px; height: 215px;" src="{{ url('temp/'.$image->uuid) }}">
         </div>
         HTML;
     }

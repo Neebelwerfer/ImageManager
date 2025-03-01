@@ -4,37 +4,27 @@
     </h2>
 </x-slot>
 
-<div class="relative flex flex-row h-full">
 
-    <div class="flex justify-center w-full"
-        x-on:livewire-upload-finish="$wire.onUploadFinished">
+<div class="relative flex flex-row h-full" x-data="upload('{{ route('media.upload') }}')">
+    <div class="flex justify-center w-full">
         <div>
             <div wire:loading wire:target="image">
                 Uploading...
                 <x-spinning-loader />
             </div>
             <div class="flex flex-col">
-                <div class="mb-3">
-                    <input type="file" wire:model='image' name="image" placeholder="Choose image" id="imageInput">
+                <div class="mb-3" x-show="!uploading">
+                    <input type="file" accept="image/*" name="images" x-on:change="handleUpload" placeholder="Choose images" id="imageInput" multiple>
                     @error('image')
                         <div class="mt-1 mb-1 text-red-600 alert">{{ $message }}</div>
                     @enderror
                 </div>
+
+                <div class="flex flex-col" x-show="uploading" x-cloak>
+                    <h1 class="mb-2 text-6xl font-bold underline">Upload In progress: <span id="percentage">0%</span></h1>
+                    <progress max="100" id="progress"></progress>
+                </div>
             </div>
         </div>
     </div>
-
-    @if (session('status'))
-        <x-status-modal>
-            <x-slot name="header">
-                Status
-            </x-slot>
-            <div class="@if (session('error')) text-red-500 @endif">
-                {{ session('status') }}
-                @if (session('error'))
-                    {{ session('error_message') }}
-                @endif
-            </div>
-        </x-status-modal>
-    @endif
 </div>
