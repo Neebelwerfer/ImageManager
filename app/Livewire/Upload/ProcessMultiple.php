@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Upload;
 
+use App\Jobs\Upload\CleanupUpload;
 use App\Jobs\Upload\ProcessMultipleImages;
 use App\Models\ImageUpload;
 use App\Models\Upload;
@@ -24,6 +25,8 @@ class ProcessMultiple extends Component
     public $state = "waiting";
     public $selectedUUID = "";
     public $count = 0;
+    public $selectedImages = [];
+    public $editMode = false;
 
     #[On('echo:upload.{upload.user_id},.stateUpdated')]
     public function stateUpdated($data)
@@ -59,7 +62,13 @@ class ProcessMultiple extends Component
     #[Computed(persist: true, seconds: 600)]
     public function images()
     {
-        return ImageUpload::where('upload_ulid', $this->upload->ulid)->whereNot('state', 'done')->where('user_id', Auth::user()->id)->orderBy('uuid', 'desc')->get()->values();
+        $images = ImageUpload::where('upload_ulid', $this->upload->ulid)->whereNot('state', 'done')->where('user_id', Auth::user()->id)->orderBy('uuid', 'desc')->get()->values();
+        $this->selectedImages = [];
+        foreach($images as $image)
+        {
+            $this->selectedImages[$image->uuid] = false;
+        }
+        return $images;
     }
 
     public function mount($ulid)
@@ -98,13 +107,33 @@ class ProcessMultiple extends Component
         ProcessMultipleImages::dispatch(Auth::user(), $this->upload);
     }
 
+    public function deleteSelected()
+    {
+        $countNotDeleted = 0;
+        foreach($this->selectedImages as $uuid => $selected)
+        {
+            if(!$selected) continue;
+
+            $image = ImageUpload::find($uuid);
+            if($image->user_id === Auth::user()->id)
+            {
+                $image->delete();
+                unset($this->selectedImages[$uuid]);
+            }
+            else
+            {
+                $countNotDeleted++;
+            }
+        }
+        if($countNotDeleted > 0)
+        {
+            $this->js("alert(" . $countNotDeleted . ' images were not deleted');
+        }
+    }
+
     public function uploadCancel()
     {
-        foreach($this->upload->images as $imageUpload)
-        {
-            $imageUpload->delete();
-        }
-        $this->upload->delete();
+        CleanupUpload::dispatch(Auth::user(), $this->upload);
         return $this->redirectRoute('upload', navigate: true);
     }
 
