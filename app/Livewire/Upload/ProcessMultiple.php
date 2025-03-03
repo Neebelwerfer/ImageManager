@@ -10,6 +10,7 @@ use App\Support\Enums\ImageUploadStates;
 use App\Support\Enums\UploadStates;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -111,13 +112,14 @@ class ProcessMultiple extends Component
                 $albums = $data['albums'];
             }
 
+            $size = 0;
             if(isset($data['size']))
             {
                 $size = $data['size'];
             }
             else
             {
-                $size = number_format(Storage::disk('local')->size($image->path()) / 1024 / 1024, 2);
+                Log::error('Could not find size for uploaded file', ['uuid' => $image->uuid]);
             }
 
             $this->images[$count] = [

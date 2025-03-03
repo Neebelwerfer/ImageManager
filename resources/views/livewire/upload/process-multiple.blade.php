@@ -30,39 +30,40 @@
                         <livewire:upload.process-image uuid="{{ $images[$count]['uuid'] }}" wire:key='preview-{{ $count }}' wire:model="images.{{ $count }}"/>
                     @endif
                 </div>
-
-                <button class="p-1 mx-8 mt-4 border rounded btn hover:bg-gray-400 hover:dark:bg-gray-500" type="button" x-on:click="changeSelectMode" :class="$wire.editMode ? 'bg-gray-500' : 'bg-gray-700'">Edit</button>
-                <template x-if="$wire.editMode">
-                    <div class="ml-5">
-                    <x-edit>
-                        <div class="flex flex-col mx-0.5">
-                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Set Category</button>
-                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add Tag</button>
-                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add Album</button>
-                            <button class="p-1 bg-red-700 border rounded border-slate-600 hover:bg-red-400" wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</button>
-                        </div>
-                    </x-edit>
-                    </div>
-                </template>
             @endif
 
             <template x-if="maxValue > 0">
-            <div class="flex justify-center">
-                <div class="grid-flow-col mx-2 mt-2">
-                    <template x-for="(image, index) in images" :key="image.uuid">
-                        <button class="relative transition ease-in-out delay-75 bg-black border shadow-md shadow-black hover:scale-110 "
-                                style="width: 192px; height: 225px"
-                                x-on:click="onClick(index, () => $wire.select(index))"
-                                x-init="$watch('selectedImages[index]', (value) => isSelected = value)"
-                                x-data="{ isSelected: false }"
-                                :class="[(isSelected ? 'bg-blue-800' : 'bg-black'), (image.state == 'foundDuplicate' ? 'border-red-700' : image.isDirty ? 'border-orange-500' : 'border-gray-700')]" >
-                            <div>
-                                <img class="object-scale-down px-1" style="width: 190px; height: 215px;" :src="'{{ url('temp') }}/' + image.uuid">
+                <div class="flex justify-center">
+                    <div class="flex flex-col w-11/12 mx-2 mt-2">
+                        <button class="p-1 border rounded w-fit btn hover:bg-gray-400 hover:dark:bg-gray-500" type="button" x-on:click="changeSelectMode" :class="$wire.editMode ? 'bg-gray-500' : 'bg-gray-700'">Edit</button>
+                        <template x-if="$wire.editMode">
+                            <div class="-ml-2.5">
+                            <x-edit>
+                                <div class="flex flex-col mx-0.5">
+                                    <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Set Category</button>
+                                    <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add Tag</button>
+                                    <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add Album</button>
+                                    <button class="p-1 bg-red-700 border rounded border-slate-600 hover:bg-red-400" wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</button>
+                                </div>
+                            </x-edit>
                             </div>
-                        </button>
-                 </template>
+                        </template>
+                        <div>
+                            <template x-for="(image, index) in images" :key="image.uuid">
+                                <button class="relative transition ease-in-out delay-75 bg-black border shadow-md shadow-black hover:scale-110 "
+                                        style="width: 192px; height: 225px"
+                                        x-on:click="onClick(index, () => $wire.select(index))"
+                                        x-init="$watch('selectedImages[index]', (value) => isSelected = value)"
+                                        x-data="{ isSelected: false }"
+                                        :class="[(isSelected ? 'bg-blue-800' : 'bg-black'), (image.state == 'foundDuplicate' ? 'border-red-700' : image.isDirty ? 'border-orange-500' : 'border-gray-700')]" >
+                                    <div>
+                                        <img loading="lazy" class="object-scale-down px-1" style="width: 190px; height: 215px;" :src="'{{ url('temp') }}/' + image.uuid">
+                                    </div>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
                 </div>
-            </div>
             </template>
         </div>
         @elseif($state == 'done')
