@@ -19,6 +19,13 @@ class AddTag extends ModalComponent
     {
         $this->validate();
 
+        if(str_contains(trim($this->name), ' '))
+        {
+            $this->addError('name', "Tag can't have space in the middle");
+            return;
+        }
+
+
         $tag = $this->tagService->getOrCreate($this->name);
         $this->dispatch('tagSelected', ['id' => $tag->id, 'personal' => $this->personal]);
         $this->closeModal();
