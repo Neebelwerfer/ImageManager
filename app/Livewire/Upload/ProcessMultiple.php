@@ -10,6 +10,7 @@ use App\Support\Enums\ImageUploadStates;
 use App\Support\Enums\UploadStates;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -27,12 +28,12 @@ class ProcessMultiple extends Component
     public Upload $upload;
 
     public $state = "waiting";
-    public $selectedUUID = "";
-    public $count = 0;
     public $selectedImages = [];
     public $editMode = false;
 
+    public $imagesSnapshot = [];
     public $images = [];
+    public $count = 0;
 
     #[On('echo:upload.{upload.user_id},.stateUpdated')]
     public function stateUpdated($data)
@@ -142,7 +143,8 @@ class ProcessMultiple extends Component
                 Log::error('Could not find size for uploaded file', ['uuid' => $image->uuid]);
             }
 
-            $this->images[$count] = [
+
+            $imageData = [
                 'uuid' => $image->uuid,
                 'state' => $image->state,
                 'extension' => $image->extension,
@@ -155,6 +157,10 @@ class ProcessMultiple extends Component
                 'size' => $size,
                 'duplicates' => $duplicates
             ];
+
+            $this->images[$count] = $imageData;
+            $this->imagesSnapshot[$count] = $imageData;
+
             $this->selectedImages[$count] = false;
             $count += 1;
         }
@@ -201,6 +207,7 @@ class ProcessMultiple extends Component
         if($index > -1)
         {
             $this->images[$index]['duplicates'] = [];
+            $this->imagesSnapshot[$index]['duplicates'] = [];
             $imageUpload = ImageUpload::find($image['uuid']);
             $imageUpload->duplicates = json_encode([]);
             $imageUpload->save();
@@ -227,6 +234,8 @@ class ProcessMultiple extends Component
                 $this->count += 1;
 
             array_splice($this->images, $index, 1);
+            array_splice($this->selectedImages, $index, 1);
+            array_splice($this->imagesSnapshot, $index, 1);
 
             dispatch(function () use($uuid) {
                 ImageUpload::find($uuid)->delete();
@@ -256,30 +265,41 @@ class ProcessMultiple extends Component
 
     public function deleteSelected()
     {
-        $countNotDeleted = 0;
-        foreach($this->selectedImages as $count => $selected)
+        $imageToDelete = [];
+        foreach($this->selectedImages as $index => $selected)
         {
             if(!$selected) continue;
 
-            unset($this->images[$count]);
-            // $image = ImageUpload::find($uuid);
-            // if($image->user_id === Auth::user()->id)
-            // {
-            //     $image->delete();
-            //     unset($this->selectedImages[$uuid]);
-            // }
-            // else
-            // {
-            //     $countNotDeleted++;
-            // }
+            $imageToDelete[] = ['index' => $index, 'uuid' => $this->images[$index]['uuid']];
         }
-        if($countNotDeleted > 0)
+
+        foreach($imageToDelete as $toDelete)
         {
-            $this->js("alert(" . $countNotDeleted . ' images were not deleted');
+            unset($this->images[$toDelete['index']]);
+            unset($this->selectedImages[$toDelete['index']]);
+            unset($this->imagesSnapshot[$toDelete['index']]);
         }
+
+        $this->images = array_values($this->images);
+        $this->selectedImages = array_values($this->selectedImages);
+        $this->imagesSnapshot = array_values($this->imagesSnapshot);
+
+        if ($this->count > 0)
+            $this->count -= 1;
+        else
+            $this->count += 1;
+
+
         if(count($this->images) == 0)
         {
             $this->uploadCancel();
+        } else {
+            dispatch(function () use ($imageToDelete) {
+                foreach($imageToDelete as $data)
+                {
+                    ImageUpload::find($data['uuid'])->delete();
+                }
+            })->afterResponse();
         }
     }
 

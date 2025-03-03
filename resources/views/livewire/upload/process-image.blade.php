@@ -38,8 +38,11 @@
                             <div class="absolute flex justify-end w-full gap-2">
                                 <div class="mb-3">
                                     <button
+                                    class="p-1 bg-red-600 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500"
+                                    wire:click="$dispatch('discardChanges', { uuid: '{{ $imageData['uuid'] }}'})" wire:confirm='Are you sure you want to discard changes?' type="button">Discard Changes</button>
+                                    <button
                                         class="p-1 bg-red-600 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500"
-                                        wire:click="$dispatch('imageDeleted', { uuid: '{{ $imageData['uuid'] }}'})" type="button">Remove image</button>
+                                        wire:click="$dispatch('imageDeleted', { uuid: '{{ $imageData['uuid'] }}'})" wire:confirm='Are you sure you want to remove this image?' type="button">Remove image</button>
                                 </div>
                             </div>
                             @csrf
@@ -87,27 +90,6 @@
                                     </template>
                                 </div>
                             </div>
-
-                            {{-- @if(count($traits) > 0)
-                            <div class="flex flex-col w-fit">
-                                <div class="inline-flex gap-4">
-                                    <label for="tags">Traits:</label>
-                                    <div class="mb-3">
-                                        <input type="hidden" class="text-black" wire:model="traits"></input>
-
-                                        @error('tags')
-                                            <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="flex flex-col mx-5 mb-4 overflow-scroll">
-                                    @foreach ($traits as $id => $trait)
-                                        <livewire:trait.show :trait="$trait" wire:key='trait-{{ $id }}' />
-                                    @endforeach
-                                </div>
-                            </div>
-                            @endif --}}
-
                         </form>
                     </div>
                 </template>

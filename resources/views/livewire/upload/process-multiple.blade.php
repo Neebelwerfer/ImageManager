@@ -7,49 +7,45 @@
 <div x-data="multiSelect($wire.entangle('selectedImages'))">
     <div class="w-full h-full" x-data="{state: $wire.entangle('state')}">
         <template x-if="state == 'waiting'">
-            <div x-data="{
-                images: $wire.entangle('images'),
-                count: $wire.entangle('count'),
-                maxValue: '{{ count($this->images) }}'
-                }">
+            <div x-init="listen()" x-data="manageImages($wire.entangle('images'), $wire.entangle('count'), $wire.entangle('imagesSnapshot'))">
                 <div class="flex flex-row justify-center w-full gap-5 mt-2">
                     <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='finalizeUpload'>Finalize Upload</button>
-                    <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='saveImageData'>Save Data</button>
+                    <div class="inline-flex gap-2">
+                    <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='saveImageData'>Save Changes</button>
+                    <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click='discardAllChanges'>Discard Changes</button>
+                    </div>
                     <button class="p-1 bg-red-700 border rounded dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='uploadCancel'>Cancel Upload</button>
                 </div>
-                @if($count != -1)
                     <div class="flex flex-col w-full" id="process">
                         <div class="flex justify-center">
                             <div class="flex flex-row justify-between w-2/4">
                                 <button :disabled="count === 0" id="previous" :class="count === 0 ? 'bg-gray-400 dark:bg-gray-500' : 'bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500'" class="p-1 border rounded" wire:click='previous'>Previous</button>
                                 <p class="self-center">{{ $count+1 }} of {{ count($images) }}</p>
-                                <button :disabled="count === maxValue - 1" :class="count === maxValue - 1 ? 'bg-gray-400 dark:bg-gray-500' : 'bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500'" id="next" class="p-1 border rounded " wire:click='next'>Next</button>
+                                <button :disabled="count === maxValue() - 1" :class="count === maxValue() - 1 ? 'bg-gray-400 dark:bg-gray-500' : 'bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500'" id="next" class="p-1 border rounded " wire:click='next'>Next</button>
                             </div>
                         </div>
                         @if(count($images) > 0)
                             <livewire:upload.process-image uuid="{{ $images[$count]['uuid'] }}" wire:key='preview-{{ $count }}' wire:model="images.{{ $count }}"/>
                         @endif
                     </div>
-                @endif
-
-                <template x-if="maxValue > 0">
+                <template x-if="maxValue() > 0">
                     <div class="flex justify-center">
                         <div class="flex flex-col w-11/12 mx-2 mt-2">
                             <button class="p-1 border rounded w-fit btn hover:bg-gray-400 hover:dark:bg-gray-500" type="button" x-on:click="changeSelectMode" :class="$wire.editMode ? 'bg-gray-500' : 'bg-gray-700'">Edit</button>
                             <template x-if="$wire.editMode">
                                 <div class="-ml-2.5">
-                                <x-edit>
-                                    <div class="flex flex-col mx-0.5">
-                                        <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Set Category</button>
-                                        <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add Tag</button>
-                                        <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add Album</button>
-                                        <button class="p-1 bg-red-700 border rounded border-slate-600 hover:bg-red-400" wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</button>
-                                    </div>
-                                </x-edit>
+                                    <x-edit>
+                                        <div class="flex flex-col mx-0.5">
+                                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Set Category</button>
+                                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add Tag</button>
+                                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add Album</button>
+                                            <button class="p-1 bg-red-700 border rounded border-slate-600 hover:bg-red-400" wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</button>
+                                        </div>
+                                    </x-edit>
                                 </div>
                             </template>
                             <div>
-                                <template x-for="(image, index) in images" :key="image.uuid">
+                                <template x-for="(image, index) in images" :key="index">
                                     <button class="relative transition ease-in-out delay-75 bg-black border shadow-md shadow-black hover:scale-110 "
                                             style="width: 192px; height: 225px"
                                             x-on:click="onClick(index, () => $wire.select(index))"
@@ -105,3 +101,47 @@
         </template>
     </div>
 </div>
+
+<script>
+    function manageImages(images, count, snapshot) {
+        return {
+            images: images,
+            count: count,
+            snapshot: snapshot,
+
+            maxValue() {
+                return this.images.length
+            },
+            discardAllChanges() {
+                for(const index in this.images)
+                {
+                    const image = this.images[index];
+                    if(image['isDirty'])
+                    {
+                        this.images[index] = this.snapshot[index];
+                    }
+                }
+            },
+
+            discardChanges(uuid)
+            {
+                for(const index in this.images)
+                {
+                    const image = this.images[index];
+                    console.log(uuid === image['uuid']);
+                    if((image['uuid'] === uuid) && image['isDirty'])
+                    {
+                        this.images[index] = this.snapshot[index];
+                        break;
+                    }
+                }
+            },
+            listen()
+            {
+                document.addEventListener('discardChanges', (event) => {
+                    this.discardChanges(event.detail.uuid);
+                })
+            }
+        }
+    }
+</script>
