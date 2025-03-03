@@ -10,14 +10,12 @@ use App\Models\Tags;
 use App\Models\Traits;
 use App\Services\TagService;
 use App\Support\Enums\ImageUploadStates;
-use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Modelable;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -25,12 +23,10 @@ class ProcessImage extends Component
 {
     public ImageUpload $imageUpload;
 
-    public $category;
-    public $tags = [];
-    public $traits = [];
-    public $albums = [];
-    public $hash;
+    #[Modelable]
+    public $imageData = [];
 
+    public $traits = [];
     public $error = false;
     public $state = "waiting";
 
@@ -38,17 +34,24 @@ class ProcessImage extends Component
     public function categorySelected($category)
     {
         if($category == -1) {
-            $this->category = null;
+            $this->imageData['category'] = [];
+            $this->imageData['isDirty'] = true;
             return;
         }
-        $this->category = ImageCategory::find($category);
+        $category = ImageCategory::find($category);
+        $this->imageData['category'] = ['name' => $category->name, 'id' => $category->id];
+        $this->imageData['isDirty'] = true;
     }
 
 
     #[On('albumSelected')]
     public function albumSelected($albumId)
     {
-        $this->albums[$albumId] = Album::ownedOrShared(Auth::user()->id)->find($albumId);
+        if(isset($this->imageData['albums'][$albumId])) return;
+
+        $album = Album::ownedOrShared(Auth::user()->id)->find($albumId);
+        $this->imageData['albums'][$albumId] = ['name' => $album->name, 'id' => $albumId];
+        $this->imageData['isDirty'] = true;
     }
 
     #[On('tagSelected')]
@@ -56,53 +59,13 @@ class ProcessImage extends Component
     {
         $id = $tagData['id'];
         $personal = $tagData['personal'];
-        if (isset($this->tags[$id])) {
+        if (isset($this->imageData['tags'][$id])) {
             return;
         }
 
-        $this->tags[$id] = ['tag' => Tags::find($id), 'personal' => $personal];
-    }
-
-    #[Computed()]
-    public function ImageMetadata()
-    {
-        if($this->imageUpload == null) return null;
-
-        return Cache::remember('imageUpload-'.$this->imageUpload->uuid, 3600, function () {
-
-
-            $data = json_decode($this->imageUpload->data, true);
-            $data['extension'] = Str::upper($this->imageUpload->extension);
-            $data['size'] = number_format(Storage::disk('local')->size($this->imageUpload->path()) / 1024 / 1024, 2);
-
-            return $data;
-        });
-    }
-
-    public function save()
-    {
-        $tags = [];
-        foreach ($this->tags as $id => $data)
-        {
-            $tags[$data['tag']->name] = $data['personal'];
-        }
-
-        $traits = [];
-        foreach ($this->traits as $id => $imageTraitDTO)
-        {
-            $traits[$id] = $imageTraitDTO->getValue();
-        }
-
-        $data = [
-            'category' => $this->category->id ?? null,
-            'tags' => $tags,
-            'traits' => $traits,
-            'dimensions' => $this->ImageMetadata['dimensions'],
-            'albums' => array_keys($this->albums)
-        ];
-
-        $this->imageUpload->data = json_encode($data);
-        $this->imageUpload->save();
+        $tag = Tags::find($id);
+        $this->imageData['tags'][$id] = ['name' => $tag->name, 'personal' => $personal, 'id' => $id];
+        $this->imageData['isDirty'] = true;
     }
 
     public function setupTraits() {
@@ -111,50 +74,6 @@ class ProcessImage extends Component
             $at = new ImageTraitDTO($trait, Auth::user()->id, $trait->default);
             $this->traits[$trait->id] = $at;
         }
-    }
-
-    public function SetupData()
-    {
-        $this->setupTraits();
-
-        $data = json_decode($this->imageUpload->data, true);
-        if(isset($data) && !empty($data))
-        {
-            if(isset($data["category"]) && is_numeric($data['category']))
-            {
-                $this->category = ImageCategory::ownedOrShared(Auth::user()->id)->find($data['category']);
-            }
-
-            if(isset($data["tags"]))
-            {
-                foreach($data['tags'] as $name => $personal)
-                {
-                    $this->tagSelected(['id' => app(TagService::class)->getOrCreate($name)->id, 'personal' => $personal]);
-                }
-            }
-
-            if(isset($data['traits']))
-            {
-                foreach($data['traits'] as $id => $value)
-                {
-                    $this->traits[$id]->setValue($value);
-                }
-            }
-
-            if(isset($data['albums']))
-            {
-                foreach ($data['albums'] as $albumId)
-                {
-                    $this->albumSelected($albumId);
-                }
-            }
-        }
-    }
-
-    #[Computed()]
-    public function duplicates()
-    {
-        return json_decode($this->imageUpload->duplicates);
     }
 
     public function removeImage()
@@ -181,10 +100,6 @@ class ProcessImage extends Component
 
         $this->imageUpload = $res;
         $this->state = $res->state;
-
-        if($this->state == "waiting"){
-            $this->SetupData();
-        }
     }
 
     public function render()

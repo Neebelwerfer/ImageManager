@@ -9,6 +9,8 @@ use App\Models\Upload;
 use App\Support\Enums\ImageUploadStates;
 use App\Support\Enums\UploadStates;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -28,16 +30,14 @@ class ProcessMultiple extends Component
     public $selectedImages = [];
     public $editMode = false;
 
+    public $images = [];
+
     #[On('echo:upload.{upload.user_id},.stateUpdated')]
     public function stateUpdated($data)
     {
         if($data['ulid'] != $this->upload->ulid) return;
 
         $this->state = $data['state'];
-        if($this->state === "waiting")
-        {
-            $this->dispatch('reloadPage');
-        }
     }
 
     public function next(){
@@ -59,16 +59,83 @@ class ProcessMultiple extends Component
         $this->js('document.getElementById("process").scrollIntoView();');
     }
 
-    #[Computed(persist: true, seconds: 600)]
+    public function saveImageData()
+    {
+        DB::beginTransaction();
+        foreach ($this->images as $key => $image)
+        {
+            if(!$image['isDirty']) continue;
+
+            $imageUpload = ImageUpload::find($image['uuid']);
+            $data = [];
+
+            $data['category'] = $image['category'];
+            $data['albums'] = $image['albums'];
+            $data['tags'] = $image['tags'];
+            $data['dimensions'] = $image['dimensions'];
+            $data['size'] = $image['size'];
+
+            $this->images[$key]['isDirty'] = false;
+            $imageUpload->data = json_encode($data);
+            $imageUpload->save();
+        }
+        DB::commit();
+        $this->js("alert('Saved image data')");
+    }
+
     public function images()
     {
-        $images = ImageUpload::where('upload_ulid', $this->upload->ulid)->whereNot('state', 'done')->where('user_id', Auth::user()->id)->orderBy('uuid', 'desc')->get()->values();
+        $images = ImageUpload::where('upload_ulid', $this->upload->ulid)->whereNot('state', 'done')->where('user_id', Auth::user()->id)->orderBy('uuid', 'desc')->get();
         $this->selectedImages = [];
+
+        $count = 0;
         foreach($images as $image)
         {
-            $this->selectedImages[$image->uuid] = false;
+            $duplicates = json_decode($image->duplicates);
+            $data = json_decode($image->data, true);
+
+            $category = [];
+            $tags = [];
+            $albums = [];
+
+            if(isset($data['category']))
+            {
+                $category = $data['category'];
+            }
+            if(isset($data['tags']))
+            {
+                $tags = $data['tags'];
+            }
+            if(isset($data['albums']))
+            {
+                $albums = $data['albums'];
+            }
+
+            if(isset($data['size']))
+            {
+                $size = $data['size'];
+            }
+            else
+            {
+                $size = number_format(Storage::disk('local')->size($image->path()) / 1024 / 1024, 2);
+            }
+
+            $this->images[$count] = [
+                'uuid' => $image->uuid,
+                'state' => $image->state,
+                'extension' => $image->extension,
+                'category' => $category,
+                'tags' => $tags,
+                'albums' => $albums,
+                'traits' => [],
+                'isDirty' => false,
+                'dimensions' => $data['dimensions'],
+                'size' => $size,
+                'duplicates' => $duplicates
+            ];
+            $this->selectedImages[$count] = false;
+            $count += 1;
         }
-        return $images;
     }
 
     public function mount($ulid)
@@ -83,6 +150,10 @@ class ProcessMultiple extends Component
         $this->upload = $res;
 
         $this->state = $this->upload->state;
+        if($this->state === "waiting")
+        {
+            $this->images();
+        }
     }
 
     #[On('imageUploadUpdated')]
@@ -110,20 +181,21 @@ class ProcessMultiple extends Component
     public function deleteSelected()
     {
         $countNotDeleted = 0;
-        foreach($this->selectedImages as $uuid => $selected)
+        foreach($this->selectedImages as $count => $selected)
         {
             if(!$selected) continue;
 
-            $image = ImageUpload::find($uuid);
-            if($image->user_id === Auth::user()->id)
-            {
-                $image->delete();
-                unset($this->selectedImages[$uuid]);
-            }
-            else
-            {
-                $countNotDeleted++;
-            }
+            unset($this->imagesTest[$count]);
+            // $image = ImageUpload::find($uuid);
+            // if($image->user_id === Auth::user()->id)
+            // {
+            //     $image->delete();
+            //     unset($this->selectedImages[$uuid]);
+            // }
+            // else
+            // {
+            //     $countNotDeleted++;
+            // }
         }
         if($countNotDeleted > 0)
         {

@@ -151,11 +151,12 @@ class UploadController extends Controller
         $content = file_get_contents($path);
         $thumbnail = ImageManager::imagick()->read($content);
         $model->data = json_encode([
-            'category' => null,
+            'category' => [],
             'tags' => [],
             'traits' => [],
             'albums' => [],
-            'dimensions' => ['width' => $thumbnail->width(), 'height' => $thumbnail->height()]
+            'dimensions' => ['width' => $thumbnail->width(), 'height' => $thumbnail->height()],
+            'size' => number_format(filesize($path) / 1024 / 1024, 2)
         ]);
         $model->save();
 

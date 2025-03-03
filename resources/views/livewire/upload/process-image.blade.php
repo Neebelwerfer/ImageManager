@@ -1,4 +1,15 @@
-<div class="flex flex-col mx-5 mt-5">
+<div class="flex flex-col mx-5 mt-5" x-data="{
+        imageData: $wire.entangle('imageData'),
+
+        removeID(type, id)
+        {
+            if(id in this.imageData[type])
+            {
+                delete this.imageData[type][id];
+                this.imageData['isDirty'] = true;
+            }
+        },
+    }">
     <div class="flex justify-center flex-shrink-0 w-full h-full">
         <x-section class="w-3/5" style="height: 37rem">
             @if(!$error)
@@ -9,14 +20,13 @@
                                 <div class="inline-flex justify-center gap-4">
                                     <label for="category" class="flex flex-col form-label">
                                             <p>Category:</p>
-                                            <h2 class="text-xl font-semibold leading-tight text-gray-800 underline dark:text-gray-500">
-                                                @if (isset($category))
-                                                {{ $category->name }}
-                                                @endif
-                                            </h2>
+                                            <template x-if="imageData.category.name != null">
+                                                <h2 class="text-xl font-semibold leading-tight text-gray-800 underline dark:text-gray-500" x-text="imageData.category.name">
+                                                </h2>
+                                            </template>
                                     </label>
                                     <div class="mb-3">
-                                        <input type="hidden" class="text-black form-control" wire:model="category"></textarea>
+                                        <input type="hidden" class="text-black form-control" wire:model="imageData.category"></textarea>
 
                                         @error('category')
                                             <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
@@ -30,12 +40,19 @@
                         </div>
 
                         <form class="relative content-between w-full h-full ml-2 space-y-4" wire:submit="save">
+                            <div class="absolute flex justify-end w-full gap-2">
+                                <div class="mb-3">
+                                    <button
+                                        class="p-1 bg-red-600 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500"
+                                        wire:click='removeImage' type="button">Remove image</button>
+                                </div>
+                            </div>
                             @csrf
                             <div class="w-full border-b border-slate-500">
                                 <ul>
-                                    <li>Image Dimensions: {{ $this->ImageMetadata['dimensions']['height'] }} / {{ $this->ImageMetadata['dimensions']['width'] }}</li>
-                                    <li>Image Size: {{ $this->ImageMetadata['size'] }} mb</li>
-                                    <li>Image Type: {{ $this->ImageMetadata['extension'] }}</li>
+                                    <li class="inline-flex">Image Dimensions: <p class="ml-2" x-text="imageData.dimensions.height + ' / ' + imageData.dimensions.width"></p></li>
+                                    <li class="flex">Image Size: <p class="ml-2" x-text="imageData.size"></p> mb</li>
+                                    <li class="flex">Image Type: <p class="ml-2" x-text="imageData.extension"></p></li>
                                 </ul>
                             </div>
 
@@ -43,7 +60,7 @@
                                 <div class="inline-flex gap-4">
                                     <label for="tags">Tags:</label>
                                     <div class="mb-3">
-                                        <input type="hidden" class="text-black form-control" wire:model="tags"></textarea>
+                                        <input type="hidden" class="text-black form-control" wire:model="imageData.tags"></textarea>
 
                                         @error('tags')
                                             <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
@@ -52,24 +69,21 @@
                                             wire:click="$dispatch('openModal', {component: 'modal.image.add-tag'})">+</button>
                                     </div>
                                 </div>
-                                @if (count($tags) > 0)
                                 <div class="flex flex-col mx-5 mb-4">
-                                    @foreach ($tags as $tagData)
+                                    <template x-for="tag in imageData['tags']">
                                         <div class="inline-flex justify-between w-20 gap-2 border rounded">
-                                            <h1>{{ $tagData['tag']->name }}</h1>
-                                            <button class="w-5 border border-red-600 rounded hover:bg-red-400 bg-red-600/80 h-fit" type="button"
-                                                    wire:click='removeTag({{ $tagData['tag']->id }})'>X</button>
+                                            <h1 x-text="tag.name"></h1>
+                                            <button class="w-5 border border-red-600 rounded hover:bg-red-400 bg-red-600/80 h-fit" type="button" x-on:click="removeID('tags', tag.id)">X</button>
                                         </div>
-                                    @endforeach
+                                    </template>
                                 </div>
-                                @endif
                             </div>
 
                             <div class="flex flex-col">
                                 <div class="inline-flex gap-4">
                                     <label for="tags">Albums:</label>
                                     <div class="mb-3">
-                                        <input type="hidden" class="text-black" wire:model="albums"></textarea>
+                                        <input type="hidden" class="text-black" wire:model="imageData.albums"></textarea>
 
                                         @error('albums')
                                             <div class="mt-1 mb-1 text-red-600">{{ $message }}</div>
@@ -78,20 +92,18 @@
                                             wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type: 'album'}})">+</button>
                                     </div>
                                 </div>
-                                @if (count($albums) > 0)
                                 <div class="flex flex-col mx-5 mb-4">
-                                    @foreach ($albums as $album)
+                                    <template x-for="album in imageData['albums']">
                                         <div class="inline-flex justify-between w-20 gap-2 border rounded">
-                                            <h1>{{ $album->name }}</h1>
+                                            <h1 x-text="album.name"></h1>
                                             <button class="w-5 border border-red-600 rounded hover:bg-red-400 bg-red-600/80 h-fit" type="button"
-                                                    wire:click='removeAlbum({{ $album->id }})'>X</button>
+                                                    x-on:click="removeID('albums', album.id)">X</button>
                                         </div>
-                                    @endforeach
+                                    </template>
                                 </div>
-                                @endif
                             </div>
 
-                            @if(count($traits) > 0)
+                            {{-- @if(count($traits) > 0)
                             <div class="flex flex-col w-fit">
                                 <div class="inline-flex gap-4">
                                     <label for="tags">Traits:</label>
@@ -109,21 +121,8 @@
                                     @endforeach
                                 </div>
                             </div>
-                            @endif
+                            @endif --}}
 
-                            <div class="absolute bottom-0 flex flex-row justify-between w-full gap-2">
-                                <div class="mb-3">
-                                <button type="submit"
-                                    class="p-1 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
-                                    id="submit">Save</button>
-                                </div>
-
-                                <div class="mb-3">
-                                    <button
-                                        class="p-1 bg-red-600 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500"
-                                        wire:click='removeImage' type="button">Remove image</button>
-                                </div>
-                            </div>
                         </form>
                     </div>
                 @elseif ($state == "foundDuplicates")
