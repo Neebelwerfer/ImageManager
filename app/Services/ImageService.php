@@ -102,10 +102,7 @@ class ImageService
 
     public function compareHashes(int $user_id, $newHash, $threshold = 95) : array
     {
-        $images = Cache::remember('image-hashes.user-'. $user_id, 3600, function () use ($user_id)
-        {
-            return Image::ownedOrShared($user_id)->select('image_hash', 'uuid')->get();
-        });
+        $images = Image::ownedOrShared($user_id)->select('image_hash', 'uuid')->get();
 
         $hits = [];
 

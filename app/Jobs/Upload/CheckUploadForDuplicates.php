@@ -55,6 +55,7 @@ class CheckUploadForDuplicates implements ShouldQueue, ShouldQueueAfterCommit, S
                 if(count($res) > 0)
                 {
                     $imageUpload->duplicates = json_encode($res);
+                    $imageUpload->save();
                 }
             }
         } catch (\Throwable $th) {

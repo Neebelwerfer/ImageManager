@@ -116,8 +116,9 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
                     $imageScaled->scaleDown(1920, 1080);
                 }
 
-                $imageService->storeImageAndThumbnail($imageScaled, $path, $name);
 
+                $imageService->storeImageAndThumbnail($imageScaled, $path, $name);
+                $imageUpload->delete();
                 DB::commit();
             }
             catch(Throwable $e)
