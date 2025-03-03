@@ -66,25 +66,39 @@ class ProcessMultiple extends Component
         $this->js('document.getElementById("process").scrollIntoView();');
     }
 
+    private function getProcessedData($index)
+    {
+        $image = $this->images[$index];
+        $data = [];
+
+        $data['category'] = $image['category'];
+        $data['albums'] = $image['albums'];
+        $data['tags'] = $image['tags'];
+        $data['dimensions'] = $image['dimensions'];
+        $data['size'] = $image['size'];
+
+        return $data;
+    }
+
+    private function saveData($index)
+    {
+        $image = $this->images[$index];
+
+        $imageUpload = ImageUpload::find($image['uuid']);
+        $data = $this->getProcessedData($index);
+
+        $this->images[$index]['isDirty'] = false;
+        $imageUpload->data = json_encode($data);
+        $imageUpload->save();
+    }
+
     public function saveImageData()
     {
         DB::beginTransaction();
         foreach ($this->images as $key => $image)
         {
             if(!$image['isDirty']) continue;
-
-            $imageUpload = ImageUpload::find($image['uuid']);
-            $data = [];
-
-            $data['category'] = $image['category'];
-            $data['albums'] = $image['albums'];
-            $data['tags'] = $image['tags'];
-            $data['dimensions'] = $image['dimensions'];
-            $data['size'] = $image['size'];
-
-            $this->images[$key]['isDirty'] = false;
-            $imageUpload->data = json_encode($data);
-            $imageUpload->save();
+            $this->saveData($key);
         }
         DB::commit();
         $this->js("alert('Saved image data')");
@@ -92,7 +106,7 @@ class ProcessMultiple extends Component
 
     public function images()
     {
-        $images = ImageUpload::where('upload_ulid', $this->upload->ulid)->whereNot('state', 'done')->where('user_id', Auth::user()->id)->orderBy('uuid', 'desc')->get();
+        $images = ImageUpload::where('upload_ulid', $this->upload->ulid)->where('user_id', Auth::user()->id)->orderBy('uuid', 'desc')->get();
         $this->selectedImages = [];
 
         $count = 0;
@@ -171,6 +185,28 @@ class ProcessMultiple extends Component
         unset($this->images);
     }
 
+    #[On('imageDuplicatesDeleted')]
+    public function imageDuplicatesDeleted($uuid)
+    {
+        $index = -1;
+        foreach ($this->images as $key => $image)
+        {
+            if($image['uuid'] === $uuid)
+            {
+                $index = $key;
+                break;
+            }
+        }
+
+        if($index > -1)
+        {
+            $this->images[$index]['duplicates'] = [];
+            $imageUpload = ImageUpload::find($image['uuid']);
+            $imageUpload->duplicates = json_encode([]);
+            $imageUpload->save();
+        }
+    }
+
     #[On('imageDeleted')]
     public function imageDeleted($uuid)
     {
@@ -195,15 +231,19 @@ class ProcessMultiple extends Component
             dispatch(function () use($uuid) {
                 ImageUpload::find($uuid)->delete();
             })->afterResponse();
+
+            if(count($this->images) == 0)
+            {
+                $this->uploadCancel();
+            }
         }
     }
-
 
     public function finalizeUpload()
     {
         foreach($this->images as $image)
         {
-            if($image->state == ImageUploadStates::FoundDuplicates->value)
+            if(!empty($image->duplicates))
             {
                 $this->js("alert('Cant upload while images need response')");
                 return;
@@ -236,6 +276,10 @@ class ProcessMultiple extends Component
         if($countNotDeleted > 0)
         {
             $this->js("alert(" . $countNotDeleted . ' images were not deleted');
+        }
+        if(count($this->images) == 0)
+        {
+            $this->uploadCancel();
         }
     }
 

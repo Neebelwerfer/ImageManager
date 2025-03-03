@@ -57,8 +57,6 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
 
         foreach ($imageUploads as $imageUpload)
         {
-            $imageUpload->setState(ImageUploadStates::Processing);
-
             $data = json_decode($imageUpload->data, true);
 
             $name = $imageUpload->uuid;
@@ -81,8 +79,8 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
 
                 $imageScaled = ImageManager::gd()->read($decryptedImage);
 
-                if($data['category'] !== null) {
-                    $category = ImageCategory::find($data['category']);
+                if($data['category'] !== []) {
+                    $category = ImageCategory::find($data['category']['id']);
                     $categoryService->addImage($this->user, $image, $category);
                 }
 
@@ -92,16 +90,21 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
                     }
                 }
 
-                foreach($data['tags'] as $tagName => $personal)
+                foreach($data['tags'] as $id => $data)
                 {
+                    $tagName = $data['name'];
+                    $personal = $data['personal'];
                     $tag = $tagService->getOrCreate($tagName);
                     if(isset($tag))
                         $imageService->addTag($this->user, $image, $tag, $personal);
                 }
 
-                foreach($data['albums'] as $albumID)
+                if(isset($data['albums']))
                 {
-                    $albumService->addImage($this->user, $image, $albumID);
+                    foreach($data['albums'] as $albumID => $data)
+                    {
+                        $albumService->addImage($this->user, $image, $albumID);
+                    }
                 }
 
                 if($imageScaled->height() > $imageScaled->width())
@@ -115,7 +118,6 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
 
                 $imageService->storeImageAndThumbnail($imageScaled, $path, $name);
 
-                $imageUpload->setState(ImageUploadStates::Done);
                 DB::commit();
             }
             catch(Throwable $e)
@@ -128,7 +130,6 @@ class ProcessMultipleImages implements ShouldQueue, ShouldBeUnique, ShouldBeEncr
                 Storage::disk('local')->delete('originalImages/' . $path . '/' . $hasedName);
                 Storage::disk('local')->delete('images/' . $path . '/' . $hasedName . '.thumbnail');
 
-                $imageUpload->setState(ImageUploadStates::Error);
                 UploadErrors::create([
                     'image_upload_uuid' => $imageUpload->uuid,
                     'message' => $e

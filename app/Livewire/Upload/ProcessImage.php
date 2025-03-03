@@ -76,16 +76,9 @@ class ProcessImage extends Component
         }
     }
 
-    public function removeImage()
-    {
-        $this->dispatch('imageDeleted', ['uuid' => $this->imageData['uuid']]);
-    }
-
     public function accept()
     {
-        $this->imageUpload->setState(ImageUploadStates::Waiting);
-        $this->state = ImageUploadStates::Waiting->value;
-        $this->dispatch('imageUploadUpdated', ['uuid' => $this->imageUpload->uuid]);
+        $this->dispatch('imageDuplicatesDeleted', ['uuid' => $this->imageData['uuid']]);
     }
 
     public function mount($uuid)

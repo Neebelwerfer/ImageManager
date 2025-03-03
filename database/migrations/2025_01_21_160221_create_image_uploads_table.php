@@ -24,7 +24,6 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignUlid('upload_ulid')->constrained('uploads', 'ulid')->cascadeOnDelete();
             $table->string('extension');
-            $table->enum('state', ['waiting', 'foundDuplicates', 'processing', 'error', 'done'])->default('waiting');
             $table->text('hash');
             $table->jsonb('duplicates')->nullable();
             $table->jsonb('data')->nullable();
