@@ -8,6 +8,7 @@ use App\Models\ImageUpload;
 use App\Models\Upload;
 use App\Support\Enums\ImageUploadStates;
 use App\Support\Enums\UploadStates;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -39,6 +40,11 @@ class ProcessMultiple extends Component
         if($data['ulid'] != $this->upload->ulid) return;
 
         $this->state = $data['state'];
+
+        if($this->state = "waiting")
+        {
+            $this->images();
+        }
     }
 
     public function next(){
@@ -152,6 +158,7 @@ class ProcessMultiple extends Component
         $this->upload = $res;
 
         $this->state = $this->upload->state;
+
         if($this->state === "waiting")
         {
             $this->images();
@@ -162,6 +169,33 @@ class ProcessMultiple extends Component
     public function imageUploadUpdated()
     {
         unset($this->images);
+    }
+
+    #[On('imageDeleted')]
+    public function imageDeleted($uuid)
+    {
+        $index = -1;
+        foreach($this->images as $key => $image)
+        {
+            if($image['uuid'] == $uuid)
+            {
+                $index = $key;
+                break;
+            }
+        }
+        if($index > -1)
+        {
+            if ($this->count > 0)
+                $this->count -= 1;
+            else
+                $this->count += 1;
+
+            array_splice($this->images, $index, 1);
+
+            dispatch(function () use($uuid) {
+                ImageUpload::find($uuid)->delete();
+            })->afterResponse();
+        }
     }
 
 
@@ -187,7 +221,7 @@ class ProcessMultiple extends Component
         {
             if(!$selected) continue;
 
-            unset($this->imagesTest[$count]);
+            unset($this->images[$count]);
             // $image = ImageUpload::find($uuid);
             // if($image->user_id === Auth::user()->id)
             // {

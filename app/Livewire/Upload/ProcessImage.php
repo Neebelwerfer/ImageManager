@@ -78,8 +78,7 @@ class ProcessImage extends Component
 
     public function removeImage()
     {
-        $this->imageUpload->delete();
-        $this->error = true;
+        $this->dispatch('imageDeleted', ['uuid' => $this->imageData['uuid']]);
     }
 
     public function accept()

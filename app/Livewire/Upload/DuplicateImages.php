@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Upload;
 
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class DuplicateImages extends Component
 {
     public $duplicates;
-    public $user_id;
     public $count = 0;
 
     public function mount($duplicates)
@@ -43,6 +43,7 @@ class DuplicateImages extends Component
         return false;
     }
 
+    #[Computed()]
     public function count()  {
         return count($this->duplicates);
     }
