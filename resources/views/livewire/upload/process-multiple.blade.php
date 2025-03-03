@@ -46,12 +46,12 @@
                             </template>
                             <div>
                                 <template x-for="(image, index) in images" :key="index">
-                                    <button class="relative transition ease-in-out delay-75 bg-black border shadow-md shadow-black hover:scale-110 "
+                                    <button class="relative transition ease-in-out delay-75 bg-black border shadow-md hover:scale-110 "
                                             style="width: 192px; height: 225px"
-                                            x-on:click="onClick(index, () => $wire.select(index))"
+                                            x-on:click="onClick(index, () => { if(index !== count) $wire.select(index) })"
                                             x-init="$watch('selectedImages[index]', (value) => isSelected = value)"
                                             x-data="{ isSelected: false }"
-                                            :class="[(isSelected ? 'bg-blue-800' : 'bg-black'), (image.duplicates !== null && image.duplicates.length > 0 ? 'border-red-700' : (image.isDirty ? 'border-orange-500' : 'border-gray-700'))]" >
+                                            :class="[(count == index ? 'scale-105 z-10 shadow-cyan-700' : 'shadow-black') ,(isSelected ? 'bg-blue-800' : 'bg-black'), (image.duplicates !== null && image.duplicates.length > 0 ? 'border-red-700' : (image.isDirty ? 'border-orange-500' : 'border-gray-700'))]" >
                                         <div>
                                             <img loading="lazy" class="object-scale-down px-1" style="width: 190px; height: 215px;" :src="'{{ url('temp') }}/' + image.uuid">
                                         </div>
