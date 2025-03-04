@@ -1,6 +1,6 @@
 export default (selectedImagesArray) => ({
     selectedImages: selectedImagesArray,
-    allSelected: false,
+    selected: 0,
 
     selectAll(select)
     {
@@ -8,6 +8,7 @@ export default (selectedImagesArray) => ({
             this.selectedImages[key] = select;
         });
 
+        this.selected = select ? this.selectedImages.length : 0;
         this.allSelected = select;
     },
 
@@ -21,16 +22,26 @@ export default (selectedImagesArray) => ({
         }
     },
 
-    onClick(uuid, action)
+    onClick(index, action)
     {
         if(this.$wire.editMode)
         {
-            this.selectedImages[uuid] = !this.selectedImages[uuid];
-            this.allSelected = Object.keys(this.selectedImages).every(key => this.selectedImages[key] === true);
+            let wasSelected = this.selectedImages[index]
+            this.selectedImages[index] = !wasSelected;
+
+            this.selected += wasSelected ? -1 : 1;
         }
         else
         {
             action();
         }
+    },
+
+    isAllSelected(){
+        return this.selected == this.selectedImages.length;
+    },
+
+    isNoneSelected(){
+        return this.selected == 0;
     }
 });
