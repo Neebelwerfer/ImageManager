@@ -20,6 +20,8 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+use function PHPUnit\Framework\isNumeric;
+
 #[Layout('layouts.app')]
 class ProcessMultiple extends Component
 {
@@ -245,6 +247,39 @@ class ProcessMultiple extends Component
             {
                 $this->uploadCancel();
             }
+        }
+    }
+
+    #[On('categoryMultiSelect')]
+    public function categorySelected($selection)
+    {
+        $category = $selection;
+        foreach($this->selectedImages as $key => $selected)
+        {
+            if(!$selected) continue;
+
+            $this->images[$key]['category'] = $category;
+            $this->images[$key]['isDirty'] = true;
+        }
+    }
+
+
+    #[On('albumMultiSelect')]
+    public function albumSelected($selection)
+    {
+
+        $id= $selection['id'];
+        $name = $selection['name'];
+
+        foreach($this->selectedImages as $key => $selected)
+        {
+            if(!$selected) continue;
+
+            $image = $this->images[$key];
+            if(isset($image['albums'][$id])) continue;
+
+            $this->images[$key]['albums'][] = ['name' => $name, 'id' => $id];
+            $this->images[$key]['isDirty'] = true;
         }
     }
 
