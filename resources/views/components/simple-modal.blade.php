@@ -21,10 +21,8 @@
                         </h3>
                     </div>
                 @endif
-                <div class="px-4 bg-slate-400 min-h-40 min-w-96 sm:p-6">
-                    <div class="space-y-6">
+                <div class="px-4 bg-slate-400 min-h-40 min-w-96">
                         {{ $content }}
-                    </div>
                 </div>
                 @isset($buttons)
                     <div class="px-4 pb-5 bg-slate-600 sm:px-4 sm:flex">

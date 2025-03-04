@@ -102,6 +102,20 @@ class ProcessMultiple extends Component
         }
     }
 
+    public function finalizeUpload()
+    {
+        foreach($this->images as $image)
+        {
+            if(!empty($image['duplicates']) || $image['isDirty'])
+            {
+                $this->js("alert('Can\'t upload while images need attention')");
+                return;
+            }
+        }
+
+        $this->state = UploadStates::Processing->value;
+        ProcessMultipleImages::dispatch(Auth::user(), $this->upload);
+    }
 
     private function saveData($index)
     {
@@ -117,7 +131,7 @@ class ProcessMultiple extends Component
         $imageUpload->save();
     }
 
-    public function saveImageData()
+    public function saveAllChanges()
     {
         DB::beginTransaction();
         foreach ($this->images as $key => $image)
@@ -303,21 +317,6 @@ class ProcessMultiple extends Component
             $this->images[$key]['albums'][] = ['name' => $name, 'id' => $id];
             $this->images[$key]['isDirty'] = true;
         }
-    }
-
-    public function finalizeUpload()
-    {
-        foreach($this->images as $image)
-        {
-            if(!empty($image->duplicates))
-            {
-                $this->js("alert('Cant upload while images need response')");
-                return;
-            }
-        }
-
-        $this->state = UploadStates::Processing->value;
-        ProcessMultipleImages::dispatch(Auth::user(), $this->upload);
     }
 
     public function deleteSelected()
