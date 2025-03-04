@@ -5,6 +5,7 @@ export default (name) => ({
     level: 0,
 
     open(context) {
+        if(this.isOpen) return;
         Alpine.store('modalManagement').openModal(this);
         this.isOpen = true;
         this.context = context;

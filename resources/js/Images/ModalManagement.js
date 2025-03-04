@@ -11,7 +11,6 @@ export default {
         {
             this.modals[this.currentLevel - 1].isOpen = false;
         }
-        console.log("openened modal: " + modal.name);
     },
 
     isActive(modal) {
@@ -19,13 +18,12 @@ export default {
     },
 
     closeActiveModal() {
-        let modal = this.modals.pop();
+        this.modals.pop();
         this.currentLevel -= 1;
         if(this.currentLevel > -1)
         {
             this.modals[this.currentLevel].isOpen = true;
         }
-        console.log("closed modal: " + modal.name);
     },
 
     closeAll(){

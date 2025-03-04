@@ -1,4 +1,4 @@
-<x-simple-modal class="z-10" name="edit-relations">
+<x-simple-modal class="z-10" name="collection-selection">
     <x-slot name="title">
         <p x-text="context.type"></p>
     </x-slot>
@@ -20,9 +20,9 @@
                 }"
                 x-init="data = JSON.parse(await $wire.getEntries(context.type));"
             >
-                <div class="grid w-full h-full grid-cols-5 grid-rows-4 gap-2 rounded">
+                <div class="w-full h-full gap-2 overflow-scroll rounded">
                     <template x-for="entry in data" :key="entry.id">
-                        <button class="flex items-center justify-center w-full h-full p-2 border rounded bg-slate-600 hover:bg-slate-500" x-on:click="$dispatch(context.type + eventName(), {selection: entry}); closeModal()">
+                        <button class="flex items-center justify-center w-1/3 h-full p-2 border rounded bg-slate-600 hover:bg-slate-500" x-on:click="$dispatch(context.type + eventName(), {selection: entry}); closeModal()">
                             <p x-text="entry.name">
                         </button>
                     </template>

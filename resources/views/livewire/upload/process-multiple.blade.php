@@ -36,9 +36,9 @@
                                 <div class="-ml-2.5">
                                     <x-edit>
                                         <div class="flex flex-col mx-0.5">
-                                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500"  x-on:click="$dispatch('modalOpen', {name: 'edit-relations', context: { type: 'category', noOption: true, event:'MultiSelect'}})">Set Category</button>
+                                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500"  x-on:click="$dispatch('modalOpen', {name: 'collection-selection', context: { type: 'category', noOption: true, event:'MultiSelect'}})">Set Category</button>
                                             <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add Tag</button>
-                                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="$dispatch('modalOpen', {name: 'edit-relations', context: { type: 'album', event: 'MultiSelect'}})">Add Album</button>
+                                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="$dispatch('modalOpen', {name: 'collection-selection', context: { type: 'album', event: 'MultiSelect'}})">Add Album</button>
                                             <button class="p-1 bg-red-700 border rounded border-slate-600 hover:bg-red-400" wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</button>
                                         </div>
                                     </x-edit>
@@ -100,7 +100,7 @@
             </div>
         </template>
     </div>
-    <livewire:modal.upload.alpine-edit-relations />
+    <livewire:modal.upload.collection-selection />
 </div>
 
 <script>

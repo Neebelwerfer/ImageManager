@@ -4,11 +4,10 @@ namespace App\Livewire\Modal\Upload;
 
 use App\Models\Album;
 use App\Models\ImageCategory;
-use Exception;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
-class AlpineEditRelations extends Component
+class CollectionSelection extends Component
 {
     public function getEntries($type)
     {
@@ -31,6 +30,6 @@ class AlpineEditRelations extends Component
 
     public function render()
     {
-        return view('livewire.modal.upload.alpine-edit-relations');
+        return view('livewire.modal.upload.collection-selection');
     }
 }
