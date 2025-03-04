@@ -3,18 +3,10 @@
 namespace App\Livewire\Upload;
 
 use App\DTO\ImageTraitDTO;
-use App\Models\Album;
-use App\Models\ImageCategory;
 use App\Models\ImageUpload;
 use App\Models\Tags;
 use App\Models\Traits;
-use App\Services\TagService;
-use App\Support\Enums\ImageUploadStates;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Modelable;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -31,40 +23,36 @@ class ProcessImage extends Component
     public $state = "waiting";
 
     #[On('categorySelected')]
-    public function categorySelected($category)
+    public function categorySelected($selection)
     {
-        if($category == -1) {
-            $this->imageData['category'] = [];
-            $this->imageData['isDirty'] = true;
-            return;
-        }
-        $category = ImageCategory::find($category);
-        $this->imageData['category'] = ['name' => $category->name, 'id' => $category->id];
+        if(array_diff_assoc($this->imageData['category'], $selection) == []) return;
+        $this->imageData['category'] = $selection;
         $this->imageData['isDirty'] = true;
     }
 
 
     #[On('albumSelected')]
-    public function albumSelected($albumId)
+    public function albumSelected($selection)
     {
-        if(isset($this->imageData['albums'][$albumId])) return;
+        $id = $selection['id'];
+        $name = $selection['name'];
 
-        $album = Album::ownedOrShared(Auth::user()->id)->find($albumId);
-        $this->imageData['albums'][$albumId] = ['name' => $album->name, 'id' => $albumId];
+        if(isset($this->imageData['albums'][$id])) return;
+
+        $this->imageData['albums'][$id] = ['name' => $name, 'id' => $id];
         $this->imageData['isDirty'] = true;
     }
 
     #[On('tagSelected')]
-    public function tagSelected($tagData)
+    public function tagSelected($data)
     {
-        $id = $tagData['id'];
-        $personal = $tagData['personal'];
-        if (isset($this->imageData['tags'][$id])) {
+        $name = $data['name'];
+        $personal = $data['personal'];
+        if (isset($this->imageData['tags'][$name])) {
             return;
         }
 
-        $tag = Tags::find($id);
-        $this->imageData['tags'][$id] = ['name' => $tag->name, 'personal' => $personal, 'id' => $id];
+        $this->imageData['tags'][$name] = ['name' => $name, 'personal' => $personal];
         $this->imageData['isDirty'] = true;
     }
 

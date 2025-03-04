@@ -6,7 +6,7 @@ export default {
         this.currentLevel += 1;
         this.modals[this.currentLevel] = modal;
         modal.level = this.currentLevel;
-
+        console.log('opening ' + modal.name);
         if(this.currentLevel > 0)
         {
             this.modals[this.currentLevel - 1].isOpen = false;

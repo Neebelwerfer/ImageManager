@@ -27,7 +27,7 @@
                                     </label>
                                     <div class="mb-3">
                                         <button class="px-2 border rounded" type="button"
-                                            wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type:'category', noneOption: true}})">+</button>
+                                            x-on:click="$dispatch('modalOpen', {name: 'collection-selection', context: {type:'category', noneOption: true}})">+</button>
                                     </div>
                                 </div>
                                 <img id="image-preview" class="object-scale-down mr-2" src="{{ url('temp/'.$imageUpload->uuid) }}" style="max-height: 500px;">
@@ -56,14 +56,14 @@
                                     <label for="tags">Tags:</label>
                                     <div class="mb-3">
                                         <button class="px-2 border rounded" type="button"
-                                            wire:click="$dispatch('openModal', {component: 'modal.image.add-tag'})">+</button>
+                                            wire:click="$dispatch('modalOpen', {name: 'add-tag'})">+</button>
                                     </div>
                                 </div>
                                 <div class="flex flex-col mx-5 mb-4">
                                     <template x-for="tag in imageData['tags']">
                                         <div class="inline-flex justify-between w-20 gap-2 border rounded">
                                             <h1 x-text="tag.name"></h1>
-                                            <button class="w-5 border border-red-600 rounded hover:bg-red-400 bg-red-600/80 h-fit" type="button" x-on:click="removeID('tags', tag.id)">X</button>
+                                            <button class="w-5 border border-red-600 rounded hover:bg-red-400 bg-red-600/80 h-fit" type="button" x-on:click="removeID('tags', tag.name)">X</button>
                                         </div>
                                     </template>
                                 </div>
@@ -74,7 +74,7 @@
                                     <label for="tags">Albums:</label>
                                     <div class="mb-3">
                                         <button class="px-2 border rounded" type="button"
-                                            wire:click="$dispatch('openModal', {component: 'modal.upload.edit-relations', arguments: {type: 'album'}})">+</button>
+                                            wire:click="$dispatch('modalOpen', {name: 'collection-selection', context: {type:'album'}})">+</button>
                                     </div>
                                 </div>
                                 <div class="flex flex-col mx-5 mb-4">

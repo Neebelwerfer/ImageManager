@@ -40,6 +40,8 @@
             Image Manager v0.0.1
         </footer>
     </div>
+
+    <div x-data class="fixed top-0 left-0 w-full h-full origin-center bg-slate-400/50 {{ $attributes->get('class') }}" x-show="$store.modalManagement.currentLevel > -1"></div>
     @livewire('wire-elements-modal')
     @livewireScriptConfig
 </body>

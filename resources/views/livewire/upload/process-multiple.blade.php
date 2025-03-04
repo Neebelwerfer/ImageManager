@@ -37,7 +37,7 @@
                                     <x-edit>
                                         <div class="flex flex-col mx-0.5">
                                             <button :disabled="isNoneSelected()" :class="isNoneSelected() ? '' : 'hover:bg-gray-400 hover:dark:bg-gray-500'" class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700"  x-on:click="$dispatch('modalOpen', {name: 'collection-selection', context: { type: 'category', noOption: true, event:'MultiSelect'}})">Set Category</button>
-                                            <button :disabled="isNoneSelected()" :class="isNoneSelected() ? '' : 'hover:bg-gray-400 hover:dark:bg-gray-500'" class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700">Add Tag</button>
+                                            <button :disabled="isNoneSelected()" :class="isNoneSelected() ? '' : 'hover:bg-gray-400 hover:dark:bg-gray-500'" class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700" x-on:click="$dispatch('modalOpen', {name: 'add-tag'})">Add Tag</button>
                                             <button :disabled="isNoneSelected()" :class="isNoneSelected() ? '' : 'hover:bg-gray-400 hover:dark:bg-gray-500'" class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700" x-on:click="$dispatch('modalOpen', {name: 'collection-selection', context: { type: 'album', event: 'MultiSelect'}})">Add Album</button>
                                             <button :disabled="isNoneSelected()" :class="isNoneSelected() ? '' : 'hover:bg-red-400'" class="p-1 bg-red-700 border rounded border-slate-600 " wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</button>
                                         </div>
@@ -101,6 +101,7 @@
         </template>
     </div>
     <livewire:modal.upload.collection-selection />
+    <x:modal.add-tag />
 </div>
 
 <script>

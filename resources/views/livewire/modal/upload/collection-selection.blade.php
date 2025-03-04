@@ -35,7 +35,9 @@
     </x-slot>
 
     <x-slot name="buttons">
-        <button class="p-1 mt-4 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="$dispatch('modalClose', {name: 'edit-relations'})">Close</button>
-        {{-- <button class="p-1 mt-4 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click="$dispatch('openModal', {component: 'modal.image.create-relation-classification', arguments: {type: context.type}})">Create <p x-text="context.type"></p></button> --}}
+        <button class="p-1 mt-4 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="closeModal()">Close</button>
+        <button class="p-1 mt-4 border rounded btn bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="$dispatch('modalOpen', {name: 'add-tag'})">Create <p x-text="context.type"></p></button>
+    </x-slot>
+    <x-slot name="modals">
     </x-slot>
 </x-simple-modal>
