@@ -38,9 +38,6 @@
                             <div class="absolute flex justify-end w-full gap-2">
                                 <div class="mb-3">
                                     <button
-                                    class="p-1 bg-red-600 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500"
-                                    wire:click="$dispatch('discardChanges', { uuid: '{{ $imageData['uuid'] }}'})" wire:confirm='Are you sure you want to discard changes?' type="button">Discard Changes</button>
-                                    <button
                                         class="p-1 bg-red-600 border rounded btn dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500"
                                         wire:click="$dispatch('imageDeleted', { uuid: '{{ $imageData['uuid'] }}'})" wire:confirm='Are you sure you want to remove this image?' type="button">Remove image</button>
                                 </div>
@@ -89,6 +86,18 @@
                                         </div>
                                     </template>
                                 </div>
+                            </div>
+                            <div class="absolute bottom-0 flex flex-row justify-between w-full gap-2">
+                                <button
+                                class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
+                                wire:click="$dispatch('saveChanges', { uuid: '{{ $imageData['uuid'] }}'})" type="button">
+                                    Save Changes
+                                </button>
+                                <button
+                                class="p-1 border rounded bg-slate-600 dark:bg-gray-700 hover:bg-gray-400 hover:dark:bg-gray-500"
+                                wire:click="$dispatch('discardChanges', { uuid: '{{ $imageData['uuid'] }}'})" wire:confirm='Are you sure you want to discard changes?' type="button">
+                                    Discard Changes
+                                </button>
                             </div>
                         </form>
                     </div>

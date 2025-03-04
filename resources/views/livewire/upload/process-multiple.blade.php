@@ -11,8 +11,8 @@
                 <div class="flex flex-row justify-center w-full gap-5 mt-2">
                     <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='finalizeUpload'>Finalize Upload</button>
                     <div class="inline-flex gap-2">
-                    <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='saveImageData'>Save Changes</button>
-                    <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click='discardAllChanges'>Discard Changes</button>
+                    <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='saveImageData'>Save All Changes</button>
+                    <button class="p-1 bg-gray-700 border rounded dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click='discardAllChanges'>Discard All Changes</button>
                     </div>
                     <button class="p-1 bg-red-700 border rounded dark:bg-red-700 hover:bg-gray-400 hover:dark:bg-gray-500" wire:click='uploadCancel'>Cancel Upload</button>
                 </div>
@@ -36,10 +36,10 @@
                                 <div class="-ml-2.5">
                                     <x-edit>
                                         <div class="flex flex-col mx-0.5">
-                                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500"  x-on:click="$dispatch('modalOpen', {name: 'collection-selection', context: { type: 'category', noOption: true, event:'MultiSelect'}})">Set Category</button>
-                                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500">Add Tag</button>
-                                            <button class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700 hover:bg-gray-400 hover:dark:bg-gray-500" x-on:click="$dispatch('modalOpen', {name: 'collection-selection', context: { type: 'album', event: 'MultiSelect'}})">Add Album</button>
-                                            <button class="p-1 bg-red-700 border rounded border-slate-600 hover:bg-red-400" wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</button>
+                                            <button :disabled="isNoneSelected()" :class="isNoneSelected() ? '' : 'hover:bg-gray-400 hover:dark:bg-gray-500'" class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700"  x-on:click="$dispatch('modalOpen', {name: 'collection-selection', context: { type: 'category', noOption: true, event:'MultiSelect'}})">Set Category</button>
+                                            <button :disabled="isNoneSelected()" :class="isNoneSelected() ? '' : 'hover:bg-gray-400 hover:dark:bg-gray-500'" class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700">Add Tag</button>
+                                            <button :disabled="isNoneSelected()" :class="isNoneSelected() ? '' : 'hover:bg-gray-400 hover:dark:bg-gray-500'" class="p-1 bg-gray-700 border rounded border-slate-600 dark:bg-slate-700" x-on:click="$dispatch('modalOpen', {name: 'collection-selection', context: { type: 'album', event: 'MultiSelect'}})">Add Album</button>
+                                            <button :disabled="isNoneSelected()" :class="isNoneSelected() ? '' : 'hover:bg-red-400'" class="p-1 bg-red-700 border rounded border-slate-600 " wire:confirm='Are you sure you want to delete selected images?' wire:click='deleteSelected'>Delete</button>
                                         </div>
                                     </x-edit>
                                 </div>

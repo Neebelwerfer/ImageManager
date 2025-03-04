@@ -83,6 +83,26 @@ class ProcessMultiple extends Component
         return $data;
     }
 
+    #[On('saveChanges')]
+    public function saveChanges($uuid)
+    {
+        $index = -1;
+        foreach ($this->images as $key => $image)
+        {
+            if($image['uuid'] === $uuid)
+            {
+                $index = $key;
+                break;
+            }
+        }
+
+        if($index > -1){
+            $this->saveData($index);
+            $this->js("alert('Successfully saved changes')");
+        }
+    }
+
+
     private function saveData($index)
     {
         $image = $this->images[$index];
@@ -91,6 +111,8 @@ class ProcessMultiple extends Component
         $data = $this->getProcessedData($index);
 
         $this->images[$index]['isDirty'] = false;
+        $this->imagesSnapshot[$index] = $this->images[$index];
+
         $imageUpload->data = json_encode($data);
         $imageUpload->save();
     }
@@ -104,7 +126,7 @@ class ProcessMultiple extends Component
             $this->saveData($key);
         }
         DB::commit();
-        $this->js("alert('Saved image data')");
+        $this->js("alert('Successfully saved all changes')");
     }
 
     public function images()
